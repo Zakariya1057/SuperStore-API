@@ -31,10 +31,11 @@ class CreateRecommendedTable extends Migration
             $table->unsignedBigInteger('recommended_product_id');
 
             $table->unique(['product_id','recommended_product_id']);
-            $table->unique('product_id');
 
             $table->foreign('product_id')->references('id')->on('products');
             $table->foreign('recommended_product_id')->references('id')->on('products');
+
+            $table->index('product_id');
 
             $table->timestamps();
         });

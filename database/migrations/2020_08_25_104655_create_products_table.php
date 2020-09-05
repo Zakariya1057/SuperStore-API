@@ -52,8 +52,8 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('large_image');
-            $table->string('small_image');
+            $table->string('large_image')->nullable();
+            $table->string('small_image')->nullable();
             $table->text('description')->nullable();
 
             $table->decimal('price', 4,2);
