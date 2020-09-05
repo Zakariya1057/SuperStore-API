@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Casts\HTMLDecode;
 
 class Store extends Model
 {
@@ -27,6 +28,9 @@ class Store extends Model
         'password', 'remember_token',
     ];
 
+    protected $casts = [
+        'name' => HTMLDecode::class
+    ];
 
     public function opening_hours() {
         return $this->hasMany('App\OpeningHour');
