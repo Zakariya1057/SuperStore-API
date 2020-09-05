@@ -19,5 +19,20 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::prefix('store')->group(function () {
-    Route::get('/{store}', 'StoreController@show')->name('store.show');
+    Route::get('/{store_id}', 'StoreController@show')->name('store.show');
+});
+
+Route::prefix('grocery')->group(function () {
+    Route::get('{store_type_id}', 'GroceryController@categories')->name('grocery.categories');
+    Route::get('products/{store_type_id}', 'GroceryController@products')->name('grocery.products');
+});
+
+Route::prefix('product')->group(function () {
+    Route::get('/{product}', 'ProductController@show')->name('product.show');
+    Route::get('/{product}/reviews', 'ReviewController@index')->name('review.index');
+});
+
+
+Route::prefix('image')->group(function () {
+    Route::get('/{type}/{name}', 'ImageController@show')->name('image.show');
 });
