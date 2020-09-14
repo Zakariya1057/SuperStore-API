@@ -10,7 +10,8 @@ class Product extends Model
 {
     public $casts = [
         'name' => HTMLDecode::class,
-        'price' => 'decimal:2',
+        'price' => 'double',
+        'old_price' => 'double',
         'avg_rating' => 'double',
 
         'large_image' => Image::class,

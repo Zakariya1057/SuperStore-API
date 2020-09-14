@@ -32,7 +32,24 @@ Route::prefix('product')->group(function () {
     Route::get('/{product}/reviews', 'ReviewController@index')->name('review.index');
 });
 
-
 Route::prefix('image')->group(function () {
     Route::get('/{type}/{name}', 'ImageController@show')->name('image.show');
 });
+
+Route::prefix('list')->group(function () {
+    Route::get('/', 'ListViewController@index')->name('list.index');
+    Route::post('/create', 'ListViewController@create')->name('list.create');
+    Route::post('/delete', 'ListViewController@delete')->name('list.delete');
+    Route::post('/update', 'ListViewController@update')->name('list.update');
+    
+    Route::get('/{list}', 'ListViewController@show')->name('list.show');
+    Route::post('{list}/restart', 'ListViewController@restart')->name('list.restart');
+
+    Route::prefix('{list}/item')->group(function () {
+        Route::post('/create', 'GroceryListViewController@create')->name('list_item.create');
+        Route::post('/update', 'GroceryListViewController@update')->name('list_item.update');
+        Route::post('/delete', 'GroceryListViewController@delete')->name('list_item.delete');
+    });
+});
+
+Route::get('promotion/{promotion_id}', 'PromotionController@index')->name('promotion.index');

@@ -10,4 +10,8 @@ class Promotion extends Model
     public $casts = [
         'name' => HTMLDecode::class
     ];
+
+    public function products() {
+        return $this->hasMany('App\Product');
+    }
 }

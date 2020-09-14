@@ -30,6 +30,7 @@ class CreateReviewsTable extends Migration
             $table->id();
             $table->text('text');
             $table->string('title');
+            $table->string('image')->nullable();
             $table->integer('rating');
 
             $table->unsignedBigInteger('product_id');
