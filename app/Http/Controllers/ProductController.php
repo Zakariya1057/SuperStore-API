@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Product;
 use App\Recommended;
 use App\Casts\HTMLDecode;
+use App\FavouriteProducts;
 use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
     public function show(Product $product){
 
+        $user_id = 1;
+        
         // $product_details = Cache::remember('product_'.$product->id, 86400, function () use($product) {
 
             $product->ingredients;
@@ -19,7 +22,7 @@ class ProductController extends Controller
                 $product->reviews[0]->name = $product->reviews[0]->user->name;
             }
            
-            $recommended = Recommended::where('product_id',$product->id)
+            $recommended = Recommended::where([ ['recommended.product_id',$product->id] ])
             ->join('products','products.id','recommended_product_id')
             ->withCasts(
                 $product->casts
@@ -28,6 +31,8 @@ class ProductController extends Controller
             $product->recommended = $recommended;
             $product->promotion;
 
+            $product->favourite = FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product->id] ])->exists();
+            
             // return $product;
         // });
 

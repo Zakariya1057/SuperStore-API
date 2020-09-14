@@ -27,10 +27,13 @@ Route::prefix('grocery')->group(function () {
     Route::get('products/{store_type_id}', 'GroceryController@products')->name('grocery.products');
 });
 
-Route::prefix('product')->group(function () {
-    Route::get('/{product}', 'ProductController@show')->name('product.show');
-    Route::get('/{product}/reviews', 'ReviewController@index')->name('review.index');
+Route::prefix('product/{product}')->group(function () {
+    Route::get('/', 'ProductController@show')->name('product.show');
+    Route::get('/reviews', 'ReviewController@index')->name('review.index');
+    Route::post('/favourite', 'FavouriteProductsController@update')->name('favourite.update');
 });
+
+Route::get('/favourites', 'FavouriteProductsController@index')->name('favourite.index');
 
 Route::prefix('image')->group(function () {
     Route::get('/{type}/{name}', 'ImageController@show')->name('image.show');

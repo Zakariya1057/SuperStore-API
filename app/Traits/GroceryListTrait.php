@@ -62,6 +62,7 @@ trait GroceryListTrait {
             'products.price as price',
             'grocery_list_items.quantity as quantity',
             'category_aisles.name as aisle_name',
+            'products.weight as weight',
             'products.small_image as small_image',
             'products.large_image as large_image',
             'grocery_list_items.ticked_off as ticked_off',
