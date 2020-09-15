@@ -30,7 +30,9 @@ Route::prefix('grocery')->group(function () {
 Route::prefix('product/{product}')->group(function () {
     Route::get('/', 'ProductController@show')->name('product.show');
 
-    Route::post('/review', 'ReviewController@create')->name('review.create');
+    Route::post('/review/create', 'ReviewController@create')->name('review.create');
+    Route::post('/review/delete', 'ReviewController@delete')->name('review.delete');
+    
     Route::get('/reviews', 'ReviewController@index')->name('review.index');
     Route::get('/review', 'ReviewController@show')->name('review.show');
 

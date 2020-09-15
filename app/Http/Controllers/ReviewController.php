@@ -20,6 +20,12 @@ class ReviewController extends Controller
         return response()->json(['data' => $review]);
     }
 
+    public function delete($product_id){
+        $user_id = 2;
+        Review::where([ ['user_id', $user_id],['product_id',$product_id ] ])->delete();
+        return response()->json(['data' => ['status' => 'success']]);
+    }
+
     public function create($product_id, Request $request){
 
         $user_id = 2;
