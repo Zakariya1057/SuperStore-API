@@ -23,7 +23,7 @@ class Product extends Model
     }
 
     public function reviews() {
-        return $this->hasMany('App\Review')->limit(1);
+        return $this->hasMany('App\Review')->orderBy('reviews.created_at','DESC')->limit(1);
     }
 
     public function promotion(){

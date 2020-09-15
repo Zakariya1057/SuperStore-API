@@ -29,7 +29,11 @@ Route::prefix('grocery')->group(function () {
 
 Route::prefix('product/{product}')->group(function () {
     Route::get('/', 'ProductController@show')->name('product.show');
+
+    Route::post('/review', 'ReviewController@create')->name('review.create');
     Route::get('/reviews', 'ReviewController@index')->name('review.index');
+    Route::get('/review', 'ReviewController@show')->name('review.show');
+
     Route::post('/favourite', 'FavouriteProductsController@update')->name('favourite.update');
 });
 
