@@ -14,5 +14,7 @@ class StoreLocation extends Model
         'address_line2' => HTMLDecode::class,
         'address_line3' => HTMLDecode::class,
 
+        'latitude' => 'double',
+        'longitude' => 'double',
     ];
 }

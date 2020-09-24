@@ -7,10 +7,11 @@ use App\Casts\HTMLDecode;
 
 class ParentCategory extends Model
 {
-    public $visible = ['id', 'name','child_categories'];
+    // public $visible = ['id', 'name','child_categories'];
     
     protected $casts = [
-        'name' => HTMLDecode::class
+        'name' => HTMLDecode::class,
+        'description' =>  HTMLDecode::class,
     ];
 
     public function child_categories() {

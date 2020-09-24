@@ -16,6 +16,14 @@ trait StoreTrait {
     //     return $store;
     // }
 
+    public function stores_by_type($store_type_id){
+
+    }
+
+    public function details($store_id){
+        
+    }
+
 }
 
 ?>
