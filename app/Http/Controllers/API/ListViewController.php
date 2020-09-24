@@ -1,14 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use App\GroceryList;
 use App\GroceryListItem;
-use App\ParentCategory;
-use App\Product;
 use App\Traits\GroceryListTrait;
-use Exception;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class ListViewController extends Controller
 {

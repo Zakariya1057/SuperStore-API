@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use App\Promotion;
+use App\Http\Controllers\Controller;
 
 class PromotionController extends Controller
 {

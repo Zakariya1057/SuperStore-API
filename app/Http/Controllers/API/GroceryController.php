@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use App\ChildCategory;
 use App\GrandParentCategory;
 use App\ParentCategory;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class GroceryController extends Controller
 {

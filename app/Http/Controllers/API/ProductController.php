@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use App\Product;
 use App\Recommended;
 use App\Casts\HTMLDecode;
 use App\FavouriteProducts;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Controller;
 
 class ProductController extends Controller
 {

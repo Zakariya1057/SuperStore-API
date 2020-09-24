@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use App\Store;
 use App\Traits\StoreTrait;
 use Exception;
 use App\Casts\Image;
+use App\Http\Controllers\Controller;
+
 class StoreController extends Controller
 {
     

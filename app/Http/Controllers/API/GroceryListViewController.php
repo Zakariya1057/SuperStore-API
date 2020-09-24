@@ -1,19 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\ChildCategory;
+use App\Http\Controllers\Controller;
 use App\GroceryList;
 use App\GroceryListItem;
 use App\Product;
 use App\Traits\GroceryListTrait;
 use Illuminate\Http\Request;
-use Exception;
-
-//Grocery List
-
-// 1. Lists Table. Details
-// 2. List Item. ID, list_id, product_id, parent_cateog, updated_at, created_at
 
 class GroceryListViewController extends Controller
 {

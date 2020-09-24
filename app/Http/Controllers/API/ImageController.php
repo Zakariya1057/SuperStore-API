@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Controller;
 
 class ImageController extends Controller
 {
