@@ -21,6 +21,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::prefix('user')->group(function () {
     Route::post('/register', 'API\UserController@register')->name('user.register');
+    Route::post('/login', 'API\UserController@login')->name('user.login');
+    Route::post('/update', 'API\UserController@update')->name('user.update');
 });
 
 Route::prefix('store')->group(function () {
