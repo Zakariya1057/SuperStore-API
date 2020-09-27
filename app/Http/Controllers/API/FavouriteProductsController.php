@@ -19,7 +19,7 @@ class FavouriteProductsController extends Controller
         ->select('products.*')
         ->join('products','products.id','favourite_products.product_id')->withCasts(
             $product->casts
-        )->get();
+        )->orderBy('favourite_products.created_at','DESC')->get();
 
         return response()->json(['data' => $products ]);
     }
