@@ -24,16 +24,16 @@ class ListViewController extends Controller
 
         $validated_data = $request->validate([
             'data.name' => 'required|max:255',
-            'data.store_id' => 'required',
+            'data.store_type_id' => 'required',
         ]);
         
         $list_name = $validated_data['data']['name'];
-        $store_id = $validated_data['data']['store_id'];
+        $store_type_id = $validated_data['data']['store_type_id'];
         $user_id = 1;
 
         $list = new GroceryList();
         $list->name = $list_name;
-        $list->store_id = $store_id;
+        $list->store_type_id = $store_type_id;
         $list->user_id = $user_id;
         $list->save();
 
@@ -71,27 +71,20 @@ class ListViewController extends Controller
         // Item ticked off, or quantity changed
         $validated_data = $request->validate([
             'data.list_id' => 'required',
-            'data.store_id' => 'required',
+            'data.store_type_id' => 'required',
             'data.name' => 'required'
         ]);
 
         $data = $validated_data['data'];
         $user_id = 1;
 
-        // $status = $data['status'];
         $name = $data['name'];
-        $store_id = $data['store_id'];
-
-        // $lower_status = strtolower($status);
-
-        // if($lower_status != 'in progress' && $lower_status != 'completed' && $lower_status != 'not started' ){
-        //     return response()->json(['data' => ['error' => 'Unknown List Status: ']], 422);
-        // }
+        $store_type_id = $data['store_type_id'];
 
         GroceryList::where([['id',$data['list_id']],['user_id', $user_id]])
         ->update([
             'name' => $name,
-            'store_id' => $store_id
+            'store_type_id' => $store_type_id
         ]);
 
         // If all products ticked off, then change status to complete
