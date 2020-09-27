@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class CreateGrandParentCategoriesTable extends Migration
 {
@@ -53,7 +54,8 @@ class CreateGrandParentCategoriesTable extends Migration
             $table->unsignedBigInteger('store_id')->nullable();
             
             $table->foreign('store_type_id')->references('id')->on('store_types');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
     }
 

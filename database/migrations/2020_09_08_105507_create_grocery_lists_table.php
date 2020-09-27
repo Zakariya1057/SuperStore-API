@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
+use Illuminate\Support\Facades\DB;
 class CreateGroceryListsTable extends Migration
 {
     /**
@@ -18,20 +18,21 @@ class CreateGroceryListsTable extends Migration
             $table->id();
 
             $table->string('name');
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_id');
 
             $table->string('status')->default('Not Started');
             $table->decimal('total_price', 7,2)->default(0);
 
-            $table->unsignedBigInteger('store_id');
+            $table->unsignedBigInteger('store_type_id')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('store_id')->references('id')->on('stores');
+            $table->foreign('store_type_id')->references('id')->on('store_types');
 
             $table->index('user_id');
             $table->index('name');
 
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
     }
 
