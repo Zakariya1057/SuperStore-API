@@ -22,55 +22,67 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('user')->group(function () {
     Route::post('/register', 'API\UserController@register')->name('user.register');
     Route::post('/login', 'API\UserController@login')->name('user.login');
-    Route::post('/update', 'API\UserController@update')->name('user.update');
-});
+    Route::post('/logout', 'API\UserController@logout')->name('user.logout')->middleware('auth:sanctum');
+    Route::post('/update', 'API\UserController@update')->name('user.update')->middleware('auth:sanctum');
 
-Route::prefix('store')->group(function () {
-    Route::get('/{store_id}', 'API\StoreController@show')->name('store.show');
-});
-
-Route::prefix('grocery')->group(function () {
-    Route::get('{store_type_id}', 'API\GroceryController@categories')->name('grocery.categories');
-    Route::get('products/{store_type_id}', 'API\GroceryController@products')->name('grocery.products');
-});
-
-Route::prefix('product/{product}')->group(function () {
-    Route::get('/', 'API\ProductController@show')->name('product.show');
-
-    Route::post('/review/create', 'API\ReviewController@create')->name('review.create');
-    Route::post('/review/delete', 'API\ReviewController@delete')->name('review.delete');
-    
-    Route::get('/reviews', 'API\ReviewController@index')->name('review.index');
-    Route::get('/review', 'API\ReviewController@show')->name('review.show');
-
-    Route::post('/favourite', 'API\FavouriteProductsController@update')->name('favourite.update');
-});
-
-Route::get('/favourites', 'API\FavouriteProductsController@index')->name('favourite.index');
-
-Route::prefix('image')->group(function () {
-    Route::get('/{type}/{name}', 'API\ImageController@show')->name('image.show');
-});
-
-Route::prefix('list')->group(function () {
-    Route::get('/', 'API\ListViewController@index')->name('list.index');
-    Route::post('/create', 'API\ListViewController@create')->name('list.create');
-    Route::post('/delete', 'API\ListViewController@delete')->name('list.delete');
-    Route::post('/update', 'API\ListViewController@update')->name('list.update');
-    
-    Route::get('/{list}', 'API\ListViewController@show')->name('list.show');
-    Route::post('{list}/restart', 'API\ListViewController@restart')->name('list.restart');
-
-    Route::prefix('{list}/item')->group(function () {
-        Route::post('/create', 'API\GroceryListViewController@create')->name('list_item.create');
-        Route::post('/update', 'API\GroceryListViewController@update')->name('list_item.update');
-        Route::post('/delete', 'API\GroceryListViewController@delete')->name('list_item.delete');
+    Route::prefix('reset')->group(function () {
+        Route::post('/send-token', 'API\ResetPasswordController@send_token')->name('user.reset.send_token');
+        Route::post('/validate-token', 'API\ResetPasswordController@validate_token')->name('user.reset.validate_token');
+        Route::post('/new-password', 'API\ResetPasswordController@new_password')->name('user.reset.new_password');
     });
 });
 
-Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
+Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
 
-Route::prefix('search')->group(function () {
-    Route::get('/suggestions/{query}', 'API\SearchViewController@suggestions')->name('search.suggestions');
-    Route::post('/results', 'API\SearchViewController@results')->name('search.results');
+    Route::prefix('store')->group(function () {
+        Route::get('/{store_id}', 'API\StoreController@show')->name('store.show');
+    });
+    
+    Route::prefix('grocery')->group(function () {
+        Route::get('{store_type_id}', 'API\GroceryController@categories')->name('grocery.categories');
+        Route::get('products/{store_type_id}', 'API\GroceryController@products')->name('grocery.products');
+    });
+    
+    Route::prefix('product/{product}')->group(function () {
+        Route::get('/', 'API\ProductController@show')->name('product.show');
+    
+        Route::post('/review/create', 'API\ReviewController@create')->name('review.create');
+        Route::post('/review/delete', 'API\ReviewController@delete')->name('review.delete');
+        
+        Route::get('/reviews', 'API\ReviewController@index')->name('review.index');
+        Route::get('/review', 'API\ReviewController@show')->name('review.show');
+    
+        Route::post('/favourite', 'API\FavouriteProductsController@update')->name('favourite.update');
+    });
+    
+    Route::get('/favourites', 'API\FavouriteProductsController@index')->name('favourite.index');
+    
+    Route::prefix('image')->group(function () {
+        Route::get('/{type}/{name}', 'API\ImageController@show')->name('image.show');
+    });
+    
+    Route::prefix('list')->group(function () {
+        Route::get('/', 'API\ListViewController@index')->name('list.index');
+        Route::post('/create', 'API\ListViewController@create')->name('list.create');
+        Route::post('/delete', 'API\ListViewController@delete')->name('list.delete');
+        Route::post('/update', 'API\ListViewController@update')->name('list.update');
+        
+        Route::get('/{list}', 'API\ListViewController@show')->name('list.show');
+        Route::post('{list}/restart', 'API\ListViewController@restart')->name('list.restart');
+    
+        Route::prefix('{list}/item')->group(function () {
+            Route::post('/create', 'API\GroceryListViewController@create')->name('list_item.create');
+            Route::post('/update', 'API\GroceryListViewController@update')->name('list_item.update');
+            Route::post('/delete', 'API\GroceryListViewController@delete')->name('list_item.delete');
+        });
+    });
+    
+    Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
+    
+    Route::prefix('search')->group(function () {
+        Route::get('/suggestions/{query}', 'API\SearchViewController@suggestions')->name('search.suggestions');
+        Route::post('/results', 'API\SearchViewController@results')->name('search.results');
+    });
+
 });
+

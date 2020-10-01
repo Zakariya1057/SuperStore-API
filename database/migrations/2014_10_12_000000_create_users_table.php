@@ -20,7 +20,13 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
             $table->rememberToken();
+
+            $table->timestamp('token_sent_at')->nullable();
+
+            $table->timestamp('logged_in_at')->nullable();
+            $table->timestamp('logged_out_at')->nullable();
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

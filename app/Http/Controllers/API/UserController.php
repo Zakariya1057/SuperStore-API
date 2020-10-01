@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\API;
 
 use App\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
+use App\Traits\UserTrait;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+
+    use UserTrait;
 
     public function register(Request $request){
 
@@ -17,6 +20,7 @@ class UserController extends Controller
             'data.name' => [],
             'data.email' => [],
             'data.password' => [],
+            'data.password_confirmation' => [],
         ]);
 
         $data = $validated_data['data'];
@@ -29,21 +33,21 @@ class UserController extends Controller
             return $nameError ?? $passwordError ?? $emailError;
         }
 
-        if( User::where('name', $data['name'])->exists() ){
-            return response()->json(['data' => ['error' => 'Name belongs to another user.']], 422);
-        }
-
         if( User::where('email', $data['email'])->exists() ){
             return response()->json(['data' => ['error' => 'Email address belongs to another user.']], 422);
         }
-
-        User::create([
+        
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
 
-        return response()->json(['data' => ['status' => 'sucess']]);
+        $token = $user->createToken($user->id)->plainTextToken;
+
+        User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
+
+        return response()->json(['data' => ['token' => $token, 'name' => $user->name, 'email' => $user->email]]);
     }
 
     public function login(Request $request){
@@ -62,23 +66,32 @@ class UserController extends Controller
             return $emailError ?? $passwordError;
         }
 
-        $password_results = User::where('email', $data['email'])->select('password')->get()->first();
+        $user = User::where('email', $data['email'])->get()->first();
 
-        if(!$password_results){
+        if(!$user){
             return response()->json(['data' => ['error' => 'Email address doesn\'t belongs to any user.']], 404);
         }
 
-        if (Hash::check($data['password'], $password_results->password)) {
-            return response()->json(['data' => ['token' => 'token']]);
+        if (Hash::check($data['password'], $user->password)) {
+            $user->tokens()->delete();
+            $token = $user->createToken($user->id)->plainTextToken;
+            User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
+            return response()->json(['data' => ['token' => $token, 'name' => $user->name, 'email' => $user->email]]);
         } else {
             return response()->json(['data' => ['error' => 'Wrong password.']], 404);
         }
 
     }
 
+    public function logout(Request $request){
+        $request->user()->tokens()->delete();
+        User::where('id', $request->user()->id)->update(['logged_out_at' => Carbon::now()]);
+        return response()->json(['data' => ['status' => 'sucess']]);
+    }
+
     public function update(Request $request){
 
-        $user_id = 1;
+        $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
             'data.email' => [],
@@ -99,78 +112,21 @@ class UserController extends Controller
         $value = $data[ $data['type'] ];
 
         if($type == 'password'){
-            $type = 'new_password';
+            $type = 'edit_password';
         }
 
-        $error = $this->validate_field($data,$type);
+        $error = $this->validate_field($data,$type,$request->user()->id);
         if($error){
             return $error;
         }
 
-        if($type == 'new_password'){
+        if($type == 'edit_password'){
            $value  = Hash::make($value);
         }
 
         User::where('id',$user_id)->update([$data['type'] => $value ]);
 
         return response()->json(['data' => ['status' => 'sucess']]);
-
-    }
-
-    public function validate_field($data, $type){
-
-        $user_id = 1;
-
-        $type_validations = [
-            'name' => ['field' => 'name', 'validation' => 'required|string|max:255'],
-            'email' => ['field' => 'email', 'validation' => 'required|email|max:255'],
-            'password' => ['field' => 'password', 'validation' => 'required|string'],
-            'new_password' => ['field' => 'password', 'validation' => 'required|string|min:8|confirmed'],
-        ];
-        
-        if(!key_exists($type,$type_validations)){
-            return response()->json(['data' => ['error' => 'Unknown Type: '. $type]], 422);
-        }
-
-        $validation = $type_validations[$type]['validation'];
-        $field = $type_validations[$type]['field'];
-
-        if(!key_exists($field, $data)){
-            return response()->json(['data' => ['error' => "The $field field must be included."]], 422);
-        } else {
-            $validator = Validator::make($data, [$field => $validation]);
-            if($validator->fails()) {
-                return response()->json(['data' => ['error' => $validator->errors()->get($field)[0]]], 422);
-            }
-        }
-
-        if($type == 'new_password'){
-            // Make sure passwords match up correctly
-            if(!key_exists('current_password', $data)){
-                return response()->json(['data' => ['error' => "The current password field must be included."]], 422);
-            }
-
-            if($data['current_password'] == ''){
-                return response()->json(['data' => ['error' => "Current password required"]], 422);
-            }
-
-            $current_password = $data['current_password'];
-            $new_password = $data['password'];
-
-            $password_results = User::where('id', $user_id)->select('password')->get()->first();
-            if(!$password_results){
-                return response()->json(['data' => ['error' => "No User Found."]], 422);
-            }
-
-            if($current_password == $new_password){
-                return response()->json(['data' => ['error' => "New password must be different to current password."]], 422);
-            }
-
-            if (!Hash::check($current_password, $password_results->password)) {
-                return response()->json(['data' => ['error' => "Incorrect current password."]], 422);
-            }
-
-        }
 
     }
 
