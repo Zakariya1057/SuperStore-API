@@ -9,26 +9,26 @@ use App\Http\Controllers\Controller;
 class ReviewController extends Controller
 {
     public function index($product_id){
-        $reviews = Review::where('product_id', $product_id)->join('users','users.id','reviews.user_id')->select(['reviews.id', 'name','title','text','rating'])->orderBy('reviews.created_at','DESC')->get();
+        $reviews = Review::where('product_id', $product_id)->join('users','users.id','reviews.user_id')->select(['reviews.id', 'name','title','text','rating', 'reviews.updated_at'])->orderBy('reviews.created_at','DESC')->get();
         return response()->json(['data' => $reviews]);
     }
 
-    public function show($product_id){
-        $user_id = 2;
+    public function show(Request $request, $product_id){
+        $user_id = $request->user()->id;
 
         $review = Review::where([ ['user_id', $user_id],['product_id',$product_id ] ])->orderBy('created_at','DESC')->get() ?? [];
         return response()->json(['data' => $review]);
     }
 
-    public function delete($product_id){
-        $user_id = 2;
+    public function delete(Request $request, $product_id){
+        $user_id = $request->user()->id;
         Review::where([ ['user_id', $user_id],['product_id',$product_id ] ])->delete();
         return response()->json(['data' => ['status' => 'success']]);
     }
 
     public function create($product_id, Request $request){
 
-        $user_id = 2;
+        $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
             'data.text' => 'required',

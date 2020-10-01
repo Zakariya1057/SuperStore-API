@@ -10,8 +10,8 @@ use App\Http\Controllers\Controller;
 class FavouriteProductsController extends Controller
 {
     
-    public function index(){
-        $user_id = 1;
+    public function index(Request $request){
+        $user_id = $request->user()->id;
 
         $product = new Product();
         
@@ -25,7 +25,7 @@ class FavouriteProductsController extends Controller
     }
 
     public function update($product_id, Request $request){
-        $user_id = 1;
+        $user_id = $request->user()->id;
 
         // Item ticked off, or quantity changed
         $validated_data = $request->validate([

@@ -70,7 +70,7 @@ class GroceryListViewController extends Controller
 
         $data = $validated_data['data'];
 
-        $user_id = 1;
+        $user_id = $request->user()->id;
 
         $list = GroceryList::where([ [ 'id',$list_id], ['user_id', $user_id] ])->first();
 
@@ -104,7 +104,7 @@ class GroceryListViewController extends Controller
 
         $product_id = $validated_data['data']['product_id'];
 
-        $user_id = 1;
+        $user_id = $request->user()->id;
 
         GroceryListItem::where([ ['list_id',$list_id], ['product_id',$product_id, ['user_id', $user_id]] ])->delete();
 

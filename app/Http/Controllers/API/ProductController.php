@@ -8,12 +8,19 @@ use App\Casts\HTMLDecode;
 use App\FavouriteProducts;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function show(Product $product){
+    public function show(Request $request, $product_id){
 
-        $user_id = 1;
+        $product = Product::where('id',$product_id)->get()->first();
+
+        if(!$product){
+            return response()->json(['data' => ['error' => 'No Products Found.']], 404);
+        }
+
+        $user_id = $request->user()->id;
         
         // $product_details = Cache::remember('product_'.$product->id, 86400, function () use($product) {
 

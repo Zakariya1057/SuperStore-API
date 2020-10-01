@@ -5,22 +5,24 @@ namespace App\Http\Controllers\API;
 use App\GroceryList;
 use App\GroceryListItem;
 use App\Traits\GroceryListTrait;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class ListViewController extends Controller
 {
     
     use GroceryListTrait;
 
-    public function index(){
+    public function index(Request $request){
         //Use user_id to get all lists for user
-        $user_id = 1;
+        $user_id = $request->user()->id;
         $lists = GroceryList::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
         return response()->json(['data' => $lists]);
     }
 
     public function create(Request $request){
+
+        $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
             'data.name' => 'required|max:255',
@@ -29,7 +31,6 @@ class ListViewController extends Controller
         
         $list_name = $validated_data['data']['name'];
         $store_type_id = $validated_data['data']['store_type_id'];
-        $user_id = 1;
 
         $list = new GroceryList();
         $list->name = $list_name;
@@ -37,28 +38,26 @@ class ListViewController extends Controller
         $list->user_id = $user_id;
         $list->save();
 
-        return $this->index();
+        return $this->index($request);
 
     }
 
-    public function show($list_id){
-
-        $user_id = 1;
-        
+    public function show(Request $request, $list_id){
+        $user_id = $request->user()->id;
         $list = $this->show_list($list_id, $user_id);
-
         return response()->json(['data' => $list]);
     }
 
     public function delete(Request $request){
         // Delete shopping list and all shopping items within
+
+        $user_id = $request->user()->id;
+
         $validated_data = $request->validate([
             'data.list_id' => 'required',
         ]);
 
         $data = $validated_data['data'];
-
-        $user_id = 1;
 
         GroceryListItem::where('list_id',$data['list_id'])->delete();
 
@@ -69,6 +68,9 @@ class ListViewController extends Controller
 
     public function update(Request $request){
         // Item ticked off, or quantity changed
+
+        $user_id = $request->user()->id;
+
         $validated_data = $request->validate([
             'data.list_id' => 'required',
             'data.store_type_id' => 'required',
@@ -76,7 +78,6 @@ class ListViewController extends Controller
         ]);
 
         $data = $validated_data['data'];
-        $user_id = 1;
 
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
@@ -91,8 +92,9 @@ class ListViewController extends Controller
         return response()->json(['data' => ['status' => 'success']]);
     }
 
-    public function restart($list_id){
-        $user_id = 1;
+    public function restart(Request $request, $list_id){
+
+        $user_id = $request->user()->id;
 
         //Make sure that list belongs to user
         $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ])->get()->first();
