@@ -56,7 +56,9 @@ return [
         'postmark' => [
             'transport' => 'postmark',
         ],
-
+        'sendinblue' => [
+            'transport' => 'sendinblue',
+        ],
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => '/usr/sbin/sendmail -bs',
