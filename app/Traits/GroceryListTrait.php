@@ -5,6 +5,8 @@ namespace App\Traits;
 use App\GroceryList;
 use App\GroceryListItem;
 use App\Product;
+use App\Casts\PromotionCalculator;
+use Illuminate\Support\Facades\Log;
 
 trait GroceryListTrait {
 
@@ -51,6 +53,11 @@ trait GroceryListTrait {
             return response()->json(['data' => ['error' => 'No List Found For User']], 404);
         }
 
+        $product = new Product();
+
+        $casts = $product->casts ?? [];
+        $casts['discount'] = PromotionCalculator::class;
+
         $list_items = GroceryListItem::where([ ['list_id', $list->id] ])
         ->select([
             'grocery_list_items.id as id',
@@ -66,16 +73,18 @@ trait GroceryListTrait {
             'products.small_image as small_image',
             'products.large_image as large_image',
             'grocery_list_items.ticked_off as ticked_off',
+            'promotions.name as discount'
         ])
         ->join('parent_categories', 'parent_categories.id','=','grocery_list_items.parent_category_id')
         ->join('products', 'products.id','=','grocery_list_items.product_id')
+        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
         ->leftJoin('category_aisles', function ($join) use($list) {
             $join->on('category_aisles.category_id','=','grocery_list_items.parent_category_id')
                  ->where('category_aisles.store_id',$list->store_id);
         })
         ->orderBy('grocery_list_items.parent_category_id','ASC')
         ->withCasts(
-            $product->casts
+            $casts
         )
         ->get();
 
@@ -114,8 +123,43 @@ trait GroceryListTrait {
     }
 
     protected function item_price($product_id,$quantity=1){
-        $product_price = (float)Product::where('id',$product_id)->select('price')->first()->price;
-        return $quantity * $product_price;
+        $product = Product::where('products.id',$product_id)->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->select('products.price','promotions.name as discount')->withCasts(['discount' => PromotionCalculator::class])->get()->first();
+    
+        $price = $product->price;
+        $total = 0;
+
+        if($quantity == 0){
+            return $total;
+        }
+
+        if(!is_null($product->discount)){
+            $discount_details = (object)$product->discount;
+            $remainder = ($quantity % $discount_details->quantity);
+            $goes_into_fully = round($quantity / $discount_details->quantity);
+
+            if($quantity < $discount_details->quantity){
+                $total = $quantity * $price;   
+            } else {
+
+                if( !is_null($discount_details->for_quantity)){
+                    $total = ( $goes_into_fully * ( $discount_details->for_quantity * $price)) + ($remainder * $price);
+                } else {
+                    Log::debug('Goes Into Fully: '.$goes_into_fully);
+                    Log::debug('Discount Price: '.$discount_details->price);
+                    Log::debug('Remainder: '.$remainder);
+                    Log::debug('Price: '.$price);
+    
+                    $total = ($goes_into_fully * $discount_details->price) + ($remainder * $price);
+                }
+            }
+
+
+        } else {
+            $total = $quantity * $price;
+        }
+        
+        return $total;
+
     }
 
 }

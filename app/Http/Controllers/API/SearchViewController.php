@@ -9,6 +9,7 @@ use App\Store;
 use App\StoreType;
 use Illuminate\Http\Request;
 use App\Casts\HTMLDecode;
+use App\Casts\PromotionCalculator;
 use App\Http\Controllers\Controller;
 // Use elastic search in future
 
@@ -58,6 +59,7 @@ class SearchViewController extends Controller
 
         $casts = $product->casts ?? [];
         $casts['parent_category_name'] = HTMLDecode::class;
+        $casts['discount'] = PromotionCalculator::class;
 
         if($type == 'stores'){
 
@@ -76,7 +78,7 @@ class SearchViewController extends Controller
             $results_data['stores'] = $stores;
 
         } elseif($type == 'products'){
-            $results_data['products'] = ParentCategory::select('products.*','parent_categories.id as parent_category_id','parent_categories.name as parent_category_name')->where('products.name', 'like', "$detail%")->join('child_categories','child_categories.parent_category_id','parent_categories.id')->join('products','products.parent_category_id','child_categories.id')->withCasts($casts)->orderByRaw('total_reviews_count / avg_rating desc')->get();
+            $results_data['products'] = ParentCategory::select('products.*','parent_categories.id as parent_category_id','parent_categories.name as parent_category_name','promotions.name as discount')->where('products.name', 'like', "$detail%")->join('child_categories','child_categories.parent_category_id','parent_categories.id')->join('products','products.parent_category_id','child_categories.id')->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->withCasts($casts)->orderByRaw('total_reviews_count / avg_rating desc')->get();
         } elseif($type == 'child_categories'){
             $results_data['products'] = ParentCategory::select('products.*','parent_categories.id as parent_category_id','parent_categories.name as parent_category_name')->where('child_categories.name', 'like', "$detail%")->join('child_categories','child_categories.parent_category_id','parent_categories.id')->join('products','products.parent_category_id','child_categories.id')->withCasts($casts)->orderByRaw('total_reviews_count / avg_rating desc')->get();
         } elseif($type == 'parent_categories'){
