@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Casts\HTMLDecode;
 class OpeningHour extends Model
 {
-
-    protected $casts = [
+    public $casts = [
         'opens_at' => 'datetime:h:iA',
         'closes_at' => 'datetime:h:iA',
         'closed_today' => 'boolean'

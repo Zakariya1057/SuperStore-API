@@ -13,6 +13,7 @@ class Product extends Model
         'price' => 'double',
         'old_price' => 'double',
         'avg_rating' => 'double',
+        'brand' => HTMLDecode::class,
 
         'large_image' => Image::class,
         'small_image' => Image::class,

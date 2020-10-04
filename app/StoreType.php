@@ -8,7 +8,7 @@ use App\Casts\Image;
 
 class StoreType extends Model
 {
-    protected $casts = [
+    public $casts = [
         'large_logo' => Image::class,
         'small_logo' => Image::class,
     ];
