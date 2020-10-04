@@ -194,9 +194,6 @@ class SearchViewController extends Controller
                     }
 
                     $results['filter'] = [];
-    
-                    arsort($filter_categories, 1); 
-                    arsort($filter_brands, 1); 
 
                     $results['filter']['categories'] = $filter_categories; 
                     $results['filter']['brands'] = $filter_brands; 
