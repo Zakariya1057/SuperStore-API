@@ -90,6 +90,7 @@ class CreateProductsTable extends Migration
             $table->unique('site_product_id');
 
             $table->index('name');
+            $table->index('dietary_info');
             $table->index('parent_category_id');
             $table->index('store_type_id');
 

@@ -43,6 +43,9 @@ class CreateOpeningHoursTable extends Migration
             $table->boolean('closed_today')->nullable();
 
             $table->foreign('store_id')->references('id')->on('stores');
+            
+            $table->index('store_id');
+            $table->index('day_of_week');
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
