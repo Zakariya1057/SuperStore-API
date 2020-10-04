@@ -26,10 +26,14 @@ Route::prefix('user')->group(function () {
     Route::post('/update', 'API\UserController@update')->name('user.update')->middleware('auth:sanctum');
 
     Route::prefix('reset')->group(function () {
-        Route::post('/send-token', 'API\ResetPasswordController@send_token')->name('user.reset.send_token');
-        Route::post('/validate-token', 'API\ResetPasswordController@validate_token')->name('user.reset.validate_token');
-        Route::post('/new-password', 'API\ResetPasswordController@new_password')->name('user.reset.new_password');
+        Route::post('/send-code', 'API\ResetPasswordController@send_code')->name('user.reset.send_code');
+        Route::post('/validate-code', 'API\ResetPasswordController@validate_code')->name('user.reset.validate_code');
+        Route::post('/password', 'API\ResetPasswordController@new_password')->name('user.reset.new_password');
     });
+});
+
+Route::prefix('image')->group(function () {
+    Route::get('/{type}/{name}', 'API\ImageController@show')->name('image.show');
 });
 
 Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
@@ -56,10 +60,6 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
     });
     
     Route::get('/favourites', 'API\FavouriteProductsController@index')->name('favourite.index');
-    
-    Route::prefix('image')->group(function () {
-        Route::get('/{type}/{name}', 'API\ImageController@show')->name('image.show');
-    });
     
     Route::prefix('list')->group(function () {
         Route::get('/', 'API\ListViewController@index')->name('list.index');
