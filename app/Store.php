@@ -39,7 +39,7 @@ class Store extends Model
     public function facilities(){
         return $this->hasMany('App\Facility');
     }
-
+    
     public function location(){
         return $this->hasOne('App\StoreLocation');
     }

@@ -13,15 +13,9 @@ class StoreController extends Controller
     
     use StoreTrait;
 
-    /**
-     * Show details about store:
-     *  1. Name, Logo, Address
-     *  2. Address
-     *  3. Facilities
-     *
-     */
     public function show($store_id)
     {
+
         $store = Store::select('stores.*', 'store_types.large_logo', 'store_types.small_logo')
         ->where('stores.id', $store_id)
         ->join('store_types', 'store_types.id', '=', 'stores.store_type_id')
@@ -32,11 +26,11 @@ class StoreController extends Controller
         ->first();
 
         if($store){
-            $store->location = $store->location;
-            $store->opening_hours = $store->opening_hours;
-            $store->facilities = $store->facilities;
+            $store->location;
+            $store->opening_hours;
+            $store->facilities;
         } else {
-           throw new Exception('Store Not Found With ID: '. $store_id);
+            return response()->json(['data' => ['error' => 'No store found.']], 404);
         }
 
         return $store;

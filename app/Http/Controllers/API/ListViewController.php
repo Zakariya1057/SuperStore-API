@@ -15,6 +15,7 @@ class ListViewController extends Controller
 
     public function index(Request $request){
         //Use user_id to get all lists for user
+
         $user_id = $request->user()->id;
         $lists = GroceryList::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
         return response()->json(['data' => $lists]);

@@ -13,6 +13,7 @@ class FavouriteProductsController extends Controller
     public function index(Request $request){
         $user_id = $request->user()->id;
 
+
         $product = new Product();
         
         $products = FavouriteProducts::where([ ['user_id', $user_id] ])
@@ -25,6 +26,7 @@ class FavouriteProductsController extends Controller
     }
 
     public function update($product_id, Request $request){
+
         $user_id = $request->user()->id;
 
         // Item ticked off, or quantity changed
