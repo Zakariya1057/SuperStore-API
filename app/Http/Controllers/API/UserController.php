@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
+use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ class UserController extends Controller
 {
 
     use UserTrait;
+    use SanitizeTrait;
 
     public function register(Request $request){
 
@@ -24,7 +26,8 @@ class UserController extends Controller
         ]);
 
         $data = $validated_data['data'];
-
+        $data = $this->sanitizeAllFields($data);
+        
         $nameError = $this->validate_field($data,'name');
         $emailError = $this->validate_field($data,'email');
         $passwordError = $this->validate_field($data,'new_password');

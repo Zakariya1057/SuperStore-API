@@ -5,9 +5,12 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Review;
 use App\Http\Controllers\Controller;
+use App\Traits\SanitizeTrait;
 
 class ReviewController extends Controller
 {
+    use SanitizeTrait;
+
     public function index($product_id){
         $reviews = Review::where('product_id', $product_id)->join('users','users.id','reviews.user_id')->select(['reviews.id', 'name','title','text','rating', 'reviews.updated_at'])->orderBy('reviews.created_at','DESC')->get();
         return response()->json(['data' => $reviews]);
@@ -37,6 +40,7 @@ class ReviewController extends Controller
         ]);
 
         $data = $validated_data['data'];
+        $data = $this->sanitizeAllFields($data);
 
         $text = $data['text'];
         $rating = $data['rating'];
