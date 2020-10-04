@@ -17,7 +17,7 @@ class ProductController extends Controller
         $product = Product::where('id',$product_id)->get()->first();
 
         if(!$product){
-            return response()->json(['data' => ['error' => 'No Products Found.']], 404);
+            return response()->json(['data' => ['error' => 'No Product Found.']], 404);
         }
 
         $user_id = $request->user()->id;
