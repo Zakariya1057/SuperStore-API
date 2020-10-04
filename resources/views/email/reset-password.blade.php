@@ -182,7 +182,7 @@
                     <table border="0" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="border-radius: 6px; padding: 24px 0px;">
-                          <p href="https://sendgrid.com" target="_blank" style="display: inline-block; padding: 0px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 35px; text-decoration: none; border-radius: 6px; color:#1a82e2">{{ $token }}</p>
+                          <p href="https://sendgrid.com" target="_blank" style="display: inline-block; padding: 0px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 35px; text-decoration: none; border-radius: 6px; color:#1a82e2">{{ $code }}</p>
                         </td>
                       </tr>
                     </table>

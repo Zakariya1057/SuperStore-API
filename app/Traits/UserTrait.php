@@ -12,7 +12,7 @@ trait UserTrait {
 
         $type_validations = [
             'name' => ['field' => 'name', 'validation' => 'required|string|max:255'],
-            'token' => ['field' => 'token', 'validation' => 'required|integer'],
+            'code' => ['field' => 'code', 'validation' => 'required|integer'],
             'email' => ['field' => 'email', 'validation' => 'required|email|max:255'],
             'password' => ['field' => 'password', 'validation' => 'required|string'],
             'edit_password' => ['field' => 'password', 'validation' => 'required|string|min:8|confirmed'],

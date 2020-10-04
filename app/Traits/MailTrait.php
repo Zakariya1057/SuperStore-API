@@ -11,7 +11,7 @@ trait MailTrait {
 
         Log::debug("Sending Reset Password To $name_to($email_to)");
 
-        Mail::send('email.reset-password', ['name' => $name_to,'token' => $reset_code], function ($message) use($email_to) {
+        Mail::send('email.reset-password', ['name' => $name_to,'code' => $reset_code], function ($message) use($email_to) {
             $email_from_address = env('MAIL_FROM_ADDRESS');
             $email_from_name = env('MAIL_FROM_ADDRESS');
             $reset_password_subject = env('RESET_PASSWORD_SUBJECT');
