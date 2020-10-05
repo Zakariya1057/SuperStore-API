@@ -13,6 +13,7 @@ use App\Casts\PromotionCalculator;
 use App\Http\Controllers\Controller;
 use App\OpeningHour;
 use App\Traits\SanitizeTrait;
+use App\Traits\StoreTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -22,6 +23,7 @@ class SearchViewController extends Controller
 {
 
     use SanitizeTrait;
+    use StoreTrait;
 
     public function suggestions($query){
         $results = Cache::remember('search_suggestions_'.$query, now()->addMinutes(30), function () use ($query){
@@ -70,7 +72,7 @@ class SearchViewController extends Controller
         $category = $data['category'] ?? '';
         $brand = $data['brand'] ?? '';
 
-        $results = Cache::remember("search_results_{$type}_{$detail}_{$sort}_{$order}_{$dietary}_{$category}_{$brand}", now()->addMinutes(60), function () use ($type, $detail, $data){
+        // $results = Cache::remember("search_results_{$type}_{$detail}_{$sort}_{$order}_{$dietary}_{$category}_{$brand}", now()->addMinutes(60), function () use ($type, $detail, $data){
 
             $results = array(
                 'stores' => [],
@@ -85,26 +87,8 @@ class SearchViewController extends Controller
             $casts['discount'] = PromotionCalculator::class;
     
             if($type == 'stores'){
-    
-                $hour = new OpeningHour();
-                $store_type = new StoreType();
-    
-                $casts = array_merge($hour->casts, $store_type->casts);
-    
-                $stores = Store::select('stores.*', 'store_types.large_logo', 'store_types.small_logo','closes_at','opens_at')
-                ->where('store_type_id', $detail)
-                ->join('store_types', 'store_types.id', '=', 'stores.store_type_id')
-                ->join('opening_hours', function ($join) {
-                    $join->on('opening_hours.store_id', '=', 'stores.id')->where('day_of_week', '=', Carbon::now()->dayOfWeek);
-                })
-                ->withCasts($casts)->get();
-    
-                foreach($stores as $store){
-                    $store->location;
-                }
-    
+                $stores = $this->stores_by_type($detail);
                 $results['stores'] = $stores;
-    
             } else {
     
                 $base_query = ParentCategory::
@@ -202,9 +186,9 @@ class SearchViewController extends Controller
     
             }
 
-            return $results;
+            // return $results;
 
-        });
+        // });
 
         return response()->json(['data' => $results]);
 
