@@ -118,10 +118,6 @@ trait GroceryListTrait {
         return $list;
     }
 
-    protected function calculate_total($list_id){
-
-    }
-
     protected function item_price($product_id,$quantity=1){
         $product = Product::where('products.id',$product_id)->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->select('products.price','promotions.name as discount')->withCasts(['discount' => PromotionCalculator::class])->get()->first();
     
@@ -144,15 +140,9 @@ trait GroceryListTrait {
                 if( !is_null($discount_details->for_quantity)){
                     $total = ( $goes_into_fully * ( $discount_details->for_quantity * $price)) + ($remainder * $price);
                 } else {
-                    Log::debug('Goes Into Fully: '.$goes_into_fully);
-                    Log::debug('Discount Price: '.$discount_details->price);
-                    Log::debug('Remainder: '.$remainder);
-                    Log::debug('Price: '.$price);
-    
                     $total = ($goes_into_fully * $discount_details->price) + ($remainder * $price);
                 }
             }
-
 
         } else {
             $total = $quantity * $price;
