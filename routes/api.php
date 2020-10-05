@@ -38,6 +38,8 @@ Route::prefix('image')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
 
+    Route::get('/home', 'API\HomeController@show')->name('home.show');
+
     Route::prefix('store')->group(function () {
         Route::get('/{store_id}', 'API\StoreController@show')->name('store.show');
     });
