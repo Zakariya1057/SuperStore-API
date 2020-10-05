@@ -67,12 +67,12 @@ class CreateProductsTable extends Migration
             $table->boolean('recommended_searched')->nullable();
             $table->boolean('reviews_searched')->nullable();
 
-            $table->text('weight')->nullable();
-            $table->text('brand');
+            $table->string('weight')->nullable();
+            $table->string('brand');
             $table->text('storage')->nullable();
 
-            $table->text('dietary_info')->nullable();
-            $table->text('allergen_info')->nullable();
+            $table->string('dietary_info')->nullable();
+            $table->string('allergen_info')->nullable();
 
             $table->decimal('avg_rating', 4,2)->nullable();
             $table->integer('total_reviews_count')->nullable();
