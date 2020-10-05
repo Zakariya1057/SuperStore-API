@@ -14,7 +14,11 @@ class ProductController extends Controller
 {
     public function show(Request $request, $product_id){
 
-        $product = Product::where('id',$product_id)->get()->first();
+        $product = Product::where('products.id',$product_id)
+        ->select('products.*','parent_categories.id as parent_category_id','parent_categories.name as parent_category_name')
+        ->join('child_categories','child_categories.id','products.parent_category_id')
+        ->join('parent_categories','child_categories.parent_category_id','parent_categories.id')
+        ->get()->first();
 
         if(!$product){
             return response()->json(['data' => ['error' => 'No Product Found.']], 404);
