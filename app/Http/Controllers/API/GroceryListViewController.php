@@ -76,17 +76,23 @@ class GroceryListViewController extends Controller
 
         if($list){
 
-            $total_price = $this->item_price($data['product_id'], $data['quantity']);
-
             $quantity = $data['quantity'];
-            $ticked_off = strtolower($data['ticked_off']) == 'true' ? 1 : 0;
 
-            GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])
-            ->update([
-                'quantity' => $quantity,
-                'ticked_off' => $ticked_off,
-                'total_price' => $total_price
-            ]);
+            if($quantity == 0){
+                GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])->delete();
+            } else {
+
+                $total_price = $this->item_price($data['product_id'], $data['quantity']);
+                $ticked_off = strtolower($data['ticked_off']) == 'true' ? 1 : 0;
+    
+                GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])
+                ->update([
+                    'quantity' => $quantity,
+                    'ticked_off' => $ticked_off,
+                    'total_price' => $total_price
+                ]);
+
+            }
 
         }
 
