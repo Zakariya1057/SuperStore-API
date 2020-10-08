@@ -96,6 +96,7 @@ class SearchViewController extends Controller
                     'products.*',
                     'parent_categories.id as parent_category_id',
                     'parent_categories.name as parent_category_name',
+                    'promotions.id as promotion_id',
                     'promotions.name as discount'
                 )
                 ->join('child_categories','child_categories.parent_category_id','parent_categories.id')

@@ -9,16 +9,31 @@ use App\FavouriteProducts;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Casts\PromotionCalculator;
 
 class ProductController extends Controller
 {
     public function show(Request $request, $product_id){
 
+        $product = new Product();
+        $casts = $product->casts;
+
+        $casts['discount'] = PromotionCalculator::class;
+
         $product = Product::where('products.id',$product_id)
-        ->select('products.*','parent_categories.id as parent_category_id','parent_categories.name as parent_category_name')
+        ->select(
+            'products.*',
+            'parent_categories.id as parent_category_id',
+            'parent_categories.name as parent_category_name',
+            'promotions.id as promotion_id',
+            'promotions.name as discount'
+        )
         ->join('child_categories','child_categories.id','products.parent_category_id')
+        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
         ->join('parent_categories','child_categories.parent_category_id','parent_categories.id')
-        ->get()->first();
+        ->withCasts($casts)
+        ->get()
+        ->first();
 
         if(!$product){
             return response()->json(['data' => ['error' => 'No Product Found.']], 404);
@@ -41,8 +56,7 @@ class ProductController extends Controller
             )->get();
     
             $product->recommended = $recommended;
-            $product->promotion;
-
+           
             $product->favourite = FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product->id] ])->exists();
             
             // return $product;

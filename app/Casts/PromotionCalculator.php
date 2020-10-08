@@ -21,6 +21,8 @@ class PromotionCalculator implements CastsAttributes
             return;
         }
 
+        $name = null;
+
         $value = html_entity_decode($value, ENT_QUOTES);
         preg_match('/(\d+).+£(\d+\.*\d*)$/',$value,$price_promotion_matches);
 
@@ -37,7 +39,7 @@ class PromotionCalculator implements CastsAttributes
             $for_quantity = (int)$quantity_promotion_matches[2];
         }
 
-        return ['quantity' => $quantity, 'price' => $price, 'for_quantity' => $for_quantity];
+        return ['id' => $model->promotion_id,'name' => $value, 'quantity' => $quantity, 'price' => $price, 'for_quantity' => $for_quantity];
     }
 
     /**
