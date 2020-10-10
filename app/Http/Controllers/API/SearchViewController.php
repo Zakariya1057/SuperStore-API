@@ -26,13 +26,21 @@ class SearchViewController extends Controller
     use StoreTrait;
 
     public function suggestions($query){
+
         $results = Cache::remember('search_suggestions_'.$query, now()->addMinutes(30), function () use ($query){
             $results = array();
 
             $stores = StoreType::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(2)->get()->toArray();
             $child_categories = ChildCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
             $parent_categories = ParentCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
-            $products = Product::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit(5)->get()->toArray();
+
+            if((count($child_categories) + count($parent_categories)) <= 3 ){
+                $product_limit = 10;
+            } else {
+                $product_limit = 5;
+            }
+
+            $products = Product::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
     
             $results['stores'] = $stores ?? [];
             $results['parent_categories'] = $parent_categories ?? [];
@@ -55,7 +63,7 @@ class SearchViewController extends Controller
             'data.order' => '', // asc/desc
 
             'data.dietary' => '',  // Halal, Vegetarian
-            'data.category' => '',
+            'data.child_category' => '',
             'data.brand' => '',
         ]);
 
@@ -84,6 +92,7 @@ class SearchViewController extends Controller
        
             $casts = $product->casts ?? [];
             $casts['parent_category_name'] = HTMLDecode::class;
+            $casts['child_category_name'] = HTMLDecode::class;
             $casts['discount'] = PromotionCalculator::class;
     
             if($type == 'stores'){
@@ -96,6 +105,7 @@ class SearchViewController extends Controller
                     'products.*',
                     'parent_categories.id as parent_category_id',
                     'parent_categories.name as parent_category_name',
+                    'child_categories.name as child_category_name',
                     'promotions.id as promotion_id',
                     'promotions.name as discount'
                 )
@@ -149,9 +159,9 @@ class SearchViewController extends Controller
                     $base_query = $base_query->where('brand',$brand);
                 }
                 
-                if(key_exists('category', $data) && $type != 'parent_categories'){
-                    $category = $data['category'];
-                    $base_query = $base_query->where('parent_categories.name',$category);
+                if(key_exists('child_category', $data)){
+                    $category = $data['child_category'];
+                    $base_query = $base_query->where('child_categories.name',$category);
                 }
                 
                 // Get Results
@@ -170,10 +180,10 @@ class SearchViewController extends Controller
                             $filter_brands[$product->brand] = 1;
                         }
        
-                        if(key_exists($product->parent_category_name, $filter_categories)){
-                            $filter_categories[$product->parent_category_name]++;
+                        if(key_exists($product->child_category_name, $filter_categories)){
+                            $filter_categories[$product->child_category_name]++;
                         } else {
-                            $filter_categories[$product->parent_category_name] = 1;
+                            $filter_categories[$product->child_category_name] = 1;
                         }
     
                     }
