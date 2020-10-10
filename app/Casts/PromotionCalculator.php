@@ -39,6 +39,10 @@ class PromotionCalculator implements CastsAttributes
             $for_quantity = (int)$quantity_promotion_matches[2];
         }
 
+        if(!$quantity_promotion_matches && !$price_promotion_matches){
+            return null;
+        }
+
         return ['id' => $model->promotion_id,'name' => $value, 'quantity' => $quantity, 'price' => $price, 'for_quantity' => $for_quantity];
     }
 
