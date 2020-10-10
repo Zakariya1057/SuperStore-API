@@ -3,52 +3,48 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Traits\GroceryListTrait;
 use App\Traits\MonitoringTrait;
 use App\Traits\PromotionTrait;
 use App\Traits\StoreTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
     use StoreTrait;
     use MonitoringTrait;
     use PromotionTrait;
+    use GroceryListTrait;
 
     public function show(Request $request){
-
         $user = $request->user();
-        // 1. Grocery List Price Changes
-        // 2. Store Locations(Asda)
-        // 3. Monitored Price Changes
-        // 4. Offers, 2 for 3,
-        // 5. Best Fruits, Vegetables, Meats
 
-        $stores = $this->stores_by_type(1,false);
+        
         $monitoring = $this->monitoring_products($user->id);
-        $promotions = $this->store_promotions(1);
+        $lists = $this->lists_progress($user->id);
+        $groceries = $this->grocery_items($user->id);
 
-        $data = [
+        // Cache::flush();
 
-            // Add In Future, with Tesco
-            // 'grocery_list' => [
-            //    // Price changes in shopping list, based on sale or rollback. Only really works for sites like asda. 
-            // ],
+        $data = Cache::remember("home_page", now()->addWeek(1), function (){
+            $featured_items = $this->featured_items();
+            $stores = $this->stores_by_type(1,false);
+            $categories = $this->home_categories();
+            $promotions = $this->store_promotions(1);
 
-            'list_progress' => [], // Grocery List Items, Recently Used 4. Progress Bar. 10/5. In Progress. -> Click Show
-            'stores' => $stores,
-            'grocery_items_sale' => $monitoring, // Items from shopping list on sale, offers
-            'monitoring' => $monitoring, // Items added to monitoring list
-            'offers' => $promotions, // Top product promotions, top 3 groups
+            return [
+                'stores' => $stores,
+                'featured' => $featured_items,
+                'promotions' => $promotions,
+                'categories' => $categories
+            ];
 
-            'best_categories' => [
-                // Top 20 Items From Categories
-                'Fruits' => [], 
-                'Vegetables' => [],
-                'Drinks' => [],
-                'Meats' => []
-            ]
-        ];
+        });
 
+        $data['monitoring'] = $monitoring;
+        $data['lists'] = $lists;
+        $data['groceries'] = $groceries;
 
         return response()->json(['data' => $data]);
     }

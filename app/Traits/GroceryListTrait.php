@@ -2,10 +2,15 @@
 
 namespace App\Traits;
 
+use App\Casts\HTMLDecode;
 use App\GroceryList;
 use App\GroceryListItem;
 use App\Product;
 use App\Casts\PromotionCalculator;
+use App\ChildCategory;
+use App\FeaturedItem;
+use App\ParentCategory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 trait GroceryListTrait {
@@ -82,7 +87,7 @@ trait GroceryListTrait {
 
                 $new_total = 0;
 
-                // Log::debug("$product_count >= $quantity");
+                Log::debug("$product_count >= $quantity");
 
                 if($product_count >= $quantity){
 
@@ -103,13 +108,13 @@ trait GroceryListTrait {
                     $remainder = ($total_quantity % $discount->quantity);
                     $goes_into_fully = floor($total_quantity / $discount->quantity);
 
-                    // Log::debug('Old Promoted Products total: '.$previous_total_price);
-                    // Log::debug('Most Expensive Price: '.$highest_price);
+                    Log::debug('Old Promoted Products total: '.$previous_total_price);
+                    Log::debug('Most Expensive Price: '.$highest_price);
 
                     if( !is_null($discount->for_quantity)){
                         $new_total = ( $goes_into_fully * ( $discount->for_quantity * $highest_price)) + ($remainder * $highest_price);
                     } else {
-                        // Log::debug("($goes_into_fully * $discount->price) + ($remainder * $highest_price);");
+                        Log::debug("($goes_into_fully * $discount->price) + ($remainder * $highest_price);");
                         $new_total = ($goes_into_fully * $discount->price) + ($remainder * $highest_price);
                     }
 
@@ -214,6 +219,16 @@ trait GroceryListTrait {
         return $list;
     }
 
+    public function grocery_items($user_id){
+        $product = new Product();
+        return GroceryList::where('user_id', $user_id)->select('products.*')->join('grocery_list_items','grocery_list_items.list_id','grocery_lists.id')->join('products', 'products.id','=','grocery_list_items.product_id')->orderBy('grocery_lists.updated_at', 'DESC')->limit(15)->withCasts($product->casts)->get();
+    }
+
+    public function featured_items(){
+        $product = new Product();
+        return FeaturedItem::select('products.*')->whereRaw('type = "products" AND week = WEEK(NOW()) AND year = YEAR(NOW())')->join('products', 'products.id','=','featured_id')->orderBy('featured_items.updated_at', 'DESC')->limit(10)->withCasts($product->casts)->get();
+    }
+
     protected function item_price($product_id,$quantity=1){
         $product = Product::where('products.id',$product_id)->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->select('products.price', 'promotions.id as promotion_id','promotions.name as discount')->withCasts(['discount' => PromotionCalculator::class])->get()->first();
     
@@ -246,6 +261,58 @@ trait GroceryListTrait {
         
         return $total;
 
+    }
+
+    function home_categories(){
+
+        $product = new Product();
+        $casts = $product->casts;
+
+        $categories = FeaturedItem::select('parent_categories.*')->whereRaw('type = "categories" AND week = WEEK(NOW()) AND year = YEAR(NOW())')->join('parent_categories','parent_categories.id','featured_id')->withCasts(['name' => HTMLDecode::class])->limit(10)->get();
+
+        $results = [];
+        foreach($categories as $category){
+            $results[$category->name] = ChildCategory::where('child_categories.parent_category_id', $category->id)
+            ->join('products','products.parent_category_id','child_categories.id')
+            ->select(
+                'products.*'
+            )->limit(15)->withCasts($casts)->get();
+
+        }
+
+        return $results;
+    }
+
+    function lists_progress($user_id){
+
+        $lists =  DB::select( "SELECT
+        grocery_lists.id,
+        grocery_lists.name,
+        IF(items.total_items IS NULL, 0, items.total_items) AS total_items,
+        IF(items.ticked_off_items IS NULL, 0, items.ticked_off_items) AS ticked_off_items
+
+        FROM
+            `grocery_lists`
+
+        LEFT JOIN 
+            (SELECT *, COUNT(*) as total_items,sum(ticked_off = 1) AS ticked_off_items FROM `grocery_list_items` GROUP BY  `grocery_list_items`.`list_id`) items ON items.`list_id` = `grocery_lists`.`id`
+        
+        WHERE
+            `user_id` = ?
+
+        ORDER BY
+            (ticked_off_items/ total_items) DESC,
+            `grocery_lists`.`updated_at` DESC
+
+        LIMIT 4;
+        
+        ", [$user_id] );
+
+        foreach($lists as $list){
+            $list->ticked_off_items = (int)$list->ticked_off_items;
+        }
+
+        return $lists;
     }
 
 }
