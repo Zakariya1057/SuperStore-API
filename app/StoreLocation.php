@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class StoreLocation extends Model
 {
     //
-    protected $casts = [
+    public $casts = [
         'city' => HTMLDecode::class,
         'address_line1' => HTMLDecode::class,
         'address_line2' => HTMLDecode::class,
