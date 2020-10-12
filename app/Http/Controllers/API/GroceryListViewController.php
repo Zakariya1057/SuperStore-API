@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\CategoryProduct;
 use App\Http\Controllers\Controller;
 use App\GroceryList;
 use App\GroceryListItem;
@@ -23,11 +24,7 @@ class GroceryListViewController extends Controller
         $data = $validated_data['data'];
         $product_id = $data['product_id'];
 
-        $parent_category_id = Product::where('products.id', $product_id)
-        ->select('parent_categories.id')
-        ->join('child_categories', 'child_categories.id','products.parent_category_id')
-        ->join('parent_categories', 'parent_categories.id','child_categories.parent_category_id')
-        ->first()->id;
+        $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
        
         $quantity = 1;
 

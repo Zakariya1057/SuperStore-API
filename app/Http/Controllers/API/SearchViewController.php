@@ -109,8 +109,9 @@ class SearchViewController extends Controller
                     'promotions.id as promotion_id',
                     'promotions.name as discount'
                 )
-                ->join('child_categories','child_categories.parent_category_id','parent_categories.id')
-                ->join('products','products.parent_category_id','child_categories.id')
+                ->join('category_products','category_products.parent_category_id','parent_categories.id')
+                ->join('products','products.id','category_products.product_id')
+                ->join('child_categories','child_categories.id','category_products.child_category_id')
                 ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
                 ->withCasts($casts);
                 

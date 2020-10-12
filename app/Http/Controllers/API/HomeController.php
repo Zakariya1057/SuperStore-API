@@ -25,7 +25,7 @@ class HomeController extends Controller
         $lists = $this->lists_progress($user->id);
         $groceries = $this->grocery_items($user->id);
 
-        // Cache::flush();
+        Cache::flush();
 
         $data = Cache::remember("home_page", now()->addWeek(1), function (){
             $featured_items = $this->featured_items();

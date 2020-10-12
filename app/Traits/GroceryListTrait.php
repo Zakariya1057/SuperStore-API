@@ -273,7 +273,8 @@ trait GroceryListTrait {
         $results = [];
         foreach($categories as $category){
             $results[$category->name] = ChildCategory::where('child_categories.parent_category_id', $category->id)
-            ->join('products','products.parent_category_id','child_categories.id')
+            ->join('category_products','category_products.child_category_id','child_categories.id')
+            ->join('products','products.id','category_products.product_id')
             ->select(
                 'products.*'
             )->limit(15)->withCasts($casts)->get();

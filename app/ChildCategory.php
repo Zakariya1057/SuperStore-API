@@ -12,6 +12,11 @@ class ChildCategory extends Model
     ];
 
     public function products() {
-        return $this->hasMany('App\Product','parent_category_id');
+        $product = new Product();
+        return $this->hasMany('App\CategoryProduct','child_category_id')
+        ->join('products','products.id','category_products.product_id')
+        ->select(
+            'products.*'
+        )->limit(15)->withCasts($product->casts);
     }
 }

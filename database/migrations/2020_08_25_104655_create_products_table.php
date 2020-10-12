@@ -78,21 +78,13 @@ class CreateProductsTable extends Migration
             $table->integer('total_reviews_count')->nullable();
             
             $table->text('url')->nullable();
-
-            $table->unsignedBigInteger('parent_category_id');
-            $table->unsignedBigInteger('store_type_id');
-
-
-            $table->foreign('parent_category_id')->references('id')->on('child_categories');
-            $table->foreign('store_type_id')->references('id')->on('store_types');
             $table->foreign('promotion_id')->references('id')->on('promotions');
 
             $table->unique('site_product_id');
 
             $table->index('name');
             $table->index('dietary_info');
-            $table->index('parent_category_id');
-            $table->index('store_type_id');
+            $table->index('allergen_info');
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

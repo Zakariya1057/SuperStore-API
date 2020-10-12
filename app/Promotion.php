@@ -14,10 +14,10 @@ class Promotion extends Model
     ];
 
     public function products() {
-        return $this->hasMany('App\Product')
-        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
-        ->join('child_categories','child_categories.id','products.parent_category_id')
-        ->join('parent_categories','child_categories.parent_category_id','parent_categories.id')
+        return $this->hasMany('App\Product','promotion_id')
+        ->join('promotions','promotions.id','products.promotion_id')
+        ->join('category_products','category_products.product_id','products.id')
+        ->join('parent_categories','parent_categories.id','category_products.parent_category_id')
         ->select(
             'products.*',            
             'parent_categories.id as parent_category_id',

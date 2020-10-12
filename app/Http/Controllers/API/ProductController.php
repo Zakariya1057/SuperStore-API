@@ -28,9 +28,9 @@ class ProductController extends Controller
             'promotions.id as promotion_id',
             'promotions.name as discount'
         )
-        ->join('child_categories','child_categories.id','products.parent_category_id')
+        ->join('category_products','category_products.product_id','products.id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
-        ->join('parent_categories','child_categories.parent_category_id','parent_categories.id')
+        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->withCasts($casts)
         ->get()
         ->first();
