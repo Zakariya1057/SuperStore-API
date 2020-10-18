@@ -27,16 +27,19 @@ class ListViewController extends Controller
 
         $validated_data = $request->validate([
             'data.name' => 'required|max:255',
+            'data.identifier' => 'required',
             'data.store_type_id' => 'required',
         ]);
         
         $list_name = $validated_data['data']['name'];
         $store_type_id = $validated_data['data']['store_type_id'];
+        $identifier = $validated_data['data']['identifier'];
 
         $list = new GroceryList();
         $list->name = $list_name;
         $list->store_type_id = $store_type_id;
         $list->user_id = $user_id;
+        $list->identifier = $identifier;
         $list->save();
 
         return $this->index($request);
@@ -55,14 +58,16 @@ class ListViewController extends Controller
         $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
-            'data.list_id' => 'required',
+            'data.identifier' => 'required',
         ]);
 
         $data = $validated_data['data'];
 
-        GroceryListItem::where('list_id',$data['list_id'])->delete();
+        $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
 
-        GroceryList::where([ ['id',$data['list_id']], ['user_id', $user_id] ])->delete();
+        GroceryListItem::where('list_id',$list->id)->delete();
+
+        GroceryList::where([ ['id',$list->id], ['user_id', $user_id] ])->delete();
 
         return response()->json(['data' => ['status' => 'success']]);
     }
@@ -73,7 +78,7 @@ class ListViewController extends Controller
         $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
-            'data.list_id' => 'required',
+            'data.identifier' => 'required',
             'data.store_type_id' => 'required',
             'data.name' => 'required'
         ]);
@@ -83,7 +88,7 @@ class ListViewController extends Controller
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
 
-        GroceryList::where([['id',$data['list_id']],['user_id', $user_id]])
+        GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])
         ->update([
             'name' => $name,
             'store_type_id' => $store_type_id

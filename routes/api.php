@@ -69,10 +69,10 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
         Route::post('/delete', 'API\ListViewController@delete')->name('list.delete');
         Route::post('/update', 'API\ListViewController@update')->name('list.update');
         
-        Route::get('/{list}', 'API\ListViewController@show')->name('list.show');
-        Route::post('{list}/restart', 'API\ListViewController@restart')->name('list.restart');
+        Route::get('/{id}', 'API\ListViewController@show')->name('list.show');
+        Route::post('{id}/restart', 'API\ListViewController@restart')->name('list.restart');
     
-        Route::prefix('{list}/item')->group(function () {
+        Route::prefix('{id}/item')->group(function () {
             Route::post('/create', 'API\GroceryListViewController@create')->name('list_item.create');
             Route::post('/update', 'API\GroceryListViewController@update')->name('list_item.update');
             Route::post('/delete', 'API\GroceryListViewController@delete')->name('list_item.delete');

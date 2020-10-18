@@ -8,11 +8,11 @@ use App\Casts\HTMLDecode;
 class Review extends Model
 {
 
-    public $visible = ['id', 'name','title','text','rating'];
-
     protected $casts = [
         'text' => HTMLDecode::class,
         'title' => HTMLDecode::class,  
+        'updated_at' => 'datetime:d F Y',
+        'created_at' => 'datetime:d F Y',
     ];
 
     public function user() {

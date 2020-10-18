@@ -12,7 +12,7 @@ class ReviewController extends Controller
     use SanitizeTrait;
 
     public function index($product_id){
-        $reviews = Review::where('product_id', $product_id)->join('users','users.id','reviews.user_id')->select(['reviews.id', 'name','title','text','rating', 'reviews.updated_at'])->orderBy('reviews.created_at','DESC')->get();
+        $reviews = Review::where('product_id', $product_id)->join('users','users.id','reviews.user_id')->select('reviews.*','users.name')->orderBy('reviews.created_at','DESC')->get();
         return response()->json(['data' => $reviews]);
     }
 
@@ -56,16 +56,18 @@ class ReviewController extends Controller
         } else {
             // Create Review
             $review = new Review();
-            $review->user_id = $user_id;
-            $review->product_id = $product_id;
+            $review->user_id = (int)$user_id;
+            $review->product_id = (int)$product_id;
             $review->title = $title;
             $review->text = $text;
-            $review->rating = $rating;
+            $review->rating = (int)$rating;
 
             $review->save();
         }
 
-        return response()->json(['data' => ['status' => 'success']]);
+        $reviews = Review::where([ ['user_id', $user_id],['product_id',$product_id ] ])->orderBy('created_at','DESC')->get();
+
+        return response()->json(['data' => $reviews]);
 
     }
 

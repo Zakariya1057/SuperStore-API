@@ -19,6 +19,7 @@ class CreateGroceryListsTable extends Migration
 
             $table->string('name');
             $table->unsignedBigInteger('user_id');
+            $table->string('identifier');
 
             $table->string('status')->default('Not Started');
             
