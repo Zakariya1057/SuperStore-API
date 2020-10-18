@@ -132,7 +132,7 @@ class ResetPasswordController extends Controller
         $token = $user->createToken($user->id)->plainTextToken;
 
         User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
-        return response()->json(['data' => ['token' => $token, 'name' => $user->name, 'email' => $user->email]]);
+        return response()->json(['data' => ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email]]);
 
     }
 
