@@ -27,7 +27,7 @@ class SearchViewController extends Controller
 
     public function suggestions($query){
 
-        $results = Cache::remember('search_suggestions_'.$query, now()->addMinutes(30), function () use ($query){
+        $results = Cache::remember('search_suggestions_'.$query, now()->addDays(1), function () use ($query){
             $results = array();
 
             $stores = StoreType::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(2)->get()->toArray();
@@ -78,9 +78,12 @@ class SearchViewController extends Controller
         $order = $data['order'] ?? '';
         $dietary = $data['dietary'] ?? '';
         $category = $data['category'] ?? '';
+        $child_category = $data['child_category'] ?? '';
         $brand = $data['brand'] ?? '';
 
-        // $results = Cache::remember("search_results_{$type}_{$detail}_{$sort}_{$order}_{$dietary}_{$category}_{$brand}", now()->addMinutes(60), function () use ($type, $detail, $data){
+        // Cache::flush();
+
+        $results = Cache::remember("search_results_type:{$type}_detail:{$detail}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}", now()->addDays(1), function () use ($type, $detail, $data){
 
             $results = array(
                 'stores' => [],
@@ -105,14 +108,14 @@ class SearchViewController extends Controller
                     'products.*',
                     'parent_categories.id as parent_category_id',
                     'parent_categories.name as parent_category_name',
-                    'child_categories.name as child_category_name',
-                    'promotions.id as promotion_id',
+                    'child_categories.id as child_category_id',
                     'promotions.name as discount'
                 )
                 ->join('category_products','category_products.parent_category_id','parent_categories.id')
                 ->join('products','products.id','category_products.product_id')
                 ->join('child_categories','child_categories.id','category_products.child_category_id')
                 ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
+                ->groupBy('products.id')
                 ->withCasts($casts);
                 
                 if($type == 'products'){
@@ -165,8 +168,23 @@ class SearchViewController extends Controller
                     $base_query = $base_query->where('child_categories.name',$category);
                 }
                 
-                // Get Results
-                $results['products'] = $base_query->get();
+                $paginator = $base_query->paginate(100);
+
+                $results['products'] = $paginator->items();
+
+                $results['paginate'] = [
+                    'from' => 0,
+                    'current' => $paginator->currentPage(),
+                    'to' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'next_page_url' => $paginator->url( $paginator->currentPage() + 1),
+                    'current_page_url' => $paginator->url( $paginator->currentPage() ),
+                    'prev_page_url' => $paginator->previousPageUrl(),
+                    'more_available' => $paginator->hasMorePages(),
+                    // 'path' => 
+                    // 'count' => 
+
+                ];
     
                 // Filters
                 if( count($results['products']) > 0 ){
@@ -198,12 +216,13 @@ class SearchViewController extends Controller
     
             }
 
-            // return $results;
+            return $results;
 
-        // });
+        });
 
         return response()->json(['data' => $results]);
 
     }
+    
     
 }
