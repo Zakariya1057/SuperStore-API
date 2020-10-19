@@ -20,14 +20,13 @@ class HomeController extends Controller
     public function show(Request $request){
         $user = $request->user();
 
-        
         $monitoring = $this->monitoring_products($user->id);
         $lists = $this->lists_progress($user->id);
         $groceries = $this->grocery_items($user->id);
 
         Cache::flush();
 
-        $data = Cache::remember("home_page", now()->addWeek(1), function (){
+        $data = Cache::remember('home_page', now()->addWeek(1), function (){
             $featured_items = $this->featured_items();
             $stores = $this->stores_by_type(1,false);
             $categories = $this->home_categories();
