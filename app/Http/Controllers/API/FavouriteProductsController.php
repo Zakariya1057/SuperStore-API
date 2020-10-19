@@ -37,10 +37,12 @@ class FavouriteProductsController extends Controller
         $favourite = strtolower($validated_data['data']['favourite']);
 
         if ($favourite == 'true') {
-            $favourite = new FavouriteProducts();
-            $favourite->product_id = $product_id;
-            $favourite->user_id = $user_id;
-            $favourite->save();
+            if( !FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product_id] ])->exists()) {
+                $favourite = new FavouriteProducts();
+                $favourite->product_id = $product_id;
+                $favourite->user_id = $user_id;
+                $favourite->save();
+            }
         } else {
             FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product_id] ])->delete();
         }
