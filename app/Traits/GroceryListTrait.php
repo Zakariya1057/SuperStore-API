@@ -290,15 +290,11 @@ trait GroceryListTrait {
         grocery_lists.id,
         grocery_lists.identifier,
         grocery_lists.name,
-        IF(items.total_items IS NULL, 0, items.total_items) AS total_items,
-        IF(items.ticked_off_items IS NULL, 0, items.ticked_off_items) AS ticked_off_items
+        grocery_lists.total_items,
+        grocery_lists.ticked_off_items
 
         FROM
             `grocery_lists`
-
-        LEFT JOIN 
-            (SELECT *, COUNT(*) as total_items,sum(ticked_off = 1) AS ticked_off_items FROM `grocery_list_items` GROUP BY  `grocery_list_items`.`list_id`) items ON items.`list_id` = `grocery_lists`.`id`
-        
         WHERE
             `user_id` = ?
 
@@ -307,7 +303,6 @@ trait GroceryListTrait {
             `grocery_lists`.`updated_at` DESC
 
         LIMIT 4;
-        
         ", [$user_id] );
 
         foreach($lists as $list){

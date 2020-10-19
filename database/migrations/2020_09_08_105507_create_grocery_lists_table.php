@@ -23,6 +23,9 @@ class CreateGroceryListsTable extends Migration
 
             $table->string('status')->default('Not Started');
             
+            $table->integer('ticked_off_items');
+            $table->integer('total_items');
+
             $table->decimal('total_price', 7,2)->default(0);
             $table->decimal('old_total_price', 7,2)->nullable()->default(0);
 
