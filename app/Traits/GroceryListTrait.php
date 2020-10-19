@@ -288,6 +288,7 @@ trait GroceryListTrait {
 
         $lists =  DB::select( "SELECT
         grocery_lists.id,
+        grocery_lists.identifier,
         grocery_lists.name,
         IF(items.total_items IS NULL, 0, items.total_items) AS total_items,
         IF(items.ticked_off_items IS NULL, 0, items.ticked_off_items) AS ticked_off_items

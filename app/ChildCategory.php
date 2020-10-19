@@ -17,6 +17,6 @@ class ChildCategory extends Model
         ->join('products','products.id','category_products.product_id')
         ->select(
             'products.*'
-        )->limit(15)->withCasts($product->casts);
+        )->withCasts($product->casts);
     }
 }

@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class ListViewController extends Controller
 {
-    
+
     use GroceryListTrait;
 
     public function index(Request $request){
@@ -49,7 +49,13 @@ class ListViewController extends Controller
     public function show(Request $request, $list_id){
         $user_id = $request->user()->id;
         $list = $this->show_list($list_id, $user_id);
-        return response()->json(['data' => $list]);
+
+        if($list instanceOf Request){
+            return $list;
+        } else {
+            return response()->json(['data' => $list]);
+        }
+        
     }
 
     public function delete(Request $request){
