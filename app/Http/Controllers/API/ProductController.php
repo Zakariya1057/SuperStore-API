@@ -19,6 +19,7 @@ class ProductController extends Controller
         $casts = $product->casts;
 
         $casts['discount'] = PromotionCalculator::class;
+        $casts['parent_category_name'] = HTMLDecode::class;
 
         $product = Product::where('products.id',$product_id)
         ->select(
