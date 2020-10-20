@@ -22,7 +22,7 @@ trait GroceryListTrait {
         
         if($list instanceOf GroceryList){
 
-            $casts = ['discount' => PromotionCalculator::class];
+            $casts = ['promotion' => PromotionCalculator::class];
 
             $items =  GroceryListItem::
             join('products','products.id','grocery_list_items.product_id')
@@ -35,7 +35,7 @@ trait GroceryListTrait {
                 'grocery_list_items.total_price',
                 'grocery_list_items.ticked_off',
                 'promotions.id as promotion_id',
-                'promotions.name as discount'
+                'promotions.name as promotion'
             )
             ->withCasts($casts)
             ->get();
@@ -51,14 +51,14 @@ trait GroceryListTrait {
 
             foreach($items as $item){
 
-                if(!is_null($item->discount)){
-                    $discount = (object)$item->discount;
+                if(!is_null($item->promotion)){
+                    $promotion = (object)$item->promotion;
 
-                    if(key_exists($discount->id,$promotions)){
-                        $promotions[$discount->id]['products'][] = $item;
+                    if(key_exists($promotion->id,$promotions)){
+                        $promotions[$promotion->id]['products'][] = $item;
                     } else {
-                        $promotions[$discount->id] = [
-                            'details' => $discount,
+                        $promotions[$promotion->id] = [
+                            'details' => $promotion,
                             'products' => [$item],
                          ];
                     }
@@ -105,17 +105,17 @@ trait GroceryListTrait {
                         }
                     }
                     
-                    $remainder = ($total_quantity % $discount->quantity);
-                    $goes_into_fully = floor($total_quantity / $discount->quantity);
+                    $remainder = ($total_quantity % $promotion->quantity);
+                    $goes_into_fully = floor($total_quantity / $promotion->quantity);
 
                     Log::debug('Old Promoted Products total: '.$previous_total_price);
                     Log::debug('Most Expensive Price: '.$highest_price);
 
-                    if( !is_null($discount->for_quantity)){
-                        $new_total = ( $goes_into_fully * ( $discount->for_quantity * $highest_price)) + ($remainder * $highest_price);
+                    if( !is_null($promotion->for_quantity)){
+                        $new_total = ( $goes_into_fully * ( $promotion->for_quantity * $highest_price)) + ($remainder * $highest_price);
                     } else {
-                        Log::debug("($goes_into_fully * $discount->price) + ($remainder * $highest_price);");
-                        $new_total = ($goes_into_fully * $discount->price) + ($remainder * $highest_price);
+                        Log::debug("($goes_into_fully * $promotion->price) + ($remainder * $highest_price);");
+                        $new_total = ($goes_into_fully * $promotion->price) + ($remainder * $highest_price);
                     }
 
                     $new_total_price = ($total_price - $previous_total_price) + $new_total;
@@ -156,7 +156,7 @@ trait GroceryListTrait {
         $product = new Product();
 
         $casts = $product->casts ?? [];
-        $casts['discount'] = PromotionCalculator::class;
+        $casts['promotion'] = PromotionCalculator::class;
 
         $list_items = GroceryListItem::where([ ['list_id', $list->id] ])
         ->select([
@@ -174,7 +174,7 @@ trait GroceryListTrait {
             'products.large_image as large_image',
             'grocery_list_items.ticked_off as ticked_off',
             'promotions.id as promotion_id',
-            'promotions.name as discount'
+            'promotions.name as promotion'
         ])
         ->join('parent_categories', 'parent_categories.id','=','grocery_list_items.parent_category_id')
         ->join('products', 'products.id','=','grocery_list_items.product_id')
@@ -230,7 +230,7 @@ trait GroceryListTrait {
     }
 
     protected function item_price($product_id,$quantity=1){
-        $product = Product::where('products.id',$product_id)->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->select('products.price', 'promotions.id as promotion_id','promotions.name as discount')->withCasts(['discount' => PromotionCalculator::class])->get()->first();
+        $product = Product::where('products.id',$product_id)->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->select('products.price', 'promotions.id as promotion_id','promotions.name as promotion')->withCasts(['promotion' => PromotionCalculator::class])->get()->first();
     
         $price = $product->price;
         $total = 0;
@@ -239,19 +239,19 @@ trait GroceryListTrait {
             return $total;
         }
 
-        if(!is_null($product->discount)){
-            $discount_details = (object)$product->discount;
-            $remainder = ($quantity % $discount_details->quantity);
-            $goes_into_fully = floor($quantity / $discount_details->quantity);
+        if(!is_null($product->promotion)){
+            $promotion_details = (object)$product->promotion;
+            $remainder = ($quantity % $promotion_details->quantity);
+            $goes_into_fully = floor($quantity / $promotion_details->quantity);
 
-            if($quantity < $discount_details->quantity){
+            if($quantity < $promotion_details->quantity){
                 $total = $quantity * $price;   
             } else {
 
-                if( !is_null($discount_details->for_quantity)){
-                    $total = ( $goes_into_fully * ( $discount_details->for_quantity * $price)) + ($remainder * $price);
+                if( !is_null($promotion_details->for_quantity)){
+                    $total = ( $goes_into_fully * ( $promotion_details->for_quantity * $price)) + ($remainder * $price);
                 } else {
-                    $total = ($goes_into_fully * $discount_details->price) + ($remainder * $price);
+                    $total = ($goes_into_fully * $promotion_details->price) + ($remainder * $price);
                 }
             }
 
@@ -285,31 +285,7 @@ trait GroceryListTrait {
     }
 
     function lists_progress($user_id){
-
-        $lists =  DB::select( "SELECT
-        grocery_lists.id,
-        grocery_lists.identifier,
-        grocery_lists.name,
-        grocery_lists.total_items,
-        grocery_lists.ticked_off_items
-
-        FROM
-            `grocery_lists`
-        WHERE
-            `user_id` = ?
-
-        ORDER BY
-            (ticked_off_items/ total_items) DESC,
-            `grocery_lists`.`updated_at` DESC
-
-        LIMIT 4;
-        ", [$user_id] );
-
-        foreach($lists as $list){
-            $list->ticked_off_items = (int)$list->ticked_off_items;
-        }
-
-        return $lists;
+        return GroceryList::where('user_id', $user_id)->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')->get();
     }
 
 }

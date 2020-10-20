@@ -96,7 +96,7 @@ class SearchViewController extends Controller
             $casts = $product->casts ?? [];
             $casts['parent_category_name'] = HTMLDecode::class;
             $casts['child_category_name'] = HTMLDecode::class;
-            $casts['discount'] = PromotionCalculator::class;
+            $casts['promotion'] = PromotionCalculator::class;
     
             if($type == 'stores'){
                 $stores = $this->stores_by_type($detail);
@@ -109,7 +109,7 @@ class SearchViewController extends Controller
                     'parent_categories.id as parent_category_id',
                     'parent_categories.name as parent_category_name',
                     'child_categories.id as child_category_id',
-                    'promotions.name as discount'
+                    'promotions.name as promotion'
                 )
                 ->join('category_products','category_products.parent_category_id','parent_categories.id')
                 ->join('products','products.id','category_products.product_id')

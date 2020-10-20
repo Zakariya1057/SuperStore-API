@@ -18,7 +18,7 @@ class ProductController extends Controller
         $product = new Product();
         $casts = $product->casts;
 
-        $casts['discount'] = PromotionCalculator::class;
+        $casts['promotion'] = PromotionCalculator::class;
         $casts['parent_category_name'] = HTMLDecode::class;
 
         $product = Product::where('products.id',$product_id)
@@ -27,7 +27,7 @@ class ProductController extends Controller
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
             'promotions.id as promotion_id',
-            'promotions.name as discount'
+            'promotions.name as promotion'
         )
         ->join('category_products','category_products.product_id','products.id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')

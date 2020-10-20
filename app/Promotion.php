@@ -10,7 +10,7 @@ class Promotion extends Model
 {
     public $casts = [
         'name' => HTMLDecode::class,
-        'discount' => PromotionCalculator::class
+        'promotion' => PromotionCalculator::class
     ];
 
     public function products() {
@@ -23,7 +23,7 @@ class Promotion extends Model
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
             'promotions.id as promotion_id',
-            'promotions.name as discount'
+            'promotions.name as promotion'
         )->withCasts($this->casts);
     }
 }
