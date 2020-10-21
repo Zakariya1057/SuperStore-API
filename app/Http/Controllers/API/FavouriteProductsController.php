@@ -12,13 +12,14 @@ class FavouriteProductsController extends Controller
     
     public function index(Request $request){
         $user_id = $request->user()->id;
-
-
         $product = new Product();
         
         $products = FavouriteProducts::where([ ['user_id', $user_id] ])
-        ->select('products.*')
-        ->join('products','products.id','favourite_products.product_id')->withCasts(
+        ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+        ->join('products','products.id','favourite_products.product_id')
+        ->join('category_products','category_products.product_id','products.id')
+        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
+        ->withCasts(
             $product->casts
         )->orderBy('favourite_products.created_at','DESC')->get();
 
@@ -26,10 +27,8 @@ class FavouriteProductsController extends Controller
     }
 
     public function update($product_id, Request $request){
-
         $user_id = $request->user()->id;
 
-        // Item ticked off, or quantity changed
         $validated_data = $request->validate([
             'data.favourite' => 'required',
         ]);

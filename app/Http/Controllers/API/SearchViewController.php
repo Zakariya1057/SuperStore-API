@@ -93,10 +93,7 @@ class SearchViewController extends Controller
 
             $product = new Product();
        
-            $casts = $product->casts ?? [];
-            $casts['parent_category_name'] = HTMLDecode::class;
-            $casts['child_category_name'] = HTMLDecode::class;
-            $casts['promotion'] = PromotionCalculator::class;
+            $casts = $product->casts;
     
             if($type == 'stores'){
                 $stores = $this->stores_by_type($detail);
