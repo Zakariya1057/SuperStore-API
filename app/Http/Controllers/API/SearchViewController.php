@@ -81,7 +81,7 @@ class SearchViewController extends Controller
         $child_category = $data['child_category'] ?? '';
         $brand = $data['brand'] ?? '';
 
-        // Cache::flush();
+        Cache::flush();
 
         $results = Cache::remember("search_results_type:{$type}_detail:{$detail}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}", now()->addDays(1), function () use ($type, $detail, $data){
 
@@ -106,6 +106,7 @@ class SearchViewController extends Controller
                     'parent_categories.id as parent_category_id',
                     'parent_categories.name as parent_category_name',
                     'child_categories.id as child_category_id',
+                    'child_categories.name as child_category_name',
                     'promotions.name as promotion'
                 )
                 ->join('category_products','category_products.parent_category_id','parent_categories.id')
@@ -178,9 +179,6 @@ class SearchViewController extends Controller
                     'current_page_url' => $paginator->url( $paginator->currentPage() ),
                     'prev_page_url' => $paginator->previousPageUrl(),
                     'more_available' => $paginator->hasMorePages(),
-                    // 'path' => 
-                    // 'count' => 
-
                 ];
     
                 // Filters
