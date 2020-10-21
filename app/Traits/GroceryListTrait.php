@@ -9,20 +9,16 @@ use App\Product;
 use App\Casts\PromotionCalculator;
 use App\ChildCategory;
 use App\FeaturedItem;
-use App\ParentCategory;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 trait GroceryListTrait {
 
     protected function update_list($list){
-        // Get all products for list.
-        // Check if any promotion
-        // Multiple quantity with price
         
         if($list instanceOf GroceryList){
 
-            $casts = ['promotion' => PromotionCalculator::class];
+            $product = new Product();
+            $casts = $product->casts;
 
             $items =  GroceryListItem::
             join('products','products.id','grocery_list_items.product_id')
@@ -78,12 +74,12 @@ trait GroceryListTrait {
             foreach($promotions as $promotion){
                 $promotion = (object)$promotion;
 
-                $details = $promotion->details;
+                $promotion_details = $promotion->details;
                 $products = $promotion->products;
 
                 $product_count = count($products);
 
-                $quantity = $details->quantity;
+                $quantity = $promotion_details->quantity;
 
                 $new_total = 0;
 
@@ -105,17 +101,17 @@ trait GroceryListTrait {
                         }
                     }
                     
-                    $remainder = ($total_quantity % $promotion->quantity);
-                    $goes_into_fully = floor($total_quantity / $promotion->quantity);
+                    $remainder = ($total_quantity % $promotion_details->quantity);
+                    $goes_into_fully = floor($total_quantity / $promotion_details->quantity);
 
                     Log::debug('Old Promoted Products total: '.$previous_total_price);
                     Log::debug('Most Expensive Price: '.$highest_price);
 
-                    if( !is_null($promotion->for_quantity)){
-                        $new_total = ( $goes_into_fully * ( $promotion->for_quantity * $highest_price)) + ($remainder * $highest_price);
+                    if( !is_null($promotion_details->for_quantity)){
+                        $new_total = ( $goes_into_fully * ( $promotion_details->for_quantity * $highest_price)) + ($remainder * $highest_price);
                     } else {
-                        Log::debug("($goes_into_fully * $promotion->price) + ($remainder * $highest_price);");
-                        $new_total = ($goes_into_fully * $promotion->price) + ($remainder * $highest_price);
+                        Log::debug("($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);");
+                        $new_total = ($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);
                     }
 
                     $new_total_price = ($total_price - $previous_total_price) + $new_total;
@@ -221,12 +217,25 @@ trait GroceryListTrait {
 
     public function grocery_items($user_id){
         $product = new Product();
-        return GroceryList::where('user_id', $user_id)->select('products.*')->join('grocery_list_items','grocery_list_items.list_id','grocery_lists.id')->join('products', 'products.id','=','grocery_list_items.product_id')->orderBy('grocery_lists.updated_at', 'DESC')->limit(15)->withCasts($product->casts)->get();
+        return GroceryList::where('user_id', $user_id)
+        ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+        ->join('grocery_list_items','grocery_list_items.list_id','grocery_lists.id')
+        ->join('products', 'products.id','=','grocery_list_items.product_id')
+        ->orderBy('grocery_lists.updated_at', 'DESC')
+        ->join('category_products','category_products.product_id','products.id')
+        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
+        ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
     }
 
     public function featured_items(){
         $product = new Product();
-        return FeaturedItem::select('products.*')->whereRaw('type = "products" AND week = WEEK(NOW()) AND year = YEAR(NOW())')->join('products', 'products.id','=','featured_id')->orderBy('featured_items.updated_at', 'DESC')->limit(10)->withCasts($product->casts)->get();
+        return FeaturedItem::select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+        ->whereRaw('type = "products" AND week = WEEK(NOW()) AND year = YEAR(NOW())')
+        ->join('products', 'products.id','=','featured_id')
+        ->join('category_products','category_products.product_id','products.id')
+        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
+        ->orderBy('featured_items.updated_at', 'DESC')
+        ->limit(10)>groupBy('category_products.product_id')->withCasts($product->casts)->get();
     }
 
     protected function item_price($product_id,$quantity=1){
@@ -275,9 +284,9 @@ trait GroceryListTrait {
             $results[$category->name] = ChildCategory::where('child_categories.parent_category_id', $category->id)
             ->join('category_products','category_products.child_category_id','child_categories.id')
             ->join('products','products.id','category_products.product_id')
-            ->select(
-                'products.*'
-            )->limit(15)->withCasts($casts)->get();
+            ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
+            ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+            ->limit(15)->withCasts($casts)->get();
 
         }
 
