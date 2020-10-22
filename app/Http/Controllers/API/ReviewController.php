@@ -31,7 +31,10 @@ class ReviewController extends Controller
 
     public function create($product_id, Request $request){
 
-        $user_id = $request->user()->id;
+        $user = $request->user();
+
+        $user_id = $user->id;
+        $name = $user->name;
 
         $validated_data = $request->validate([
             'data.text' => 'required',
@@ -65,9 +68,10 @@ class ReviewController extends Controller
             $review->save();
         }
 
-        $reviews = Review::where([ ['user_id', $user_id],['product_id',$product_id ] ])->orderBy('created_at','DESC')->get();
+        $review = Review::where([ ['user_id', $user_id],['product_id',$product_id ] ])->orderBy('created_at','DESC')->get()->first();
+        $review->name = $name;
 
-        return response()->json(['data' => $reviews]);
+        return response()->json(['data' => [$review]]);
 
     }
 

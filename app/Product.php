@@ -16,6 +16,10 @@ class Product extends Model
         'avg_rating' => 'double',
         'brand' => HTMLDecode::class,
 
+        'description' => HTMLDecode::class,
+        'allergen_info' => HTMLDecode::class,
+        'dietary_info' => HTMLDecode::class,
+
         'large_image' => Image::class,
         'small_image' => Image::class,
 
