@@ -124,8 +124,8 @@
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
           <tr>
             <td align="center" valign="top" style="padding: 36px 24px;">
-              <a href="https://sendgrid.com" target="_blank" style="display: inline-block;">
-                <img src="./img/paste-logo-light@2x.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;">
+              <a href="#" target="_blank" style="display: inline-block;">
+                <img src="{{ $logo }}"  alt="Logo" border="0" width="200" style="display: block; width: 100px; max-width: 100px; min-width: 100px;">
               </a>
             </td>
           </tr>
