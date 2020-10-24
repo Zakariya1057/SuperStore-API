@@ -24,7 +24,7 @@ class HomeController extends Controller
         $lists = $this->lists_progress($user->id);
         $groceries = $this->grocery_items($user->id);
 
-        // Cache::flush();
+        Cache::flush();
 
         $data = Cache::remember('home_page', now()->addWeek(1), function (){
             $featured_items = $this->featured_items();
@@ -36,7 +36,7 @@ class HomeController extends Controller
                 'stores' => $stores,
                 'featured' => $featured_items,
                 'promotions' => $promotions,
-                'categories' => $categories
+                'categories' => $categories,
             ];
 
         });
@@ -44,6 +44,12 @@ class HomeController extends Controller
         $data['monitoring'] = $monitoring;
         $data['lists'] = $lists;
         $data['groceries'] = $groceries;
+
+        foreach($data as $key => $value){
+            if($value == []){
+                $data[$key] = null;
+            }
+        }
 
         return response()->json(['data' => $data]);
     }
