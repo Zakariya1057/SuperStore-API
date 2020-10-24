@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
+use App\Product;
+use App\Review;
 use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use Carbon\Carbon;
@@ -131,6 +133,26 @@ class UserController extends Controller
 
         return response()->json(['data' => ['status' => 'sucess']]);
 
+    }
+
+    public function delete(Request $request){
+        $user = $request->user();
+
+        $reviews = Review::where('user_id', $user->id)->join('products', 'products.id', 'reviews.product_id')->groupBy('products.store_type_id')->get();
+
+        foreach($reviews as $review){
+            if($user->id == $review->store_type_id){
+                return response()->json(['data' => ['error' => 'Failed to delete store account']], 402);
+            }
+
+            Review::where('user_id', $user->id)->update(['user_id' => $review->store_type_id]);
+        }
+
+        User::where('id', $user->id)->delete();
+
+        $request->user()->tokens()->delete();
+
+        return response()->json(['data' => ['status' => 'sucess']]);
     }
 
 }

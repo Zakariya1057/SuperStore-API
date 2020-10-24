@@ -24,6 +24,7 @@ Route::prefix('user')->group(function () {
     Route::post('/login', 'API\UserController@login')->name('user.login');
     Route::post('/logout', 'API\UserController@logout')->name('user.logout')->middleware('auth:sanctum');
     Route::post('/update', 'API\UserController@update')->name('user.update')->middleware('auth:sanctum');
+    Route::post('/delete', 'API\UserController@delete')->name('user.delete')->middleware('auth:sanctum');
 
     Route::prefix('reset')->group(function () {
         Route::post('/send-code', 'API\ResetPasswordController@send_code')->name('user.reset.send_code');

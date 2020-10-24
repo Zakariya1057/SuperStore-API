@@ -20,8 +20,12 @@ class CreateStoreTypesTable extends Migration
             $table->text('description')->nullable();
             $table->string('large_logo')->nullable();
             $table->string('small_logo')->nullable();
+            
+            $table->unsignedBigInteger('user_id');
 
             $table->index('name');
+            $table->foreign('user_id')->references('id')->on('users');
+            
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
