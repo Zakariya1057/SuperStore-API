@@ -12,7 +12,9 @@ class ImageController extends Controller
 {
     public function show($type,$name){
 
-        $image = Cache::remember("image_{$type}_{$name}", 86400, function () use($type,$name) {
+        Cache::flush();
+        
+        // $image = Cache::remember("image_{$type}_{$name}", 86400, function () use($type,$name) {
             
             try {
                 $aws_config = (object)config('aws');
@@ -34,9 +36,9 @@ class ImageController extends Controller
                 $image = Storage::get('public/images/no_image.png');
             }
 
-            return $image;
-            
-        });
+        //     return $image;
+
+        // });
 
 
         return response($image, 200)->header('Content-Type', 'image/gif');
