@@ -11,23 +11,7 @@ class CreatePromotionsTable extends Migration
      *
      * @return void
      */
-
-    // CREATE TABLE promotions (
-    //     id INT NOT NULL AUTO_INCREMENT,
-    //     name VARCHAR(500) NOT NULL,
-    //     site_promotion_id VARCHAR(100) NOT NULL,
-    //     url VARCHAR(500) NOT NULL,
-        
-    //     expires BIT(1) NULL DEFAULT NULL,
-        
-    //     starts_at TIMESTAMP NULL DEFAULT NULL,
-    //     ends_at TIMESTAMP NULL DEFAULT NULL,
-        
-    //     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    //     updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-        
-    //     PRIMARY KEY (id),
-    //     UNIQUE(url)
+    
     // ) ENGINE=INNODB;
 
     public function up()

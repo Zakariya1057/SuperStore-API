@@ -13,41 +13,6 @@ class CreateProductsTable extends Migration
      * @return void
      */
 
-    // id INT NOT NULL AUTO_INCREMENT,
-    // name VARCHAR(500) NOT NULL,
-	// large_image VARCHAR(200) NOT NULL,
-    // small_image VARCHAR(200) NOT NULL,
-    // description VARCHAR(2000) NULL DEFAULT NULL,
-    
-    // price DECIMAL(4,2) NOT NULL,
-    // old_price DECIMAL(4,2) NULL DEFAULT NULL,
-    // is_on_sale BIT(1) NULL DEFAULT NULL,
-    // promotion_id INT NULL DEFAULT NULL,
-    
-    // recommended_searched BIT(1) NULL DEFAULT NULL,
-    // reviews_searched BIT(1) NULL DEFAULT NULL,
-
-    // weight VARCHAR(100) NOT NULL,
-    // brand VARCHAR(100) NOT NULL,
-    // dietary_info VARCHAR(100) NULL DEFAULT NULL,
-    // allergen_info varchar(100) NULL DEFAULT NULL,
-    // storage varchar(800) NULL DEFAULT NULL,
-
-    // avg_rating DECIMAL(4,2) NULL DEFAULT NULL,
-    // total_reviews_count INT UNSIGNED NULL DEFAULT NULL,
-
-    // parent_category_id BIGINT NOT NULL,
-    // site_type_id BIGINT NOT NULL,
-    // site_product_id BIGINT NOT NULL,
-	
-    // url VARCHAR(500) NOT NULL,
-    
-    // created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    // updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-
-    // PRIMARY KEY (id),
-    // UNIQUE (site_product_id)
-
     public function up()
     {
         Schema::create('products', function (Blueprint $table) {

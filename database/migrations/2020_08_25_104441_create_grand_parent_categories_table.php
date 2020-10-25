@@ -13,35 +13,6 @@ class CreateGrandParentCategoriesTable extends Migration
      * @return void
      */
 
-    // CREATE TABLE grand_parent_categories (
-    //     id INT NOT NULL AUTO_INCREMENT,
-    //     name VARCHAR(255) NOT NULL,
-    //     site_category_id INT UNSIGNED NOT NULL,
-    //     site_type_id TINYINT UNSIGNED NOT NULL,
-    //     PRIMARY KEY (id),
-    //     UNIQUE (site_category_id)
-    // ) ENGINE=INNODB;
-    
-    // CREATE TABLE parent_categories (
-    //     id INT NOT NULL AUTO_INCREMENT,
-    //     name VARCHAR(255) NOT NULL,
-    //     site_category_id INT UNSIGNED NOT NULL,
-    //     parent_id INT UNSIGNED NOT NULL,
-    //     site_type_id TINYINT UNSIGNED NOT NULL,
-    //     PRIMARY KEY (id),
-    //     UNIQUE (site_category_id)
-    // ) ENGINE=INNODB;
-    
-    // CREATE TABLE child_categories (
-    //     id INT NOT NULL AUTO_INCREMENT,
-    //     name VARCHAR(255) NOT NULL,
-    //     site_category_id INT UNSIGNED NOT NULL,
-    //     parent_id INT UNSIGNED NOT NULL,
-    //     site_type_id TINYINT UNSIGNED NOT NULL,
-    //     PRIMARY KEY (id),
-    //     UNIQUE (site_category_id)
-    // ) ENGINE=INNODB;
-
     public function up()
     {
         Schema::create('grand_parent_categories', function (Blueprint $table) {

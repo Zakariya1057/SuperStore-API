@@ -12,17 +12,6 @@ class CreateFacilitiesTable extends Migration
      * @return void
      */
 
-
-    // id INT NOT NULL AUTO_INCREMENT,
-    // name VARCHAR(100) NOT NULL,
-	// store_id INT NULL DEFAULT NULL,
-    
-    // created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    // updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-    
-    // PRIMARY KEY (id),
-    // CONSTRAINT unique_facility UNIQUE (store_id,name)
-
     public function up()
     {
         Schema::create('facilities', function (Blueprint $table) {

@@ -12,16 +12,6 @@ class CreateIngredientsTable extends Migration
      * @return void
      */
 
-    // id INT NOT NULL AUTO_INCREMENT,
-    // name VARCHAR(500) NOT NULL,
-	// product_id INT NOT NULL,
-    
-    // created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    // updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-    
-    // PRIMARY KEY (id),
-    // CONSTRAINT unique_ingredient UNIQUE (product_id,name)
-
     public function up()
     {
         Schema::create('ingredients', function (Blueprint $table) {
