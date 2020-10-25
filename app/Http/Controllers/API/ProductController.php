@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Casts\PromotionCalculator;
+use App\MonitoredProduct;
 
 class ProductController extends Controller
 {
@@ -56,6 +57,7 @@ class ProductController extends Controller
             $product->recommended = $recommended;
            
             $product->favourite = FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product->id] ])->exists();
+            $product->monitoring = MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product->id] ])->exists();
             
             // return $product;
         // });

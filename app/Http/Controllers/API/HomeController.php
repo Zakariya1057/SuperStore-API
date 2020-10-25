@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Traits\GroceryListTrait;
+use App\Traits\GroceryTrait;
 use App\Traits\MonitoringTrait;
 use App\Traits\PromotionTrait;
 use App\Traits\StoreTrait;
@@ -16,6 +17,7 @@ class HomeController extends Controller
     use MonitoringTrait;
     use PromotionTrait;
     use GroceryListTrait;
+    use GroceryTrait;
 
     public function show(Request $request){
         $user = $request->user();
@@ -24,7 +26,7 @@ class HomeController extends Controller
         $lists = $this->lists_progress($user->id);
         $groceries = $this->grocery_items($user->id);
 
-        Cache::flush();
+        // Cache::flush();
 
         $data = Cache::remember('home_page', now()->addWeek(1), function (){
             $featured_items = $this->featured_items();
