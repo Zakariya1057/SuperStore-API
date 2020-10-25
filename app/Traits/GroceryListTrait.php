@@ -227,17 +227,6 @@ trait GroceryListTrait {
         ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
     }
 
-    public function featured_items(){
-        $product = new Product();
-        return FeaturedItem::select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
-        ->whereRaw('type = "products" AND week = WEEK(NOW()) AND year = YEAR(NOW())')
-        ->join('products', 'products.id','=','featured_id')
-        ->join('category_products','category_products.product_id','products.id')
-        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
-        ->orderBy('featured_items.updated_at', 'DESC')
-        ->limit(10)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
-    }
-
     protected function item_price($product_id,$quantity=1){
         $product = Product::where('products.id',$product_id)->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->select('products.price', 'promotions.id as promotion_id','promotions.name as promotion')->withCasts(['promotion' => PromotionCalculator::class])->get()->first();
     
@@ -270,31 +259,6 @@ trait GroceryListTrait {
         
         return $total;
 
-    }
-
-    function home_categories(){
-
-        $product = new Product();
-        $casts = $product->casts;
-
-        $categories = FeaturedItem::select('parent_categories.*')->whereRaw('type = "categories" AND week = WEEK(NOW()) AND year = YEAR(NOW())')->join('parent_categories','parent_categories.id','featured_id')->withCasts(['name' => HTMLDecode::class])->limit(10)->get();
-
-        $results = [];
-        foreach($categories as $category){
-            $results[$category->name] = ChildCategory::where('child_categories.parent_category_id', $category->id)
-            ->join('category_products','category_products.child_category_id','child_categories.id')
-            ->join('products','products.id','category_products.product_id')
-            ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
-            ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
-            ->limit(15)->withCasts($casts)->get();
-
-        }
-
-        return $results;
-    }
-
-    function lists_progress($user_id){
-        return GroceryList::where('user_id', $user_id)->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')->get();
     }
 
 }
