@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         'App\Console\Commands\BackupDatabase',
+        'App\Console\Commands\CacheHome',
+        'App\Console\Commands\CacheGroceries',
     ];
 
     /**
@@ -25,6 +27,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('backup:database')->daily()->at('06:00')->runInBackground();
+        $schedule->command('cache:home')->mondays()->at('06:00')->runInBackground();
+        $schedule->command('cache:groceries')->daily()->everySixHours()->runInBackground();
     }
 
     /**
