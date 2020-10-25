@@ -59,10 +59,11 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
         Route::get('/reviews', 'API\ReviewController@index')->name('review.index');
         Route::get('/review', 'API\ReviewController@show')->name('review.show');
     
-        Route::post('/favourite', 'API\FavouriteProductsController@update')->name('favourite.update');
+        Route::post('/favourite', 'API\FavouriteController@update')->name('favourite.update');
+        Route::post('/monitor', 'API\MonitoredController@update')->name('monitor.update');
     });
     
-    Route::get('/favourites', 'API\FavouriteProductsController@index')->name('favourite.index');
+    Route::get('/favourites', 'API\FavouriteController@index')->name('favourite.index');
     
     Route::prefix('list')->group(function () {
         Route::get('/', 'API\ListViewController@index')->name('list.index');

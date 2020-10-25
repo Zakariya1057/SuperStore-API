@@ -7,8 +7,7 @@ use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class FavouriteProductsController extends Controller
-{
+class FavouriteController extends Controller{
     
     public function index(Request $request){
         $user_id = $request->user()->id;
