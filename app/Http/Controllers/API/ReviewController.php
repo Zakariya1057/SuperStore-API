@@ -17,10 +17,15 @@ class ReviewController extends Controller
     }
 
     public function show(Request $request, $product_id){
-        $user_id = $request->user()->id;
+        $user = $request->user();
 
-        $review = Review::where([ ['user_id', $user_id],['product_id',$product_id ] ])->orderBy('created_at','DESC')->get() ?? [];
-        return response()->json(['data' => $review]);
+        $reviews = Review::where([ ['user_id', $user->id],['product_id',$product_id ] ])->orderBy('created_at','DESC')->get() ?? [];
+        
+        foreach($reviews as $review){
+            $review->name = $user->name;
+        }
+
+        return response()->json(['data' => $reviews]);
     }
 
     public function delete(Request $request, $product_id){
