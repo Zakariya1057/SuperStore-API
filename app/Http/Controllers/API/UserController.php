@@ -5,15 +5,11 @@ namespace App\Http\Controllers\API;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
-use App\Product;
 use App\Review;
 use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use Carbon\Carbon;
-use Firebase\JWT\JWK;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use \Firebase\JWT\JWT;
 
 class UserController extends Controller {
 
@@ -47,7 +43,7 @@ class UserController extends Controller {
         $user_data = [
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password'])
+            'password' => Hash::make($data['password']),
         ];
 
         $user = User::where('email', $data['email'])->get()->first();
@@ -85,11 +81,9 @@ class UserController extends Controller {
 
         $user = User::create($user_data);
 
-        $token = $user->createToken($user->id)->plainTextToken;
+        $token_data = $this->create_token($user);
+        return response()->json(['data' => $token_data]);
 
-        User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
-
-        return response()->json(['data' => ['id' => $user->id,'token' => $token, 'name' => $user->name, 'email' => $user->email]]);
     }
     
 
@@ -117,9 +111,8 @@ class UserController extends Controller {
 
         if (Hash::check($data['password'], $user->password)) {
             $user->tokens()->delete();
-            $token = $user->createToken($user->id)->plainTextToken;
-            User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
-            return response()->json(['data' => ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email]]);
+            $token_data = $this->create_token($user);
+            return response()->json(['data' => $token_data]);
         } else {
 
             if(!is_null($user->identifier)){
@@ -201,6 +194,7 @@ class UserController extends Controller {
 
     private function create_token($user){
         $token = $user->createToken($user->id)->plainTextToken;
+        User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
         return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email];
     }
 
