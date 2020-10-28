@@ -80,6 +80,11 @@ trait UserTrait {
         $token = $data['user_token'];
         $token_data = $this->get_token_data($token);
 
+        if(strtolower($token_data->aud) != strtolower(env('APP_BUNDLE_IDENTIFIER'))){
+            Log::error('Invalid App Bundle Identifier. Potential breaking attempt.');
+            return false;
+        }
+
         if(strtolower($token_data->email) != strtolower($data['email'])){
             Log::error('Token email and given email not matching. Potential breaking attempt.');
             return false;
