@@ -10,10 +10,12 @@ use App\Review;
 use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use Carbon\Carbon;
+use Firebase\JWT\JWK;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use \Firebase\JWT\JWT;
 
-class UserController extends Controller
-{
+class UserController extends Controller {
 
     use UserTrait;
     use SanitizeTrait;
@@ -25,10 +27,11 @@ class UserController extends Controller
             'data.email' => [],
             'data.password' => [],
             'data.password_confirmation' => [],
+            'data.identifier' => [],
+            'data.user_token' => []
         ]);
 
-        $data = $validated_data['data'];
-        $data = $this->sanitizeAllFields($data);
+        $data = $this->sanitizeAllFields($validated_data['data']);
         
         $nameError = $this->validate_field($data,'name');
         $emailError = $this->validate_field($data,'email');
@@ -38,15 +41,49 @@ class UserController extends Controller
             return $nameError ?? $passwordError ?? $emailError;
         }
 
-        if( User::where('email', $data['email'])->exists() ){
-            return response()->json(['data' => ['error' => 'Email address belongs to another user.']], 422);
-        }
+        $identifier = $data['identifier'] ?? '';
+        $user_token = $data['user_token'] ?? '';
         
-        $user = User::create([
+        $user_data = [
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+            'password' => Hash::make($data['password'])
+        ];
+
+        $user = User::where('email', $data['email'])->get()->first();
+        $userExists = !is_null($user);
+
+        if( $identifier != "" && $user_token != ""){
+            // Apple Login
+
+            if(!$this->validate_apple_login($data)){
+                return response()->json(['data' => ['error' => 'Invalid user data provided.']], 422);
+            } else {
+
+                $apple_user = User::where('identifier', $identifier)->get()->first();
+
+                // User Found In Database. Or user exists with that email.
+                if( !is_null($apple_user) || $userExists){
+                    $token_data = $this->create_token($apple_user ?? $user);
+                    return response()->json(['data' => $token_data]);
+                } else {
+                    // Either:
+                    // New User or
+                    // User created with email then now trying to log in with apple.  Account belongs to user without apple login. Login Anyway
+
+                    $user_data['identifier'] = $identifier;
+
+                }
+
+            }
+
+        }
+
+        if( $userExists ){
+            return response()->json(['data' => ['error' => 'Email address belongs to another user.']], 422);
+        }
+
+        $user = User::create($user_data);
 
         $token = $user->createToken($user->id)->plainTextToken;
 
@@ -54,6 +91,7 @@ class UserController extends Controller
 
         return response()->json(['data' => ['id' => $user->id,'token' => $token, 'name' => $user->name, 'email' => $user->email]]);
     }
+    
 
     public function login(Request $request){
 
@@ -62,7 +100,7 @@ class UserController extends Controller
             'data.password' => []
         ]);
         
-        $data = $validated_data['data'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
 
         $emailError = $this->validate_field($data,'email');
         $passwordError = $this->validate_field($data,'password');
@@ -83,7 +121,13 @@ class UserController extends Controller
             User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
             return response()->json(['data' => ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email]]);
         } else {
-            return response()->json(['data' => ['error' => 'Wrong password.']], 404);
+
+            if(!is_null($user->identifier)){
+                return response()->json(['data' => ['error' => 'Your account is connected to Apple. Use the Apple button to log in.']], 422);
+            } else {
+                return response()->json(['data' => ['error' => 'Wrong password.']], 404);
+            }
+            
         }
 
     }
@@ -107,7 +151,7 @@ class UserController extends Controller
             'data.type' => [],
         ]);
 
-        $data = $validated_data['data'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
 
         if(!key_exists('type',$data)){
             return response()->json(['data' => ['error' => 'Type required.']], 422);
@@ -153,6 +197,11 @@ class UserController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json(['data' => ['status' => 'sucess']]);
+    }
+
+    private function create_token($user){
+        $token = $user->createToken($user->id)->plainTextToken;
+        return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email];
     }
 
 }

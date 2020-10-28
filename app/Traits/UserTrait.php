@@ -3,8 +3,12 @@
 namespace App\Traits;
 
 use App\User;
+use Firebase\JWT\JWK;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use \Firebase\JWT\JWT;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 trait UserTrait {
 
@@ -65,6 +69,29 @@ trait UserTrait {
 
     }
 
+    private function get_token_data($token){
+        // Get Apple Public Key
+        $response = Http::get('https://appleid.apple.com/auth/keys')->json();
+        // Decode Apple Login Token.
+        return JWT::decode($token, JWK::parseKeySet($response), ['RS256']);
+    }
+
+    private function validate_apple_login($data){
+        $token = $data['user_token'];
+        $token_data = $this->get_token_data($token);
+
+        if(strtolower($token_data->email) != strtolower($data['email'])){
+            Log::error('Token email and given email not matching. Potential breaking attempt.');
+            return false;
+        }
+
+        if(strtolower($token_data->sub) != strtolower($data['identifier'])){
+            Log::error('Token user id and given user id not matching. Potential breaking attempt.');
+            return false;
+        }
+
+        return true;
+    }
 
 }
 
