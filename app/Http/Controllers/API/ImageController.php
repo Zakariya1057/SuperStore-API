@@ -8,8 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
-class ImageController extends Controller
-{
+class ImageController extends Controller {
     public function show($type,$name){
 
         Cache::flush();

@@ -7,17 +7,18 @@ use App\Review;
 use App\Http\Controllers\Controller;
 use App\Traits\SanitizeTrait;
 
-class ReviewController extends Controller
-{
+class ReviewController extends Controller {
     use SanitizeTrait;
 
     public function index($product_id){
+        $product_id = $this->sanitizeField($product_id);
         $reviews = Review::where('product_id', $product_id)->join('users','users.id','reviews.user_id')->select('reviews.*','users.name')->orderBy('reviews.created_at','DESC')->get();
         return response()->json(['data' => $reviews]);
     }
 
     public function show(Request $request, $product_id){
         $user = $request->user();
+        $product_id = $this->sanitizeField($product_id);
 
         $reviews = Review::where([ ['user_id', $user->id],['product_id',$product_id ] ])->orderBy('created_at','DESC')->get() ?? [];
         
@@ -30,6 +31,8 @@ class ReviewController extends Controller
 
     public function delete(Request $request, $product_id){
         $user_id = $request->user()->id;
+        $product_id = $this->sanitizeField($product_id);
+
         Review::where([ ['user_id', $user_id],['product_id',$product_id ] ])->delete();
         return response()->json(['data' => ['status' => 'success']]);
     }
@@ -40,6 +43,8 @@ class ReviewController extends Controller
 
         $user_id = $user->id;
         $name = $user->name;
+
+        $product_id = $this->sanitizeField($product_id);
 
         $validated_data = $request->validate([
             'data.text' => 'required',

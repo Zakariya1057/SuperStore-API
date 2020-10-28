@@ -12,14 +12,14 @@ trait SanitizeTrait
             if(is_array($value)){
                 $data[$key] = $this->sanitizeAllFields($value);
             } else {
-                $data[$key] = $this->sanitize($value);
+                $data[$key] = $this->sanitizeField($value);
             }
         }
 
         return $data;
     }
 
-    protected function sanitize($string){
+    protected function sanitizeField($string){
         
         if(!$string){
             return;

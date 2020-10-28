@@ -10,8 +10,7 @@ use App\Product;
 use App\Traits\GroceryListTrait;
 use Illuminate\Http\Request;
 
-class GroceryListViewController extends Controller
-{
+class GroceryListViewController extends Controller {
 
     use GroceryListTrait;
 

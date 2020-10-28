@@ -6,8 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\GroceryTrait;
 
-class GroceryController extends Controller
-{
+class GroceryController extends Controller {
     use GroceryTrait;
 
     public function categories($store_type_id){

@@ -12,8 +12,7 @@ use Illuminate\Http\Request;
 use App\Casts\PromotionCalculator;
 use App\MonitoredProduct;
 
-class ProductController extends Controller
-{
+class ProductController extends Controller {
     public function show(Request $request, $product_id){
 
         $product = new Product();

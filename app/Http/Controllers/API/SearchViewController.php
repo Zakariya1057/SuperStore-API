@@ -19,13 +19,14 @@ use Illuminate\Support\Facades\Cache;
 
 // Use elastic search in future
 
-class SearchViewController extends Controller
-{
+class SearchViewController extends Controller {
 
     use SanitizeTrait;
     use StoreTrait;
 
     public function suggestions($query){
+
+        $query = $this->sanitizeField($query);
 
         $results = Cache::remember('search_suggestions_'.$query, now()->addDays(1), function () use ($query){
             $results = array();

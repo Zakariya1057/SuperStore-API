@@ -8,8 +8,7 @@ use App\Traits\GroceryListTrait;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class ListViewController extends Controller
-{
+class ListViewController extends Controller {
 
     use GroceryListTrait;
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Traits\MailTrait;
+use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use App\User;
 use Carbon\Carbon;
@@ -12,10 +13,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
-class ResetPasswordController extends Controller
-{
+class ResetPasswordController extends Controller {
+    
     use MailTrait;
     use UserTrait;
+    use SanitizeTrait;
 
     // Reset Password -> Send code
     // Validate -> Validate code
@@ -26,6 +28,8 @@ class ResetPasswordController extends Controller
         $validated_data = $request->validate([
             'data.email' => []
         ]);
+
+        $validated_data = $this->sanitizeAllFields($validated_data);
 
         if(!key_exists('data',$validated_data)){
             return response()->json(['data' => ['error' => 'No email found.']], 422);
@@ -65,7 +69,7 @@ class ResetPasswordController extends Controller
             return response()->json(['data' => ['error' => 'No code data found.']], 422);
         }
 
-        $data = $validated_data['data'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
 
         $emailError = $this->validate_field($data,'email');
         $codeError = $this->validate_field($data,'code');
@@ -95,11 +99,11 @@ class ResetPasswordController extends Controller
             'data.password_confirmation' => []
         ]);
 
+        $data = $this->sanitizeAllFields($validated_data['data']);
+
         if(!key_exists('data',$validated_data)){
             return response()->json(['data' => ['error' => 'No reset data found.']], 422);
         }
-
-        $data = $validated_data['data'];
 
         $emailError = $this->validate_field($data,'email');
         $passwordError = $this->validate_field($data,'new_password');
