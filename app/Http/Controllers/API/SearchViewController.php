@@ -5,19 +5,13 @@ namespace App\Http\Controllers\API;
 use App\ChildCategory;
 use App\ParentCategory;
 use App\Product;
-use App\Store;
 use App\StoreType;
 use Illuminate\Http\Request;
-use App\Casts\HTMLDecode;
-use App\Casts\PromotionCalculator;
 use App\Http\Controllers\Controller;
-use App\OpeningHour;
 use App\Traits\SanitizeTrait;
 use App\Traits\StoreTrait;
-use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Cache;
-
-// Use elastic search in future
 
 class SearchViewController extends Controller {
 
@@ -55,7 +49,7 @@ class SearchViewController extends Controller {
     }
 
     public function results(Request $request){
-        
+
         $validated_data = $request->validate([
             'data.type' => 'required',
             'data.detail' => 'required',
@@ -130,7 +124,7 @@ class SearchViewController extends Controller {
                     $order = strtoupper($data['order']);
     
                     if($order != 'ASC' && $order != 'DESC'){
-                        return response()->json(['data' => ['error' => 'Unknown order by option.']], 422);
+                        throw new Exception('Unknown order by option.', 422);
                     }
     
                     $sort_options = [
@@ -141,7 +135,7 @@ class SearchViewController extends Controller {
                     if(key_exists($sort,$sort_options)){
                         $base_query = $base_query->orderByRaw($sort_options[$sort] . ' '. $order);
                     } else {
-                        return response()->json(['data' => ['error' => 'Unknown sort by option.']], 422);
+                        throw new Exception('Unknown sort by option.', 422);
                     }
     
                 } else {

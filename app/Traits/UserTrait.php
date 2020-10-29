@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\User;
+use Exception;
 use Firebase\JWT\JWK;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -24,29 +25,29 @@ trait UserTrait {
         ];
         
         if(!key_exists($type,$type_validations)){
-            return response()->json(['data' => ['error' => 'Unknown Type: '. $type]], 422);
+            throw new Exception('Unknown Type: '. $type, 422);
         }
 
         $validation = $type_validations[$type]['validation'];
         $field = $type_validations[$type]['field'];
 
         if(!key_exists($field, $data)){
-            return response()->json(['data' => ['error' => "The $field field must be included."]], 422);
+            throw new Exception("The $field field must be included.", 422);
         } else {
             $validator = Validator::make($data, [$field => $validation]);
             if($validator->fails()) {
-                return response()->json(['data' => ['error' => $validator->errors()->get($field)[0]]], 422);
+                throw new Exception($validator->errors()->get($field)[0], 422);
             }
         }
         
         if($type == 'edit_password'){
             // Make sure passwords match up correctly
             if(!key_exists('current_password', $data)){
-                return response()->json(['data' => ['error' => "The current password field must be included."]], 422);
+                throw new Exception('The current password field must be included.', 422);
             }
 
             if($data['current_password'] == ''){
-                return response()->json(['data' => ['error' => "Current password required"]], 422);
+                throw new Exception("Current password required", 422);
             }
 
             $current_password = $data['current_password'];
@@ -54,15 +55,15 @@ trait UserTrait {
 
             $password_results = User::where('id', $user_id)->select('password')->get()->first();
             if(!$password_results){
-                return response()->json(['data' => ['error' => "No User Found."]], 422);
+                throw new Exception('No user found.', 422);
             }
 
             if($current_password == $new_password){
-                return response()->json(['data' => ['error' => "New password must be different to current password."]], 422);
+                throw new Exception('New password must be different to current password.', 422);
             }
 
             if (!Hash::check($current_password, $password_results->password)) {
-                return response()->json(['data' => ['error' => "Incorrect current password."]], 422);
+                throw new Exception('Incorrect current password.', 422);
             }
 
         }

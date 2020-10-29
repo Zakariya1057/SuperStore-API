@@ -8,6 +8,7 @@ use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use App\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -32,7 +33,7 @@ class ResetPasswordController extends Controller {
         $validated_data = $this->sanitizeAllFields($validated_data);
 
         if(!key_exists('data',$validated_data)){
-            return response()->json(['data' => ['error' => 'No email found.']], 422);
+            throw new Exception('No email found.', 422);
         }
 
         $data = $validated_data['data'];
@@ -46,7 +47,6 @@ class ResetPasswordController extends Controller {
         $user = User::where('email',$data['email'])->get()->first();
 
         if(is_null($user)){
-            // return response()->json(['data' => ['error' => 'No user found with email.']], 404);
             Log::error('No user found with email: '. $data['email']);
         } else {
             $code = mt_rand(1000000,9999999);
@@ -66,7 +66,7 @@ class ResetPasswordController extends Controller {
         ]);
 
         if(!key_exists('data',$validated_data)){
-            return response()->json(['data' => ['error' => 'No code data found.']], 422);
+            throw new Exception('No code found.', 422);
         }
 
         $data = $this->sanitizeAllFields($validated_data['data']);
@@ -78,14 +78,14 @@ class ResetPasswordController extends Controller {
             return $emailError ?? $codeError;
         }
 
-        $user = User::where([ ['email',$data['email']],['remember_token', $data['code']] ])->get()->first();
+        $user = User::where([ ['email',$data['email']], ['remember_token', $data['code']] ])->get()->first();
         if(is_null($user)){
-            return response()->json(['data' => ['error' => 'Invalid code.']], 422);
+            throw new Exception('Invalid code.', 422);
         }
 
         $token_time_diff = Carbon::createFromFormat('Y-m-d H:i:s', $user->token_sent_at)->diffInHours(NOW());
         if($token_time_diff >= 4){
-            return response()->json(['data' => ['error' => 'Code expired please try sending another email.']], 422);
+            throw new Exception('Code expired please try sending another email.', 422);
         }
 
         return response()->json(['data' => ['status' => 'success']]);
@@ -102,7 +102,7 @@ class ResetPasswordController extends Controller {
         $data = $this->sanitizeAllFields($validated_data['data']);
 
         if(!key_exists('data',$validated_data)){
-            return response()->json(['data' => ['error' => 'No reset data found.']], 422);
+            throw new Exception('No reset data found.', 422);
         }
 
         $emailError = $this->validate_field($data,'email');
@@ -123,7 +123,7 @@ class ResetPasswordController extends Controller {
         $token_time_diff = Carbon::createFromFormat('Y-m-d H:i:s', $user->token_sent_at)->diffInHours(NOW());
 
         if($token_time_diff){
-            return response()->json(['data' => ['error' => 'Code expired please try again.']], 422);
+            throw new Exception('Code expired please try again.', 422);
         }
         
         User::where([ ['email', $data['email']],['remember_token', $data['code']] ])->update([

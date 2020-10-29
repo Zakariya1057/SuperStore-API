@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Casts\PromotionCalculator;
 use App\MonitoredProduct;
+use Exception;
 
 class ProductController extends Controller {
     public function show(Request $request, $product_id){
@@ -34,7 +35,7 @@ class ProductController extends Controller {
         ->first();
 
         if(!$product){
-            return response()->json(['data' => ['error' => 'No Product Found.']], 404);
+            throw new Exception('No product found.', 404);
         }
 
         $user_id = $request->user()->id;

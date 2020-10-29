@@ -9,6 +9,7 @@ use App\Product;
 use App\Casts\PromotionCalculator;
 use App\ChildCategory;
 use App\FeaturedItem;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 trait GroceryListTrait {
@@ -146,7 +147,7 @@ trait GroceryListTrait {
         $list = GroceryList::where([ [ 'id', $list_id],['user_id', $user_id] ])->first();
 
         if(!$list){
-            return response()->json(['data' => ['error' => 'No List Found For User']], 404);
+            throw new Exception('No list found for user.', 404);
         }
 
         $product = new Product();

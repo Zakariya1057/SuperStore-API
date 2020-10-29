@@ -2,7 +2,12 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -48,8 +53,27 @@ class Handler extends ExceptionHandler
      *
      * @throws \Throwable
      */
-    public function render($request, Throwable $exception)
-    {
-        return parent::render($request, $exception);
+    
+     // public function render($request, Throwable $exception)
+    // {
+    //     return parent::render($request, $exception);
+    // }
+
+    public function render($request, $exception){
+
+        // dd($exception);
+
+        if($exception instanceof QueryException){
+            return parent::render($request, $exception);
+        } elseif($exception instanceof AuthenticationException) {
+            return response()->json([ 'data' => ['error' => 'User Unauthenticated.'] ], 401);
+        } elseif($exception instanceof ValidationException){
+            return response()->json([ 'data' => ['error' => $exception->errors()] ], 422);
+        } elseif (!($exception instanceof NotFoundHttpException) && $request->isJson()) {
+            return response()->json([ 'data' => ['error' => $exception->getMessage()] ], $exception->getCode());
+        }  else {
+            return parent::render($request, $exception);
+        }
     }
+
 }

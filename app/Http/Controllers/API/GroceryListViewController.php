@@ -8,6 +8,7 @@ use App\GroceryList;
 use App\GroceryListItem;
 use App\Product;
 use App\Traits\GroceryListTrait;
+use Exception;
 use Illuminate\Http\Request;
 
 class GroceryListViewController extends Controller {
@@ -44,10 +45,10 @@ class GroceryListViewController extends Controller {
                 
                 $this->update_list($list);
             } else {
-                return response()->json(['data' => ['error' => 'Duplicate Product Found In Database']], 409);
+                throw new Exception('Duplicate product found in database.', 409);
             }
         } else {
-            return response()->json(['data' => ['error' => 'No List Found']], 404);
+            throw new Exception('No list found.', 409);
         }
 
         // Set off message queue to update list total.

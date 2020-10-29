@@ -6,6 +6,7 @@ use App\GroceryList;
 use App\GroceryListItem;
 use App\Traits\GroceryListTrait;
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 
 class ListViewController extends Controller {
@@ -33,6 +34,10 @@ class ListViewController extends Controller {
         $list_name = $validated_data['data']['name'];
         $store_type_id = $validated_data['data']['store_type_id'];
         $identifier = $validated_data['data']['identifier'];
+
+        if( GroceryList::where('identifier',$identifier)->exists() ){
+            throw new Exception('List with identifier found in database.', 409);
+        }
 
         $list = new GroceryList();
         $list->name = $list_name;

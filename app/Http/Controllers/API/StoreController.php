@@ -8,6 +8,8 @@ use Exception;
 use App\Casts\Image;
 use App\Http\Controllers\Controller;
 use App\Traits\SanitizeTrait;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class StoreController extends Controller {
     
@@ -33,7 +35,7 @@ class StoreController extends Controller {
             $store->opening_hours;
             $store->facilities;
         } else {
-            return response()->json(['data' => ['error' => 'No store found.']], 404);
+            throw new Exception('No store found.', 404);
         }
 
         return $store;

@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers\API;
 
+use App\FavouriteProducts;
+use App\GroceryList;
+use App\GroceryListItem;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
+use App\MonitoredProduct;
 use App\Review;
+use App\StoreType;
 use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 
 class UserController extends Controller {
@@ -53,7 +59,7 @@ class UserController extends Controller {
             // Apple Login
 
             if(!$this->validate_apple_login($data)){
-                return response()->json(['data' => ['error' => 'Invalid user data provided.']], 422);
+                throw new Exception('Invalid user data provided.', 422);
             } else {
 
                 $apple_user = User::where('identifier', $identifier)->get()->first();
@@ -76,7 +82,7 @@ class UserController extends Controller {
         }
 
         if( $userExists ){
-            return response()->json(['data' => ['error' => 'Email address belongs to another user.']], 422);
+            throw new Exception('Email address belongs to another user.', 422);
         }
 
         $user = User::create($user_data);
@@ -106,7 +112,7 @@ class UserController extends Controller {
         $user = User::where('email', $data['email'])->get()->first();
 
         if(!$user){
-            return response()->json(['data' => ['error' => 'Email address doesn\'t belongs to any user.']], 404);
+            throw new Exception('Email address doesn\'t belongs to any user.', 404);
         }
 
         if (Hash::check($data['password'], $user->password)) {
@@ -116,9 +122,9 @@ class UserController extends Controller {
         } else {
 
             if(!is_null($user->identifier)){
-                return response()->json(['data' => ['error' => 'Your account is connected to Apple. Use the Apple button to log in.']], 422);
+                throw new Exception('Your account is connected to Apple. Use the Apple button to log in.', 422);
             } else {
-                return response()->json(['data' => ['error' => 'Wrong password.']], 404);
+                throw new Exception('Incorrect password.', 404);
             }
             
         }
@@ -147,7 +153,7 @@ class UserController extends Controller {
         $data = $this->sanitizeAllFields($validated_data['data']);
 
         if(!key_exists('type',$data)){
-            return response()->json(['data' => ['error' => 'Type required.']], 422);
+            throw new Exception('Field Type required.', 422);
         }
 
         $type = $data['type'];
@@ -175,15 +181,25 @@ class UserController extends Controller {
     public function delete(Request $request){
         $user = $request->user();
 
+        if(StoreType::where('user_id', $user->id)->exists()){
+            throw new Exception('Failed to delete store account.', 402);
+        }
+
         $reviews = Review::where('user_id', $user->id)->join('products', 'products.id', 'reviews.product_id')->groupBy('products.store_type_id')->get();
 
         foreach($reviews as $review){
-            if($user->id == $review->store_type_id){
-                return response()->json(['data' => ['error' => 'Failed to delete store account']], 402);
-            }
-
             Review::where('user_id', $user->id)->update(['user_id' => $review->store_type_id]);
         }
+
+        $lists = GroceryList::where('user_id', $user->id)->get();
+
+        foreach($lists as $list){
+            GroceryListItem::where('list_id', $list->id)->delete();
+            $list->delete();
+        }
+        
+        FavouriteProducts::where('user_id', $user->id)->delete();
+        MonitoredProduct::where('user_id', $user->id)->delete();
 
         User::where('id', $user->id)->delete();
 
