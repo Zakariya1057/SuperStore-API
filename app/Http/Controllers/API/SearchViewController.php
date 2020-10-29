@@ -176,34 +176,6 @@ class SearchViewController extends Controller {
                     'more_available' => $paginator->hasMorePages(),
                 ];
     
-                // Filters
-                if( count($results['products']) > 0 ){
-
-                    $filter_categories = [];
-                    $filter_brands = [];
-        
-                    foreach( $results['products'] as $product ){
-                        if(key_exists($product->brand, $filter_brands)){
-                            $filter_brands[$product->brand]++;
-                        } else {
-                            $filter_brands[$product->brand] = 1;
-                        }
-       
-                        if(key_exists($product->child_category_name, $filter_categories)){
-                            $filter_categories[$product->child_category_name]++;
-                        } else {
-                            $filter_categories[$product->child_category_name] = 1;
-                        }
-    
-                    }
-
-                    $results['filter'] = [];
-
-                    $results['filter']['categories'] = $filter_categories; 
-                    $results['filter']['brands'] = $filter_brands; 
-
-                }
-    
             }
 
             return $results;
