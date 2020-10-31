@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use ErrorException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -63,7 +64,7 @@ class Handler extends ExceptionHandler
 
         // dd($exception);
 
-        if($exception instanceof QueryException){
+        if($exception instanceof QueryException || $exception instanceof ErrorException){
             return parent::render($request, $exception);
         } elseif($exception instanceof AuthenticationException) {
             return response()->json([ 'data' => ['error' => 'User Unauthenticated.'] ], 401);
