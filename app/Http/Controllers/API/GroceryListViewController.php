@@ -18,7 +18,9 @@ class GroceryListViewController extends Controller {
     public function create($list_id, Request $request){
 
         $validated_data = $request->validate([
-            'data.product_id' => 'required'
+            'data.product_id' => 'required',
+            'data.quantity' => '',
+            'data.ticked_off' => ''
         ]);
 
         $data = $validated_data['data'];
@@ -26,7 +28,8 @@ class GroceryListViewController extends Controller {
 
         $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
        
-        $quantity = 1;
+        $quantity = $data['quantity'] ?? 1;
+        $ticked_off = $data['ticked_off'] ?? false;
 
         $grocery = new GroceryListItem();
         $list = GroceryList::where('id', $list_id)->first();
@@ -38,6 +41,7 @@ class GroceryListViewController extends Controller {
                 $grocery->product_id = $product_id;
                 $grocery->parent_category_id = $parent_category_id;
                 $grocery->quantity = $quantity;
+                $grocery->ticked_off = $ticked_off;
 
                 $grocery->total_price = $this->item_price($product_id, $quantity);
         
