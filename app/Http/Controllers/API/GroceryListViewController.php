@@ -29,34 +29,31 @@ class GroceryListViewController extends Controller {
         $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
        
         $quantity = $data['quantity'] ?? 1;
-        $ticked_off = $data['ticked_off'] ?? false;
+        $ticked_off = strtolower($data['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
 
-        $grocery = new GroceryListItem();
         $list = GroceryList::where('id', $list_id)->first();
 
+        $total_price = $this->item_price($product_id, $quantity);
+
         if($list){
-            if($grocery->where([['list_id',$list_id], ['product_id', $product_id]])->doesntExist()){
-
-                $grocery->list_id = $list_id;
-                $grocery->product_id = $product_id;
-                $grocery->parent_category_id = $parent_category_id;
-                $grocery->quantity = $quantity;
-                $grocery->ticked_off = $ticked_off;
-
-                $grocery->total_price = $this->item_price($product_id, $quantity);
-        
-                $grocery->save();
-                
-                $this->update_list($list);
-            } else {
-                throw new Exception('Duplicate product found in database.', 409);
-            }
+            GroceryListItem::updateOrCreate(
+                [
+                    'list_id' => $list_id, 
+                    'product_id' =>  $product_id
+                ],
+    
+                [
+                    'parent_category_id' => $parent_category_id, 
+                    'quantity' => $quantity,
+                    'ticked_off' =>  $ticked_off,
+                    'total_price' => $total_price
+                ]
+            );
         } else {
             throw new Exception('No list found.', 409);
         }
 
         // Set off message queue to update list total.
-        // For Now just update it here.
         return response()->json(['data' => ['status' => 'success']]);
 
     }

@@ -10,6 +10,7 @@ use App\Casts\PromotionCalculator;
 use App\ChildCategory;
 use App\FeaturedItem;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 trait GroceryListTrait {
@@ -135,7 +136,10 @@ trait GroceryListTrait {
                 $update['status'] = 'In Progress';
             }
 
-            GroceryList::where('id',$list->id)->update($update);
+            DB::transaction(function () use($list, $update){
+                GroceryList::where('id',$list->id)->update($update);
+            }, 5);
+            
         }
 
     }

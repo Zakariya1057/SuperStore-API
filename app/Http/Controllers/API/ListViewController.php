@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\CategoryProduct;
 use App\GroceryList;
 use App\GroceryListItem;
 use App\Traits\GroceryListTrait;
@@ -90,19 +91,60 @@ class ListViewController extends Controller {
         $validated_data = $request->validate([
             'data.identifier' => 'required',
             'data.store_type_id' => 'required',
-            'data.name' => 'required'
+            'data.name' => 'required',
+            'data.items' => ''
         ]);
 
         $data = $validated_data['data'];
 
+        $items = $data['items'] ?? [];
+
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
 
-        GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])
-        ->update([
-            'name' => $name,
-            'store_type_id' => $store_type_id
-        ]);
+        $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get();
+
+        if(is_null($list)){
+            throw new Exception('No list found.', 404);
+        } else {
+            GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])
+            ->update([
+                'name' => $name,
+                'store_type_id' => $store_type_id
+            ]);
+
+            $list_id = $list->first()->id;
+
+            if(count($items) > 0){
+                // Delete all list items, create new ones
+                GroceryListItem::where('list_id', $list_id)->delete();
+            }
+
+            foreach($items as $item){
+
+                $quantity = $item['quantity'] ?? 1;
+                $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+                $product_id = $item['product_id'];
+                $total_price = $this->item_price($product_id, $quantity);
+
+                $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+                
+                GroceryListItem::create(
+                    [
+                        'list_id' => $list_id, 
+                        'product_id' =>  $product_id,
+                        'parent_category_id' => $parent_category_id, 
+                        'quantity' => $quantity,
+                        'ticked_off' =>  $ticked_off,
+                        'total_price' => $total_price
+                    ]
+                );
+
+            }
+
+            $this->update_list($list);
+            
+        }
 
         // If all products ticked off, then change status to complete
         return response()->json(['data' => ['status' => 'success']]);
