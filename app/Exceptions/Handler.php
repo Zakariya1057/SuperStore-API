@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use ErrorException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class Handler extends ExceptionHandler
     protected $dontFlash = [
         'password',
         'password_confirmation',
+        'remember_token'
     ];
 
     /**
@@ -61,10 +63,7 @@ class Handler extends ExceptionHandler
     // }
 
     public function render($request, $exception){
-
-        // dd($exception);
-
-        if($exception instanceof QueryException || $exception instanceof ErrorException){
+        if($exception instanceof QueryException || $exception instanceof ErrorException || $exception instanceOf MassAssignmentException){
             return parent::render($request, $exception);
         } elseif($exception instanceof AuthenticationException) {
             return response()->json([ 'data' => ['error' => 'User Unauthenticated.'] ], 401);
