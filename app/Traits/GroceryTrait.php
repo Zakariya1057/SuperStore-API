@@ -31,11 +31,14 @@ trait GroceryTrait {
         
         $products = ChildCategory::where('child_categories.parent_category_id', $parent_cateogy_id)
         ->join('category_products','category_products.child_category_id','child_categories.id')
+        ->join('parent_categories','parent_categories.id','child_categories.parent_category_id')
         ->join('products', 'products.id', 'category_products.product_id')
         ->select(
             'products.*',
-            'child_categories.id as category_id','child_categories.name as category_name',
-            'child_categories.parent_category_id as category_parent_category_id'
+
+            'child_categories.id as child_category_id','child_categories.name as child_category_name',
+
+            'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name'
         )
         ->withCasts( $casts )
         ->get();
@@ -43,14 +46,14 @@ trait GroceryTrait {
         $categories = [];
 
         foreach($products as $product){
-
-            if(key_exists($product->category_id , $categories)){
-                $categories[$product->category_id]['products'][] = $product;
+            
+            if(key_exists($product->child_category_id , $categories)){
+                $categories[$product->child_category_id]['products'][] = $product;
             } else {
-                $categories[$product->category_id] = [
-                    'id' => $product->category_id,
-                    'name' => $product->category_name,
-                    'parent_category_id' => $product->category_parent_category_id,
+                $categories[$product->child_category_id] = [
+                    'id' => $product->child_category_id,
+                    'name' => $product->child_category_name,
+                    'parent_category_id' => $product->parent_category_id,
                     'products' => [$product]
                 ];
             }

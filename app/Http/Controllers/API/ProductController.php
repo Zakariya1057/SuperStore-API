@@ -4,20 +4,23 @@ namespace App\Http\Controllers\API;
 
 use App\Product;
 use App\Recommended;
-use App\Casts\HTMLDecode;
 use App\FavouriteProducts;
-use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Casts\PromotionCalculator;
 use App\MonitoredProduct;
 use Exception;
+use App\Traits\SanitizeTrait;
 
 class ProductController extends Controller {
+
+    use SanitizeTrait;
+
     public function show(Request $request, $product_id){
 
         $product = new Product();
         $casts = $product->casts;
+
+        $product_id = $this->sanitizeField($product_id);
 
         $product = Product::where('products.id',$product_id)
         ->select(

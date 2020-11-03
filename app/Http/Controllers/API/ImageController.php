@@ -7,11 +7,18 @@ use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\SanitizeTrait;
 
 class ImageController extends Controller {
+
+    use SanitizeTrait;
+
     public function show($type,$name){
 
         Cache::flush();
+        
+        $type = $this->sanitizeField($type);
+        $name = $this->sanitizeField($name);
         
         // $image = Cache::remember("image_{$type}_{$name}", 86400, function () use($type,$name) {
             

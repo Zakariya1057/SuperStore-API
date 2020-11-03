@@ -6,14 +6,15 @@ use App\CategoryProduct;
 use App\Http\Controllers\Controller;
 use App\GroceryList;
 use App\GroceryListItem;
-use App\Product;
 use App\Traits\GroceryListTrait;
 use Exception;
 use Illuminate\Http\Request;
+use App\Traits\SanitizeTrait;
 
 class GroceryListViewController extends Controller {
 
     use GroceryListTrait;
+    use SanitizeTrait;
 
     public function create($list_id, Request $request){
 
@@ -23,7 +24,7 @@ class GroceryListViewController extends Controller {
             'data.ticked_off' => ''
         ]);
 
-        $data = $validated_data['data'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
         $product_id = $data['product_id'];
 
         $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
@@ -66,7 +67,7 @@ class GroceryListViewController extends Controller {
             'data.ticked_off' => 'required'
         ]);
 
-        $data = $validated_data['data'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
 
         $user_id = $request->user()->id;
 
@@ -106,7 +107,9 @@ class GroceryListViewController extends Controller {
             'data.product_id' => 'required',
         ]);
 
-        $product_id = $validated_data['data']['product_id'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
+
+        $product_id = $data['product_id'];
 
         $user_id = $request->user()->id;
 

@@ -7,6 +7,7 @@ use App\GroceryList;
 use App\GroceryListItem;
 use App\Product;
 use App\Casts\PromotionCalculator;
+use App\CategoryProduct;
 use App\ChildCategory;
 use App\FeaturedItem;
 use Exception;
@@ -85,8 +86,6 @@ trait GroceryListTrait {
 
                 $new_total = 0;
 
-                Log::debug("$product_count >= $quantity");
-
                 if($product_count >= $quantity){
 
                     $highest_price = 0;
@@ -106,9 +105,6 @@ trait GroceryListTrait {
                     $remainder = ($total_quantity % $promotion_details->quantity);
                     $goes_into_fully = floor($total_quantity / $promotion_details->quantity);
 
-                    Log::debug('Old Promoted Products total: '.$previous_total_price);
-                    Log::debug('Most Expensive Price: '.$highest_price);
-
                     if( !is_null($promotion_details->for_quantity)){
                         $new_total = ( $goes_into_fully * ( $promotion_details->for_quantity * $highest_price)) + ($remainder * $highest_price);
                     } else {
@@ -118,13 +114,10 @@ trait GroceryListTrait {
 
                     $new_total_price = ($total_price - $previous_total_price) + $new_total;
 
-                    Log::debug('Old Total Price: '.$new_total);
-
                     if($new_total != $previous_total_price){
                         $update['old_total_price'] = $total_price;
                         $update['total_price'] = $new_total_price;
                     }
-                    // Log::debug('New New Total Price: '.$new_total_price);
 
                 }
 
@@ -263,6 +256,34 @@ trait GroceryListTrait {
         }
         
         return $total;
+
+    }
+
+    protected function update_list_items($list_id, $items){
+        // Delete all list items, create new ones
+        GroceryListItem::where('list_id', $list_id)->delete();
+
+        foreach($items as $item){
+
+            $quantity = $item['quantity'] ?? 1;
+            $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+            $product_id = $item['product_id'];
+            $total_price = $this->item_price($product_id, $quantity);
+
+            $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+            
+            GroceryListItem::create(
+                [
+                    'list_id' => $list_id, 
+                    'product_id' =>  $product_id,
+                    'parent_category_id' => $parent_category_id, 
+                    'quantity' => $quantity,
+                    'ticked_off' =>  $ticked_off,
+                    'total_price' => $total_price
+                ]
+            );
+
+        }
 
     }
 

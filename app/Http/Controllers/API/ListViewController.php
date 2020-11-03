@@ -9,10 +9,12 @@ use App\Traits\GroceryListTrait;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
+use App\Traits\SanitizeTrait;
 
 class ListViewController extends Controller {
 
     use GroceryListTrait;
+    use SanitizeTrait;
 
     public function index(Request $request){
         //Use user_id to get all lists for user
@@ -30,11 +32,16 @@ class ListViewController extends Controller {
             'data.name' => 'required|max:255',
             'data.identifier' => 'required',
             'data.store_type_id' => 'required',
+            'data.items' => ''
         ]);
         
-        $list_name = $validated_data['data']['name'];
-        $store_type_id = $validated_data['data']['store_type_id'];
-        $identifier = $validated_data['data']['identifier'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
+
+        $items = $data['items'] ?? [];
+
+        $list_name = $data['name'];
+        $store_type_id = $data['store_type_id'];
+        $identifier = $data['identifier'];
 
         if( GroceryList::where('identifier',$identifier)->exists() ){
             throw new Exception('List with identifier found in database.', 409);
@@ -47,12 +54,17 @@ class ListViewController extends Controller {
         $list->identifier = $identifier;
         $list->save();
 
+        $this->update_list_items($list->id, $items);
+        $this->update_list($list);
+    
         return $this->index($request);
 
     }
 
     public function show(Request $request, $list_id){
         $user_id = $request->user()->id;
+
+        $list_id = $this->sanitizeField($list_id);
         $list = $this->show_list($list_id, $user_id);
 
         if($list instanceOf Request){
@@ -72,7 +84,7 @@ class ListViewController extends Controller {
             'data.identifier' => 'required',
         ]);
 
-        $data = $validated_data['data'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
 
         $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
 
@@ -95,14 +107,14 @@ class ListViewController extends Controller {
             'data.items' => ''
         ]);
 
-        $data = $validated_data['data'];
+        $data = $this->sanitizeAllFields($validated_data['data']);
 
         $items = $data['items'] ?? [];
 
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
 
-        $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get();
+        $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
 
         if(is_null($list)){
             throw new Exception('No list found.', 404);
@@ -113,37 +125,11 @@ class ListViewController extends Controller {
                 'store_type_id' => $store_type_id
             ]);
 
-            $list_id = $list->first()->id;
+            $list_id = $list->id;
 
-            if(count($items) > 0){
-                // Delete all list items, create new ones
-                GroceryListItem::where('list_id', $list_id)->delete();
-            }
-
-            foreach($items as $item){
-
-                $quantity = $item['quantity'] ?? 1;
-                $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
-                $product_id = $item['product_id'];
-                $total_price = $this->item_price($product_id, $quantity);
-
-                $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
-                
-                GroceryListItem::create(
-                    [
-                        'list_id' => $list_id, 
-                        'product_id' =>  $product_id,
-                        'parent_category_id' => $parent_category_id, 
-                        'quantity' => $quantity,
-                        'ticked_off' =>  $ticked_off,
-                        'total_price' => $total_price
-                    ]
-                );
-
-            }
-
+            $this->update_list_items($list_id, $items);
             $this->update_list($list);
-            
+
         }
 
         // If all products ticked off, then change status to complete
@@ -153,6 +139,8 @@ class ListViewController extends Controller {
     public function restart(Request $request, $list_id){
 
         $user_id = $request->user()->id;
+
+        $list_id = $this->sanitizeField($list_id);
 
         //Make sure that list belongs to user
         $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ])->get()->first();

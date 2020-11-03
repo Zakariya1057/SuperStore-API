@@ -6,9 +6,12 @@ use App\FavouriteProducts;
 use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Traits\SanitizeTrait;
 
 class FavouriteController extends Controller {
     
+    use SanitizeTrait;
+
     public function index(Request $request){
         $user_id = $request->user()->id;
         $product = new Product();
@@ -32,7 +35,7 @@ class FavouriteController extends Controller {
             'data.favourite' => 'required',
         ]);
 
-        $favourite = strtolower($validated_data['data']['favourite']);
+        $favourite = strtolower( $this->sanitizeField($validated_data['data']['favourite']) );
 
         if ($favourite == 'true') {
             if( !FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product_id] ])->exists()) {

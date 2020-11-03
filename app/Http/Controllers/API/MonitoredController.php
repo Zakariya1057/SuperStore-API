@@ -6,10 +6,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\MonitoredProduct;
 use App\Traits\MonitoringTrait;
+use App\Traits\SanitizeTrait;
 
 class MonitoredController extends Controller {
     
     use MonitoringTrait;
+    use SanitizeTrait;
 
     public function index(Request $request){
         $user_id = $request->user()->id;
@@ -24,7 +26,9 @@ class MonitoredController extends Controller {
             'data.monitor' => 'required',
         ]);
 
-        $monitor = strtolower($validated_data['data']['monitor']);
+        $data = $this->sanitizeAllFields($validated_data['data']);
+
+        $monitor = strtolower($data['monitor']);
 
         if ($monitor == 'true') {
             if( !MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product_id] ])->exists()) {
