@@ -21,6 +21,7 @@ class SearchViewController extends Controller {
     public function suggestions($query){
 
         $query = $this->sanitizeField($query);
+        $query = str_replace(' ','_', $query);
 
         $results = Cache::remember('search_suggestions_'.$query, now()->addDays(1), function () use ($query){
             $results = array();
@@ -76,9 +77,12 @@ class SearchViewController extends Controller {
         $child_category = $data['child_category'] ?? '';
         $brand = $data['brand'] ?? '';
 
-        Cache::flush();
+        // Cache::flush();
 
-        $results = Cache::remember("search_results_type:{$type}_detail:{$detail}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}", now()->addDays(1), function () use ($type, $detail, $data){
+        $cache_key = "search_results_type:{$type}_detail:{$detail}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}";
+        $cache_key = str_replace(' ','_',$cache_key);
+
+        $results = Cache::remember($cache_key, now()->addDays(1), function () use ($type, $detail, $data){
 
             $results = array(
                 'stores' => [],
