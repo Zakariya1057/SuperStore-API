@@ -17,6 +17,7 @@ trait UserTrait {
 
         $type_validations = [
             'name' => ['field' => 'name', 'validation' => 'required|string|max:255'],
+            'notification_token' => ['field' => 'notification_token', 'validation' => 'required|string|max:255'],
             'code' => ['field' => 'code', 'validation' => 'required|integer'],
             'email' => ['field' => 'email', 'validation' => 'required|email|max:255'],
             'password' => ['field' => 'password', 'validation' => 'required|string'],

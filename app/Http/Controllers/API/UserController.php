@@ -30,7 +30,8 @@ class UserController extends Controller {
             'data.password' => [],
             'data.password_confirmation' => [],
             'data.identifier' => [],
-            'data.user_token' => []
+            'data.user_token' => [],
+            'data.notification_token' => []
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
@@ -38,18 +39,21 @@ class UserController extends Controller {
         $nameError = $this->validate_field($data,'name');
         $emailError = $this->validate_field($data,'email');
         $passwordError = $this->validate_field($data,'new_password');
+        $notificationError = $this->validate_field($data,'notification_token');
 
-        if($nameError || $passwordError || $emailError){
-            return $nameError ?? $passwordError ?? $emailError;
+        if($nameError || $passwordError || $emailError || $notificationError){
+            return $nameError ?? $passwordError ?? $emailError ?? $notificationError;
         }
 
         $identifier = $data['identifier'] ?? '';
         $user_token = $data['user_token'] ?? '';
+        $notification_token = $data['notification_token'];
         
         $user_data = [
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'notification_token' => $data['notification_token']
         ];
 
         $user = User::where('email', $data['email'])->get()->first();
@@ -87,7 +91,7 @@ class UserController extends Controller {
 
         $user = User::create($user_data);
 
-        $token_data = $this->create_token($user);
+        $token_data = $this->create_token($user, $notification_token);
         return response()->json(['data' => $token_data]);
 
     }
@@ -97,17 +101,21 @@ class UserController extends Controller {
 
         $validated_data = $request->validate([
             'data.email' => [],
-            'data.password' => []
+            'data.password' => [],
+            'data.notification_token' => []
         ]);
         
         $data = $this->sanitizeAllFields($validated_data['data']);
 
         $emailError = $this->validate_field($data,'email');
         $passwordError = $this->validate_field($data,'password');
+        $notificationError = $this->validate_field($data,'notification_token');
 
-        if($emailError || $passwordError){
-            return $emailError ?? $passwordError;
+        if($emailError || $passwordError || $notificationError){
+            return $emailError ?? $passwordError ?? $notificationError;
         }
+
+        $notification_token = $data['notification_token'];
 
         $user = User::where('email', $data['email'])->get()->first();
 
@@ -117,7 +125,7 @@ class UserController extends Controller {
 
         if (Hash::check($data['password'], $user->password)) {
             $user->tokens()->delete();
-            $token_data = $this->create_token($user);
+            $token_data = $this->create_token($user, $notification_token);
             return response()->json(['data' => $token_data]);
         } else {
 
@@ -133,7 +141,7 @@ class UserController extends Controller {
 
     public function logout(Request $request){
         $request->user()->tokens()->delete();
-        User::where('id', $request->user()->id)->update(['logged_out_at' => Carbon::now()]);
+        User::where('id', $request->user()->id)->update(['logged_out_at' => Carbon::now(), 'notification_token' => NULL]);
         return response()->json(['data' => ['status' => 'sucess']]);
     }
 
@@ -208,9 +216,9 @@ class UserController extends Controller {
         return response()->json(['data' => ['status' => 'sucess']]);
     }
 
-    private function create_token($user){
+    private function create_token($user, $notification_token = null){
         $token = $user->createToken($user->id)->plainTextToken;
-        User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
+        User::where('id', $user->id)->update(['logged_in_at' => Carbon::now(), 'notification_token' => $notification_token]);
         return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email];
     }
 
