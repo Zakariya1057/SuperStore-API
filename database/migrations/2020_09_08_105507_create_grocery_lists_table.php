@@ -29,8 +29,11 @@ class CreateGroceryListsTable extends Migration
             $table->decimal('total_price', 7,2)->default(0);
             $table->decimal('old_total_price', 7,2)->nullable()->default(0);
 
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->unsignedBigInteger('store_type_id')->nullable();
 
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('store_type_id')->references('id')->on('store_types');
+            
             $table->index('user_id');
             $table->index('name');
 
