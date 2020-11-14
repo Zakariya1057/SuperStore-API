@@ -18,13 +18,13 @@ class CreateOpeningHoursTable extends Migration
         Schema::create('opening_hours', function (Blueprint $table) {
             $table->id();
 
-            $table->time('opens_at');
-            $table->time('closes_at');
+            $table->time('opens_at')->nullable();
+            $table->time('closes_at')->nullable();
 
             $table->smallInteger('day_of_week');
             $table->unsignedBigInteger('store_id');
 
-            $table->boolean('closed_today')->nullable();
+            $table->boolean('closed_today')->default(0);
 
             $table->foreign('store_id')->references('id')->on('stores');
             
