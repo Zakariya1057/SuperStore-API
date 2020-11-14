@@ -26,6 +26,8 @@ class CreateStoresTable extends Migration
             $table->text('uber_url')->nullable();
             $table->text('site_url')->nullable();
 
+            $table->timestamp('last_checked')->useCurrent();
+
             $table->unsignedBigInteger('store_site_id')->unique();
             $table->unsignedBigInteger('store_type_id');
 
