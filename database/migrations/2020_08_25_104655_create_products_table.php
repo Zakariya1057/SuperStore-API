@@ -45,6 +45,8 @@ class CreateProductsTable extends Migration
             $table->unsignedBigInteger('store_type_id');
             $table->text('url')->nullable();
 
+            $table->timestamp('last_checked')->useCurrent();
+            
             $table->foreign('store_type_id')->references('id')->on('store_types');
             $table->foreign('promotion_id')->references('id')->on('promotions');
 
