@@ -10,7 +10,6 @@ use App\Traits\PromotionTrait;
 use App\Traits\StoreTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use App\Traits\SanitizeTrait;
 
 class HomeController extends Controller {
     use StoreTrait;
