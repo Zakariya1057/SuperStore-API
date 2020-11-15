@@ -87,7 +87,7 @@ trait GroceryTrait {
     }
 
     public function lists_progress($user_id){
-        return GroceryList::where('user_id', $user_id)->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')->get();
+        return GroceryList::where('user_id', $user_id)->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')->limit(4)->get();
     }
 
     public function featured_items(){
