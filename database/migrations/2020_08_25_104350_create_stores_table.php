@@ -24,7 +24,7 @@ class CreateStoresTable extends Migration
 
             $table->text('google_url')->nullable();
             $table->text('uber_url')->nullable();
-            $table->text('site_url')->nullable();
+            $table->text('url')->nullable();
 
             $table->timestamp('last_checked')->useCurrent();
 
