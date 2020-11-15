@@ -217,6 +217,7 @@
           <tr>
             <td align="center" bgcolor="#e9ecef" style="font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; color: #666;">
               <p style="margin: 0;">You received this email because we received a request to reset your password for your account. If you didn't request this you can safely delete this email.</p>
+              <br><p style="margin: 0;">Code expires in 24 hours.</p>
             </td>
           </tr>
           <!-- end permission -->
