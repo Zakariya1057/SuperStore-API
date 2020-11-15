@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('identifier')->nullable();
             
             $table->boolean('send_notifications')->default(1); // Send notification to user phone if enabled.
-            $table->string('notification_token')->unique();
+            $table->string('notification_token')->unique()->nullable();
 
             $table->rememberToken();
 
