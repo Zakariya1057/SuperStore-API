@@ -27,22 +27,12 @@ class ResetPasswordController extends Controller {
     public function send_code(Request $request){
 
         $validated_data = $request->validate([
-            'data.email' => []
+            'data.email' => 'required|email|max:255',
         ]);
 
         $validated_data = $this->sanitizeAllFields($validated_data);
 
-        if(!key_exists('data',$validated_data)){
-            throw new Exception('No email found.', 422);
-        }
-
         $data = $validated_data['data'];
-
-        $emailError = $this->validate_field($data,'email');
-
-        if($emailError){
-            return $emailError;
-        }
 
         $user = User::where('email',$data['email'])->get()->first();
 
@@ -61,24 +51,13 @@ class ResetPasswordController extends Controller {
     public function validate_code(Request $request){
 
         $validated_data = $request->validate([
-            'data.email' => [],
-            'data.code' => []
+            'data.email' => 'required|email|max:255',
+            'data.code' => 'required|integer'
         ]);
-
-        if(!key_exists('data',$validated_data)){
-            throw new Exception('No code found.', 422);
-        }
 
         $data = $this->sanitizeAllFields($validated_data['data']);
 
-        $emailError = $this->validate_field($data,'email');
-        $codeError = $this->validate_field($data,'code');
-
-        if($emailError || $codeError){
-            return $emailError ?? $codeError;
-        }
-
-        $user = User::where([ ['email',$data['email']], ['remember_token', $data['code']] ])->get()->first();
+        $user = User::where([['email',$data['email']], ['remember_token', $data['code']] ])->get()->first();
         if(is_null($user)){
             throw new Exception('Invalid code.', 422);
         }
@@ -92,26 +71,14 @@ class ResetPasswordController extends Controller {
     }
 
     public function new_password(Request $request){
+
         $validated_data = $request->validate([
-            'data.email' => [],
-            'data.code' => [],
-            'data.password' => [],
-            'data.password_confirmation' => []
+            'data.code' => 'required|integer',
+            'data.email' => 'required|email|max:255',
+            'data.password' => 'required|confirmed|string|min:8|max:255',
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
-
-        if(!key_exists('data',$validated_data)){
-            throw new Exception('No reset data found.', 422);
-        }
-
-        $emailError = $this->validate_field($data,'email');
-        $passwordError = $this->validate_field($data,'new_password');
-        $codeError = $this->validate_field($data,'code');
-
-        if($emailError || $codeError || $passwordError){
-            return $emailError ?? $codeError ?? $passwordError;
-        }
 
         $user = User::where('email', $data['email'])->get()->first();
 

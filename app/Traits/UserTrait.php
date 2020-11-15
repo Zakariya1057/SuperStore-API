@@ -23,6 +23,7 @@ trait UserTrait {
             'password' => ['field' => 'password', 'validation' => 'required|string'],
             'edit_password' => ['field' => 'password', 'validation' => 'required|string|min:8|confirmed'],
             'new_password' => ['field' => 'password', 'validation' => 'required|string|min:8|confirmed'],
+            'send_notifications' => ['field' => 'send_notifications', 'validation' => 'required|boolean'],
         ];
         
         if(!key_exists($type,$type_validations)){

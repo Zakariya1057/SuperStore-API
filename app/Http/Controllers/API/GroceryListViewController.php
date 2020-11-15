@@ -54,6 +54,8 @@ class GroceryListViewController extends Controller {
             throw new Exception('No list found.', 409);
         }
 
+        $this->update_list($list);
+        
         // Set off message queue to update list total.
         return response()->json(['data' => ['status' => 'success']]);
 

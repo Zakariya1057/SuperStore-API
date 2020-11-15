@@ -11,39 +11,33 @@ use App\Http\Controllers\Controller;
 use App\MonitoredProduct;
 use App\Review;
 use App\StoreType;
+use App\Traits\GroceryListTrait;
 use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller {
 
     use UserTrait;
     use SanitizeTrait;
+    use GroceryListTrait;
 
     public function register(Request $request){
 
         $validated_data = $request->validate([
-            'data.name' => [],
-            'data.email' => [],
-            'data.password' => [],
-            'data.password_confirmation' => [],
-            'data.identifier' => [],
-            'data.user_token' => [],
-            'data.notification_token' => []
+            'data.name' => 'required|string|max:255',
+            'data.email' => 'required|email|max:255',
+            'data.password' => 'required|confirmed|string|min:8|max:255',
+            'data.identifier' => '',
+            'data.user_token' => '',
+            'data.notification_token' => 'required|string|max:255'
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
-        
-        $nameError = $this->validate_field($data,'name');
-        $emailError = $this->validate_field($data,'email');
-        $passwordError = $this->validate_field($data,'new_password');
-        $notificationError = $this->validate_field($data,'notification_token');
-
-        if($nameError || $passwordError || $emailError || $notificationError){
-            return $nameError ?? $passwordError ?? $emailError ?? $notificationError;
-        }
 
         $identifier = $data['identifier'] ?? '';
         $user_token = $data['user_token'] ?? '';
@@ -65,32 +59,64 @@ class UserController extends Controller {
             if(!$this->validate_apple_login($data)){
                 throw new Exception('Invalid user data provided.', 422);
             } else {
-
                 $apple_user = User::where('identifier', $identifier)->get()->first();
 
                 // User Found In Database. Or user exists with that email.
                 if( !is_null($apple_user) || $userExists){
-                    $token_data = $this->create_token($apple_user ?? $user);
+                    $token_data = $this->create_token($apple_user ?? $user, $notification_token);
                     return response()->json(['data' => $token_data]);
                 } else {
-                    // Either:
-                    // New User or
-                    // User created with email then now trying to log in with apple.  Account belongs to user without apple login. Login Anyway
-
                     $user_data['identifier'] = $identifier;
-
                 }
 
             }
 
         }
 
-        if( $userExists ){
+        if($userExists){
             throw new Exception('Email address belongs to another user.', 422);
         }
 
+        
         $user = User::create($user_data);
 
+        try {
+            // Create default starting list for new users.
+
+            $total_price = 0;
+
+            $uuid = Uuid::uuid4();
+            $identifier = $uuid->toString();
+    
+            $list = new GroceryList();
+            $list->name = 'Shopping List';
+            $list->user_id = $user->id;
+            $list->identifier = $identifier;
+            $list->save();
+    
+            $products = [1,2,3,4];
+    
+            foreach($products as $product_id){
+                $item = new GroceryListItem();
+                $item->list_id = $list->id;
+                $item->product_id = $product_id;
+                $item->parent_category_id = 1;
+                $item->quantity = 1;
+                $item->ticked_off = false;
+
+                $price =  $this->item_price($product_id);
+                $total_price += $price;
+                $item->total_price = $price;
+
+                $item->save();
+            }
+
+            $list->total_price = $total_price;
+            $list->save();
+        } catch(Exception $e) {
+            Log::error('Failed To Create Starting List: '.$e->getMessage());
+        }
+       
         $token_data = $this->create_token($user, $notification_token);
         return response()->json(['data' => $token_data]);
 
@@ -100,21 +126,13 @@ class UserController extends Controller {
     public function login(Request $request){
 
         $validated_data = $request->validate([
-            'data.email' => [],
-            'data.password' => [],
-            'data.notification_token' => []
+            'data.email' => 'required|email|max:255',
+            'data.password' => 'required|string|min:8|max:255',
+            'data.notification_token' => ''
         ]);
         
         $data = $this->sanitizeAllFields($validated_data['data']);
-
-        $emailError = $this->validate_field($data,'email');
-        $passwordError = $this->validate_field($data,'password');
-        $notificationError = $this->validate_field($data,'notification_token');
-
-        if($emailError || $passwordError || $notificationError){
-            return $emailError ?? $passwordError ?? $notificationError;
-        }
-
+        
         $notification_token = $data['notification_token'];
 
         $user = User::where('email', $data['email'])->get()->first();
@@ -142,7 +160,7 @@ class UserController extends Controller {
     public function logout(Request $request){
         $request->user()->tokens()->delete();
         User::where('id', $request->user()->id)->update(['logged_out_at' => Carbon::now(), 'notification_token' => NULL]);
-        return response()->json(['data' => ['status' => 'sucess']]);
+        return response()->json(['data' => ['status' => 'success']]);
     }
 
     public function update(Request $request){
@@ -156,6 +174,7 @@ class UserController extends Controller {
             'data.password_confirmation' => [],
             'data.current_password' => [],
             'data.type' => [],
+            'data.send_notifications' => [],
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
@@ -163,12 +182,17 @@ class UserController extends Controller {
         if(!key_exists('type',$data)){
             throw new Exception('Field Type required.', 422);
         }
+        
 
         $type = $data['type'];
         $value = $data[ $data['type'] ];
 
         if($type == 'password'){
             $type = 'edit_password';
+        }
+
+        if($type == 'send_notifications'){
+            $data['send_notifications'] = (bool)$data['send_notifications'] ?? null;
         }
 
         $error = $this->validate_field($data,$type,$request->user()->id);
@@ -182,7 +206,7 @@ class UserController extends Controller {
 
         User::where('id',$user_id)->update([$data['type'] => $value ]);
 
-        return response()->json(['data' => ['status' => 'sucess']]);
+        return response()->json(['data' => ['status' => 'success']]);
 
     }
 
@@ -213,13 +237,24 @@ class UserController extends Controller {
 
         $request->user()->tokens()->delete();
 
-        return response()->json(['data' => ['status' => 'sucess']]);
+        return response()->json(['data' => ['status' => 'success']]);
     }
 
     private function create_token($user, $notification_token = null){
         $token = $user->createToken($user->id)->plainTextToken;
-        User::where('id', $user->id)->update(['logged_in_at' => Carbon::now(), 'notification_token' => $notification_token]);
-        return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email];
+
+        $update_fields = ['logged_in_at' => Carbon::now(), 'notification_token' => $notification_token];
+
+        if(is_null($notification_token)){
+            $update_fields['send_notifications'] = 0;
+            $send_notifications = false;
+        } else {
+            $update_fields['send_notifications'] = 1;
+            $send_notifications = true;
+        }
+
+        User::where('id', $user->id)->update($update_fields);
+        return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email,'send_notifications' => $send_notifications];
     }
 
 }
