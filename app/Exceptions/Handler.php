@@ -68,7 +68,11 @@ class Handler extends ExceptionHandler
         } elseif($exception instanceof AuthenticationException) {
             return response()->json([ 'data' => ['error' => 'User Unauthenticated.'] ], 401);
         } elseif($exception instanceof ValidationException){
-            return response()->json([ 'data' => ['error' => $exception->errors()] ], 422);
+            $messages = [];
+            foreach(array_values($exception->errors()) as $error){
+                $messages[] = str_replace('data.','',$error[0]);
+            }
+            return response()->json([ 'data' => ['error' => join(' ',$messages)]], 422);
         } elseif (!($exception instanceof NotFoundHttpException) && $request->isJson()) {
             return response()->json([ 'data' => ['error' => $exception->getMessage()] ], $exception->getCode());
         }  else {
