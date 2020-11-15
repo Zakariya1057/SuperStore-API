@@ -20,7 +20,9 @@
         "laravel/telescope": "^3.5",
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.1",
+        "lcobucci/jwt": "^3.3",
         "paragonie/random_compat": "2.*",
+        "ramsey/uuid": "^4.1",
         "symfony/http-client": "^5.1",
         "webup/laravel-sendinblue": "^3.0"
     },
