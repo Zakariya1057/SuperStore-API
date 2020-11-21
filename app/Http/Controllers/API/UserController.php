@@ -243,6 +243,8 @@ class UserController extends Controller {
     private function create_token($user, $notification_token = null){
         $token = $user->createToken($user->id)->plainTextToken;
 
+        User::where('notification_token', $notification_token)->update(['notification_token' => NULL]);
+
         $update_fields = ['logged_in_at' => Carbon::now(), 'notification_token' => $notification_token];
 
         if(is_null($notification_token)){
