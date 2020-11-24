@@ -76,9 +76,12 @@ class ResetPasswordController extends Controller {
             'data.code' => 'required|integer',
             'data.email' => 'required|email|max:255',
             'data.password' => 'required|confirmed|string|min:8|max:255',
+            'data.notification_token' => ''
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
+
+        $notification_token = $data['notification_token'];
 
         $user = User::where('email', $data['email'])->get()->first();
 
@@ -102,8 +105,8 @@ class ResetPasswordController extends Controller {
         $user->tokens()->delete();
         $token = $user->createToken($user->id)->plainTextToken;
 
-        User::where('id', $user->id)->update(['logged_in_at' => Carbon::now()]);
-        return response()->json(['data' => ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email]]);
+        $token_data = $this->create_token($user, $notification_token);
+        return response()->json(['data' => $token_data]);
 
     }
 

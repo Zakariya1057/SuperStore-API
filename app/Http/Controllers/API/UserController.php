@@ -240,23 +240,4 @@ class UserController extends Controller {
         return response()->json(['data' => ['status' => 'success']]);
     }
 
-    private function create_token($user, $notification_token = null){
-        $token = $user->createToken($user->id)->plainTextToken;
-
-        User::where('notification_token', $notification_token)->update(['notification_token' => NULL]);
-
-        $update_fields = ['logged_in_at' => Carbon::now(), 'notification_token' => $notification_token];
-
-        if(is_null($notification_token)){
-            $update_fields['send_notifications'] = 0;
-            $send_notifications = false;
-        } else {
-            $update_fields['send_notifications'] = 1;
-            $send_notifications = true;
-        }
-
-        User::where('id', $user->id)->update($update_fields);
-        return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email,'send_notifications' => $send_notifications];
-    }
-
 }
