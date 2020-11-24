@@ -80,22 +80,24 @@ trait GroceryListTrait {
                 $promotion_details = $promotion->details;
                 $products = $promotion->products;
 
-                $product_count = count($products);
+                $total_quantity = 0;
+
+                foreach($products as $product){
+                    $total_quantity += $product->product_quantity;
+                }
 
                 $quantity = $promotion_details->quantity;
 
                 $new_total = 0;
 
-                if($product_count >= $quantity){
+                if($total_quantity >= $quantity){
 
                     $highest_price = 0;
                     $previous_total_price = 0;
-                    $total_quantity = 0;
 
                     // Get the most expensive item
                     foreach($products as $product){
                         $previous_total_price = $previous_total_price + $product->total_price;
-                        $total_quantity = $total_quantity + $product->product_quantity;
 
                         if($product->product_price > $highest_price){
                             $highest_price = $product->product_price;
