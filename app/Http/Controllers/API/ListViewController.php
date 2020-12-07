@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use App\CategoryProduct;
 use App\GroceryList;
 use App\GroceryListItem;
 use App\Traits\GroceryListTrait;
@@ -54,7 +53,7 @@ class ListViewController extends Controller {
         $list->identifier = $identifier;
         $list->save();
 
-        $this->update_list_items($list->id, $items);
+        $this->update_list_items($list->id, $items, 'overwrite');
         $this->update_list($list);
     
         return $this->index($request);
@@ -104,7 +103,8 @@ class ListViewController extends Controller {
             'data.identifier' => 'required',
             'data.store_type_id' => 'required',
             'data.name' => 'required',
-            'data.items' => ''
+            'data.items' => '',
+            'data.mode' => 'required'
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
@@ -113,6 +113,7 @@ class ListViewController extends Controller {
 
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
+        $mode = $data['mode'];
 
         $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
 
@@ -127,7 +128,7 @@ class ListViewController extends Controller {
 
             $list_id = $list->id;
 
-            $this->update_list_items($list_id, $items);
+            $this->update_list_items($list_id, $items, $mode);
             $this->update_list($list);
 
         }

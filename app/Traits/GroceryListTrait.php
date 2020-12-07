@@ -2,14 +2,11 @@
 
 namespace App\Traits;
 
-use App\Casts\HTMLDecode;
 use App\GroceryList;
 use App\GroceryListItem;
 use App\Product;
 use App\Casts\PromotionCalculator;
 use App\CategoryProduct;
-use App\ChildCategory;
-use App\FeaturedItem;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -261,31 +258,65 @@ trait GroceryListTrait {
 
     }
 
-    protected function update_list_items($list_id, $items){
+    protected function update_list_items($list_id, $items,$mode){
         // Delete all list items, create new ones
-        GroceryListItem::where('list_id', $list_id)->delete();
+        $mode = strtolower($mode);
 
-        foreach($items as $item){
+        if($mode == 'overwrite'){
 
-            $quantity = $item['quantity'] ?? 1;
-            $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
-            $product_id = $item['product_id'];
-            $total_price = $this->item_price($product_id, $quantity);
+            GroceryListItem::where('list_id', $list_id)->delete();
 
-            $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
-            
-            GroceryListItem::create(
-                [
-                    'list_id' => $list_id, 
-                    'product_id' =>  $product_id,
-                    'parent_category_id' => $parent_category_id, 
-                    'quantity' => $quantity,
-                    'ticked_off' =>  $ticked_off,
-                    'total_price' => $total_price
-                ]
-            );
+            foreach($items as $item){
+    
+                $quantity = $item['quantity'] ?? 1;
+                $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+                $product_id = $item['product_id'];
+                $total_price = $this->item_price($product_id, $quantity);
+    
+                $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+                
+                GroceryListItem::create(
+                    [
+                        'list_id' => $list_id, 
+                        'product_id' =>  $product_id,
+                        'parent_category_id' => $parent_category_id, 
+                        'quantity' => $quantity,
+                        'ticked_off' =>  $ticked_off,
+                        'total_price' => $total_price
+                    ]
+                );
+    
+            }
 
+        } else if ($mode == 'append') {
+
+            foreach($items as $item){
+    
+                $quantity = $item['quantity'] ?? 1;
+                $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+                $product_id = $item['product_id'];
+                $total_price = $this->item_price($product_id, $quantity);
+    
+                $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+                
+                GroceryListItem::insertOrIgnore(
+                    [
+                        'list_id' => $list_id, 
+                        'product_id' =>  $product_id,
+                        'parent_category_id' => $parent_category_id, 
+                        'quantity' => $quantity,
+                        'ticked_off' =>  $ticked_off,
+                        'total_price' => $total_price
+                    ]
+                );
+    
+            }
+
+        } else {
+            throw new Exception('Unknown Update List Type Mode: '.$mode);
         }
+
+
 
     }
 
