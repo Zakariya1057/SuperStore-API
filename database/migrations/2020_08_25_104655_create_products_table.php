@@ -29,6 +29,8 @@ class CreateProductsTable extends Migration
             $table->unsignedBigInteger('promotion_id')->nullable();
             $table->unsignedBigInteger('site_product_id')->nullable();
 
+            $table->boolean('available')->default(1);
+
             $table->boolean('recommended_searched')->nullable();
             $table->boolean('reviews_searched')->nullable();
 
