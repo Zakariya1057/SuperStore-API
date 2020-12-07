@@ -8,8 +8,6 @@ use Exception;
 use App\Casts\Image;
 use App\Http\Controllers\Controller;
 use App\Traits\SanitizeTrait;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class StoreController extends Controller {
     
