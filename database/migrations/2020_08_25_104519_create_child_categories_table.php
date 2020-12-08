@@ -27,7 +27,8 @@ class CreateChildCategoriesTable extends Migration
             
             $table->foreign('store_type_id')->references('id')->on('store_types');
             $table->foreign('parent_category_id')->references('id')->on('parent_categories');
-
+            $table->index('name');
+            
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
