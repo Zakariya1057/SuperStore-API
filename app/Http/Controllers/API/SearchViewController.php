@@ -9,42 +9,81 @@ use App\StoreType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Traits\SanitizeTrait;
+use App\Traits\SearchTrait;
 use App\Traits\StoreTrait;
 use Exception;
 use Illuminate\Support\Facades\Cache;
+use Elasticsearch\ClientBuilder;
+use Illuminate\Support\Facades\Log;
 
 class SearchViewController extends Controller {
 
     use SanitizeTrait;
     use StoreTrait;
+    use SearchTrait;
 
     public function suggestions($query){
 
         $query = $this->sanitizeField($query);
-        $query = str_replace(' ','_', $query);
+        
+        $results = [
+            'stores' => [],
+            'parent_categories' => [],
+            'child_categories' => [],
+            'products' => []
+        ];
 
-        $results = Cache::remember('search_suggestions_'.$query, now()->addDays(1), function () use ($query){
-            $results = array();
+        try {
 
-            $stores = StoreType::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(2)->get()->toArray();
-            $child_categories = ChildCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
-            $parent_categories = ParentCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
+            $client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
+            $types = ['stores', 'categories', 'products'];
 
-            if((count($child_categories) + count($parent_categories)) <= 3 ){
-                $product_limit = 10;
-            } else {
-                $product_limit = 5;
+            foreach($types as $type){
+                $response = $this->search($client, $type, $query);
+                $results[$type] = [];
+
+                foreach($response['hits']['hits'] as $item){
+                    $source = $item['_source'];
+
+                    if($type == 'categories'){
+                        $type = $source['type'];
+                    }
+
+                    $results[$type][] = ['id' => $source['id'], 'name' => $source['name']];
+                }
             }
 
-            $products = Product::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
-    
-            $results['stores'] = $stores ?? [];
-            $results['parent_categories'] = $parent_categories ?? [];
-            $results['child_categories'] = $child_categories ?? [];
-            $results['products'] = $products ?? [];
+        } catch(Exception $e){
 
-            return $results;
-        });
+            // Backup search in case elasticsearch fails from now
+            Log::critical('Elasticsearch Error: ' . $e);
+
+            $cache = str_replace(' ','_', $query);
+
+            $results = Cache::remember('search_suggestions_'.$cache, now()->addDays(1), function () use ($query){
+                $results = array();
+
+                $stores = StoreType::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(2)->get()->toArray();
+                $child_categories = ChildCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
+                $parent_categories = ParentCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
+
+                if((count($child_categories) + count($parent_categories)) <= 3 ){
+                    $product_limit = 10;
+                } else {
+                    $product_limit = 5;
+                }
+
+                $products = Product::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
+        
+                $results['stores'] = $stores ?? [];
+                $results['parent_categories'] = $parent_categories ?? [];
+                $results['child_categories'] = $child_categories ?? [];
+                $results['products'] = $products ?? [];
+
+                return $results;
+            });
+        
+        }
 
         return response()->json(['data' => $results]);
     }

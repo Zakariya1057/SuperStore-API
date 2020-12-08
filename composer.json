@@ -24,7 +24,8 @@
         "paragonie/random_compat": "2.*",
         "ramsey/uuid": "^4.1",
         "symfony/http-client": "^5.1",
-        "webup/laravel-sendinblue": "^3.0"
+        "webup/laravel-sendinblue": "^3.0",
+        "elasticsearch/elasticsearch": "^7.0"
     },
     "require-dev": {
         "facade/ignition": "^2.0",
