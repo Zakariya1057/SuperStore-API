@@ -17,7 +17,7 @@ class HTMLDecode implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-        return is_null($value) ? $value : html_entity_decode($value, ENT_QUOTES);
+        return is_null($value) ? $value : html_entity_decode($value, ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -31,6 +31,9 @@ class HTMLDecode implements CastsAttributes
      */
     public function set($model, $key, $value, $attributes)
     {
-        return htmlentities($value, ENT_QUOTES);
+        $value = str_replace('\n', "\n", $value);
+        $value = strip_tags($value);
+        $value = preg_replace( "/\r/", '', $value);
+        return htmlentities($value, ENT_QUOTES,'UTF-8', false);
     }
 }
