@@ -12,10 +12,9 @@ use App\Traits\SanitizeTrait;
 use App\Traits\SearchTrait;
 use App\Traits\StoreTrait;
 use Exception;
-use Illuminate\Support\Facades\Cache;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Redis;
 class SearchViewController extends Controller {
 
     use SanitizeTrait;
@@ -33,56 +32,57 @@ class SearchViewController extends Controller {
             'products' => []
         ];
 
-        try {
+        $cache_key = 'search_suggestions_' . str_replace(' ','_', $query);
 
-            $client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
-            $types = ['stores', 'categories', 'products'];
+        if(Redis::get($cache_key)){
+            $results = json_decode(Redis::get($cache_key));
+        } else {
 
-            foreach($types as $type){
-                $response = $this->search($client, $type, $query);
-                $results[$type] = [];
+            try {
 
-                foreach($response['hits']['hits'] as $item){
-                    $source = $item['_source'];
-
-                    if($type == 'categories'){
-                        $type = $source['type'];
+                $client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
+                $types = ['stores', 'categories', 'products'];
+    
+                foreach($types as $type){
+                    $response = $this->search($client, $type, $query);
+                    $results[$type] = [];
+    
+                    foreach($response['hits']['hits'] as $item){
+                        $source = $item['_source'];
+    
+                        if($type == 'categories'){
+                            $type = $source['type'];
+                        }
+    
+                        $results[$type][] = ['id' => $source['id'], 'name' => $source['name']];
                     }
-
-                    $results[$type][] = ['id' => $source['id'], 'name' => $source['name']];
                 }
-            }
-
-        } catch(Exception $e){
-
-            // Backup search in case elasticsearch fails from now
-            Log::critical('Elasticsearch Error: ' . $e);
-
-            $cache = str_replace(' ','_', $query);
-
-            $results = Cache::remember('search_suggestions_'.$cache, now()->addDays(1), function () use ($query){
-                $results = array();
-
+    
+            } catch(Exception $e){
+                // Backup search in case elasticsearch fails from now
+                Log::critical('Elasticsearch Error: ' . $e);
+    
                 $stores = StoreType::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(2)->get()->toArray();
                 $child_categories = ChildCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
                 $parent_categories = ParentCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
-
+    
                 if((count($child_categories) + count($parent_categories)) <= 3 ){
                     $product_limit = 10;
                 } else {
                     $product_limit = 5;
                 }
-
+    
                 $products = Product::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
         
                 $results['stores'] = $stores ?? [];
                 $results['parent_categories'] = $parent_categories ?? [];
                 $results['child_categories'] = $child_categories ?? [];
-                $results['products'] = $products ?? [];
+                $results['products'] = $products ?? [];            
+            }
 
-                return $results;
-            });
-        
+            Redis::set($cache_key, json_encode($results));
+            Redis::expire($cache_key, 86400);
+
         }
 
         return response()->json(['data' => $results]);
@@ -116,21 +116,22 @@ class SearchViewController extends Controller {
         $child_category = $data['child_category'] ?? '';
         $brand = $data['brand'] ?? '';
 
-        // Cache::flush();
-
         $cache_key = "search_results_type:{$type}_detail:{$detail}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}";
         $cache_key = str_replace(' ','_',$cache_key);
 
-        $results = Cache::remember($cache_key, now()->addDays(1), function () use ($type, $detail, $data){
+        $results = array(
+            'stores' => [],
+            'products' => [],
+            'filter' => null
+        );
 
-            $results = array(
-                'stores' => [],
-                'products' => [],
-                'filter' => null
-            );
-
+        if(Redis::get($cache_key)){
+            $results = json_decode(Redis::get($cache_key));
+            Log::debug('Retrieved');
+        } else {
+            Log::debug('Fetched');
             $product = new Product();
-       
+        
             $casts = $product->casts;
     
             if($type == 'stores'){
@@ -155,7 +156,7 @@ class SearchViewController extends Controller {
                 ->withCasts($casts);
                 
                 if($type == 'products'){
-                   $base_query = $base_query->where('products.name', 'like', "$detail%");
+                    $base_query = $base_query->where('products.name', 'like', "$detail%");
                 } elseif($type == 'child_categories'){
                     $base_query = $base_query->where('child_categories.name',$detail);
                 } elseif($type == 'parent_categories'){
@@ -221,9 +222,10 @@ class SearchViewController extends Controller {
     
             }
 
-            return $results;
+            Redis::set($cache_key, json_encode($results));
+            Redis::expire($cache_key, 86400);
 
-        });
+        }
 
         return response()->json(['data' => $results]);
 

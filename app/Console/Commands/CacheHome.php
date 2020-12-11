@@ -7,8 +7,7 @@ use App\Traits\GroceryTrait;
 use App\Traits\PromotionTrait;
 use App\Traits\StoreTrait;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
-
+use Illuminate\Support\Facades\Redis;
 class CacheHome extends Command
 {
     use StoreTrait;
@@ -49,6 +48,8 @@ class CacheHome extends Command
     {
         $this->info('Weekly Home Cache Start');
 
+        $cache_key = 'home_page';
+
         $featured_items = $this->featured_items();
         $stores = $this->stores_by_type(1,false);
         $categories = $this->home_categories();
@@ -61,7 +62,8 @@ class CacheHome extends Command
             'categories' => $categories,
         ];
 
-        Cache::put('home_page', $data);
+        Redis::set($cache_key, json_encode($data));
+        Redis::expire($cache_key, 604800);
 
         $this->info('Weekly Home Cache Complete');
         

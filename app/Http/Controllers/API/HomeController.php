@@ -9,8 +9,7 @@ use App\Traits\MonitoringTrait;
 use App\Traits\PromotionTrait;
 use App\Traits\StoreTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-
+use Illuminate\Support\Facades\Redis;
 class HomeController extends Controller {
     use StoreTrait;
     use MonitoringTrait;
@@ -21,36 +20,32 @@ class HomeController extends Controller {
     public function show(Request $request){
         $user = $request->user();
 
-        $monitoring = $this->monitoring_products($user->id);
-        $lists = $this->lists_progress($user->id);
-        $groceries = $this->grocery_items($user->id);
+        $data['monitoring'] = $this->monitoring_products($user->id);
+        $data['lists'] = $this->lists_progress($user->id);
+        $data['groceries'] = $this->grocery_items($user->id);
 
-        // Cache::flush();
+        $cache_key = 'home_page';
 
-        $data = Cache::remember('home_page', now()->addWeek(1), function (){
-            $featured_items = $this->featured_items();
-            $stores = $this->stores_by_type(1,false);
-            $categories = $this->home_categories();
-            $promotions = $this->store_promotions(1);
+        $retrieved_data = Redis::get($cache_key);
+        if($retrieved_data){
+            $data = json_decode( $retrieved_data );
+        } else {
 
-            return [
-                'stores' => $stores,
-                'featured' => $featured_items,
-                'promotions' => $promotions,
-                'categories' => $categories,
-            ];
-
-        });
-
-        $data['monitoring'] = $monitoring;
-        $data['lists'] = $lists;
-        $data['groceries'] = $groceries;
-
-        foreach($data as $key => $value){
-            if($value == []){
-                $data[$key] = null;
+            $data['featured'] = $this->featured_items();
+            $data['stores'] = $this->stores_by_type(1,false);
+            $data['categories'] = $this->home_categories();
+            $data['promotions'] = $this->store_promotions(1);
+    
+            foreach($data as $key => $value){
+                if($value == []){
+                    $data[$key] = null;
+                }
             }
+    
+            Redis::set($cache_key, json_encode($data));
+            Redis::expire($cache_key, 604800);
         }
+
 
         return response()->json(['data' => $data]);
     }
