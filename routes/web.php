@@ -14,9 +14,17 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home', ['title' => 'Home - SuperStore', 'description' => '', 'keywords' => '']);
 });
 
-Auth::routes();
+Route::get('/terms-conditions', function () {
+    return view('terms', ['title' => 'Terms And Condition - SuperStore', 'description' => '', 'keywords' => '']);
+});
+
+Route::get('/privacy-policy', function () {
+    return view('privacy', ['title' => 'Privacy Policy - SuperStore', 'description' => '', 'keywords' => '']);
+});
+
+// Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');

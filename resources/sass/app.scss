@@ -6,3 +6,113 @@
 
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
+
+@font-face {
+	font-family: logan;
+	font-size: 400;
+	src: url(/fonts/logan-regular.woff2)
+}
+
+@font-face {
+	font-family: logan-medium;
+	font-size: 600;
+	src: url(/fonts/logan-medium.woff2)
+}
+
+@font-face {
+	font-family: logan-bold;
+	font-size: 800;
+	src: url(/fonts/logan-bold.woff2)
+}
+
+body {
+	font-family: "logan", Helvetica, sans-serif;
+	font-size: 15px;
+	line-height: 25px;
+	color: #2d2d2d;
+    margin: 0;
+    background-color: white;
+}
+
+h1 {
+	font-family: "logan-bold", Helvetica, sans-serif;
+	font-size: 4.5rem;
+	line-height: 5rem;
+	letter-spacing: -0.7px;
+	margin-bottom: 30px
+}
+
+h2 {
+    font-family: "logan-medium", Helvetica, sans-serif;
+    line-height: 4rem;
+    font-size: 3.2rem;
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+
+.download {
+    padding: 10px 60px;
+    font-size: 20px;
+    font-family: "logan-bold", Helvetica, sans-serif;
+    letter-spacing: 0.07em;
+}
+
+.greybg {
+    // background: #f0f0f0;
+    background-color: #0779d11a;
+}
+
+.whitebg {
+    margin-top: 100px !important;
+}
+
+footer {
+    background: #f1f1f1;
+}
+
+p {
+    font-size: 1.3rem;
+    line-height: 2rem;
+    word-spacing: 6px;
+    font-weight: 500;
+}
+
+@media only screen and (max-width: 769px) {
+    .small-center {
+      text-align: center;
+    }
+    .w-60 {
+        width: 80% !important;
+    }
+}
+
+@media only screen and (min-width: 769px) {
+    .w-60 {
+        width: 60% !important;
+    }
+}
+
+.app-logo {
+    width: 200px !important;
+}
+
+nav {
+    background-color: #0479D1 !important;
+}
+
+.logo {
+    width: 50px;
+}
+
+.company-name {
+    font-family: 'Spartan', sans-serif;
+}
+
+li {
+    font-size: 1.3em;
+}
