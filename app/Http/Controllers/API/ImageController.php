@@ -45,7 +45,7 @@ class ImageController extends Controller {
                 Redis::expire($cache_key, 604800);
 
             } catch(Exception $e){
-                $image = Storage::get('public/images/no_image.png');
+                $image = file_get_contents(__DIR__.'/../../../../public/img/no_image.png');
             }
 
         }
