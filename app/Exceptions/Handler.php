@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use ErrorException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -64,7 +65,7 @@ class Handler extends ExceptionHandler
 
     public function render($request, $exception){
         // return parent::render($request, $exception);
-        if($exception instanceof QueryException || $exception instanceof ErrorException || $exception instanceOf MassAssignmentException){
+        if($exception instanceof QueryException || $exception instanceof ErrorException || $exception instanceOf MassAssignmentException || $exception instanceOf BindingResolutionException){
             return parent::render($request, $exception);
         } elseif($exception instanceof AuthenticationException) {
             return response()->json([ 'data' => ['error' => 'User Unauthenticated.'] ], 401);

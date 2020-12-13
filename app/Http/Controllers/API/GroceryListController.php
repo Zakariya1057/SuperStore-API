@@ -11,7 +11,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\Traits\SanitizeTrait;
 
-class GroceryListViewController extends Controller {
+class GroceryListController extends Controller {
 
     use GroceryListTrait;
     use SanitizeTrait;
