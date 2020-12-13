@@ -28,7 +28,11 @@ class HomeController extends Controller {
 
         $retrieved_data = Redis::get($cache_key);
         if($retrieved_data){
-            $data = json_decode( $retrieved_data );
+            $retrieved_data = (array)json_decode( $retrieved_data );
+            $data['featured'] = $retrieved_data['featured'];
+            $data['stores'] = $retrieved_data['stores'];
+            $data['categories'] = $retrieved_data['categories'];
+            $data['promotions'] = $retrieved_data['promotions'];
         } else {
 
             $data['featured'] = $this->featured_items();
