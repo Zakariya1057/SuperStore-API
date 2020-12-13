@@ -63,6 +63,7 @@ class Handler extends ExceptionHandler
     // }
 
     public function render($request, $exception){
+        // return parent::render($request, $exception);
         if($exception instanceof QueryException || $exception instanceof ErrorException || $exception instanceOf MassAssignmentException){
             return parent::render($request, $exception);
         } elseif($exception instanceof AuthenticationException) {

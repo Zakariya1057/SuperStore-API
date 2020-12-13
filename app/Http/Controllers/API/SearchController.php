@@ -15,7 +15,7 @@ use Exception;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
-class SearchViewController extends Controller {
+class SearchController extends Controller {
 
     use SanitizeTrait;
     use StoreTrait;

@@ -69,26 +69,26 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
     Route::get('/favourites', 'API\FavouriteController@index')->name('favourite.index');
     
     Route::prefix('list')->group(function () {
-        Route::get('/', 'API\ListViewController@index')->name('list.index');
-        Route::post('/create', 'API\ListViewController@create')->name('list.create');
-        Route::post('/delete', 'API\ListViewController@delete')->name('list.delete');
-        Route::post('/update', 'API\ListViewController@update')->name('list.update');
+        Route::get('/', 'API\ListController@index')->name('list.index');
+        Route::post('/create', 'API\ListController@create')->name('list.create');
+        Route::post('/delete', 'API\ListController@delete')->name('list.delete');
+        Route::post('/update', 'API\ListController@update')->name('list.update');
         
-        Route::get('/{id}', 'API\ListViewController@show')->name('list.show');
-        Route::post('{id}/restart', 'API\ListViewController@restart')->name('list.restart');
+        Route::get('/{id}', 'API\ListController@show')->name('list.show');
+        Route::post('{id}/restart', 'API\ListController@restart')->name('list.restart');
     
         Route::prefix('{id}/item')->group(function () {
-            Route::post('/create', 'API\GroceryListViewController@create')->name('list_item.create');
-            Route::post('/update', 'API\GroceryListViewController@update')->name('list_item.update');
-            Route::post('/delete', 'API\GroceryListViewController@delete')->name('list_item.delete');
+            Route::post('/create', 'API\GroceryListController@create')->name('list_item.create');
+            Route::post('/update', 'API\GroceryListController@update')->name('list_item.update');
+            Route::post('/delete', 'API\GroceryListController@delete')->name('list_item.delete');
         });
     });
     
     Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
     
     Route::prefix('search')->group(function () {
-        Route::get('/suggestions/{query}', 'API\SearchViewController@suggestions')->name('search.suggestions');
-        Route::post('/results', 'API\SearchViewController@results')->name('search.results');
+        Route::get('/suggestions/{query}', 'API\SearchController@suggestions')->name('search.suggestions');
+        Route::post('/results', 'API\SearchController@results')->name('search.results');
     });
 
 });

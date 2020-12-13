@@ -313,7 +313,7 @@ trait GroceryListTrait {
             }
 
         } else {
-            throw new Exception('Unknown Update List Type Mode: '.$mode);
+            // throw new Exception('Unknown Update List Type Mode: '.$mode);
         }
 
 

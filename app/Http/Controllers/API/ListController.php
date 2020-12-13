@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\Traits\SanitizeTrait;
 
-class ListViewController extends Controller {
+class ListController extends Controller {
 
     use GroceryListTrait;
     use SanitizeTrait;
@@ -104,7 +104,7 @@ class ListViewController extends Controller {
             'data.store_type_id' => 'required',
             'data.name' => 'required',
             'data.items' => '',
-            'data.mode' => 'required'
+            'data.mode' => ''
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
@@ -113,7 +113,7 @@ class ListViewController extends Controller {
 
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
-        $mode = $data['mode'];
+        $mode = $data['mode'] ?? '';
 
         $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
 
