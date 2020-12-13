@@ -262,61 +262,70 @@ trait GroceryListTrait {
         // Delete all list items, create new ones
         $mode = strtolower($mode);
 
-        if($mode == 'overwrite'){
+        DB::beginTransaction();
 
-            GroceryListItem::where('list_id', $list_id)->delete();
+        try {
 
-            foreach($items as $item){
+            if($mode == 'overwrite'){
+
+                GroceryListItem::where('list_id', $list_id)->delete();
     
-                $quantity = $item['quantity'] ?? 1;
-                $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
-                $product_id = $item['product_id'];
-                $total_price = $this->item_price($product_id, $quantity);
+                foreach($items as $item){
+        
+                    $quantity = $item['quantity'] ?? 1;
+                    $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+                    $product_id = $item['product_id'];
+                    $total_price = $this->item_price($product_id, $quantity);
+        
+                    $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+                    
+                    GroceryListItem::create(
+                        [
+                            'list_id' => $list_id, 
+                            'product_id' =>  $product_id,
+                            'parent_category_id' => $parent_category_id, 
+                            'quantity' => $quantity,
+                            'ticked_off' =>  $ticked_off,
+                            'total_price' => $total_price
+                        ]
+                    );
+        
+                }
     
-                $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
-                
-                GroceryListItem::create(
-                    [
-                        'list_id' => $list_id, 
-                        'product_id' =>  $product_id,
-                        'parent_category_id' => $parent_category_id, 
-                        'quantity' => $quantity,
-                        'ticked_off' =>  $ticked_off,
-                        'total_price' => $total_price
-                    ]
-                );
+            } else if ($mode == 'append') {
     
+                foreach($items as $item){
+        
+                    $quantity = $item['quantity'] ?? 1;
+                    $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+                    $product_id = $item['product_id'];
+                    $total_price = $this->item_price($product_id, $quantity);
+        
+                    $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+                    
+                    GroceryListItem::insertOrIgnore(
+                        [
+                            'list_id' => $list_id, 
+                            'product_id' =>  $product_id,
+                            'parent_category_id' => $parent_category_id, 
+                            'quantity' => $quantity,
+                            'ticked_off' =>  $ticked_off,
+                            'total_price' => $total_price
+                        ]
+                    );
+        
+                }
+    
+            } else {
+                // throw new Exception('Unknown Update List Type Mode: '.$mode);
             }
-
-        } else if ($mode == 'append') {
-
-            foreach($items as $item){
     
-                $quantity = $item['quantity'] ?? 1;
-                $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
-                $product_id = $item['product_id'];
-                $total_price = $this->item_price($product_id, $quantity);
-    
-                $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
-                
-                GroceryListItem::insertOrIgnore(
-                    [
-                        'list_id' => $list_id, 
-                        'product_id' =>  $product_id,
-                        'parent_category_id' => $parent_category_id, 
-                        'quantity' => $quantity,
-                        'ticked_off' =>  $ticked_off,
-                        'total_price' => $total_price
-                    ]
-                );
-    
-            }
-
-        } else {
-            // throw new Exception('Unknown Update List Type Mode: '.$mode);
+        } catch(Exception $e) {
+            Log::error('Grocery List Update. Sync Error: ' . $e->getMessage());
+            DB::rollBack();
         }
 
-
+        DB::commit();
 
     }
 

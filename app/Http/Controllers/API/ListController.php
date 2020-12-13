@@ -120,16 +120,22 @@ class ListController extends Controller {
         if(is_null($list)){
             throw new Exception('No list found.', 404);
         } else {
-            GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])
-            ->update([
-                'name' => $name,
-                'store_type_id' => $store_type_id
-            ]);
 
             $list_id = $list->id;
 
-            $this->update_list_items($list_id, $items, $mode);
-            $this->update_list($list);
+            if($mode == 'delete'){
+                GroceryListItem::where('list_id', $list_id)->delete();
+                GroceryList::where('id', $list_id)->delete();
+            } else {
+                GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])
+                ->update([
+                    'name' => $name,
+                    'store_type_id' => $store_type_id
+                ]);
+    
+                $this->update_list_items($list_id, $items, $mode);
+                $this->update_list($list);
+            }
 
         }
 
