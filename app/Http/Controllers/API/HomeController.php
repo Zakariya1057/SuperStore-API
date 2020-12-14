@@ -40,16 +40,15 @@ class HomeController extends Controller {
             $data['categories'] = $this->home_categories();
             $data['promotions'] = $this->store_promotions(1);
     
-            foreach($data as $key => $value){
-                if($value == []){
-                    $data[$key] = null;
-                }
-            }
-    
             Redis::set($cache_key, json_encode($data));
             Redis::expire($cache_key, 604800);
         }
 
+        foreach($data as $key => $value){
+            if($value == []){
+                $data[$key] = null;
+            }
+        }
 
         return response()->json(['data' => $data]);
     }
