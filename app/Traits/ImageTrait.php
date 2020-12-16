@@ -35,7 +35,6 @@ trait ImageTrait {
                 $image = $result['Body'];
 
                 Redis::set($cache_key, base64_encode($image));
-                Redis::expire($cache_key, 604800);
 
             } catch(Exception $e){
                 $image = file_get_contents(__DIR__.'/../../public/img/no_image.png');
