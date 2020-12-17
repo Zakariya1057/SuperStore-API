@@ -24,7 +24,7 @@ class SearchController extends Controller {
     public function suggestions($query){
 
         $query = $this->sanitizeField($query);
-        
+
         $results = [
             'stores' => [],
             'parent_categories' => [],
@@ -41,10 +41,14 @@ class SearchController extends Controller {
             try {
 
                 $client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
-                $types = ['stores', 'categories', 'products'];
+                $types = [
+                    'stores' => 2, 
+                    'categories' => 3, 
+                    'products' => 5
+                ];
     
-                foreach($types as $type){
-                    $response = $this->search($client, $type, $query);
+                foreach($types as $type => $limit){
+                    $response = $this->search($client, $type, $query, $limit);
                     $results[$type] = [];
     
                     foreach($response['hits']['hits'] as $item){
