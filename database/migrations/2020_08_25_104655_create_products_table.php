@@ -22,8 +22,8 @@ class CreateProductsTable extends Migration
             $table->string('small_image')->nullable();
             $table->text('description')->nullable();
 
-            $table->decimal('price', 4,2);
-            $table->decimal('old_price', 4,2)->nullable();
+            $table->decimal('price', 6,2);
+            $table->decimal('old_price', 6,2)->nullable();
 
             $table->boolean('is_on_sale')->nullable();
             $table->unsignedBigInteger('promotion_id')->nullable();
