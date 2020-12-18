@@ -47,8 +47,10 @@ class SearchController extends Controller {
                     'products' => 5
                 ];
     
+                $total_items = 0;
+
                 foreach($types as $type => $limit){
-                    $response = $this->search($client, $type, $query, $limit);
+                    $response = $this->search($client, $type, $query, $type == 'products' && $total_items <= 3 ? 10 :  $limit);
                     $results[$type] = [];
     
                     foreach($response['hits']['hits'] as $item){
@@ -57,7 +59,8 @@ class SearchController extends Controller {
                         if($type == 'categories'){
                             $type = $source['type'];
                         }
-    
+                        
+                        $total_items++;
                         $results[$type][] = ['id' => $source['id'], 'name' => $source['name']];
                     }
                 }
