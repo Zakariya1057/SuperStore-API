@@ -79,7 +79,7 @@ trait GroceryTrait {
             ->join('products','products.id','category_products.product_id')
             ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
             ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
-            ->limit(15)->withCasts($casts)->get();
+            ->limit(15)->groupBy('category_products.product_id')->withCasts($casts)->get();
 
         }
 
