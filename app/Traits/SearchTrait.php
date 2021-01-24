@@ -28,28 +28,52 @@ trait SearchTrait {
 
                         'bool' => [
 
-                        'must' => [
-                            [
-                                'multi_match' => [
-                                    'query' => $query,
-                                    'fields' => $fields_match,
-                                    'operator' => 'or',
-                                    'fuzziness' => 'auto'
+                            'must' => [
+                                [
+                                    'multi_match' => [
+                                        'query' => $query,
+                                        'fields' => $fields_match,
+                                        'operator' => 'or',
+                                        'fuzziness' => 'auto'
+                                    ]
                                 ]
+                            ],
+                        
+                            'should' => [
+                                [
+                                    'multi_match' => [
+                                        'query' => $query,
+                                        'fields' => $fields_should,
+                                        'operator' => 'and'
+                                    ]
+                                ]
+                            ]
+
+                        ],
+                    ],
+
+                    'sort' => [
+                    
+                        [
+                            '_script' => [
+                                'type' => 'number',
+                                'script' => [
+                                    'lang' => 'painless',
+                                    'source' => "
+                                    if(doc['avg_rating'].value > 0 && doc['total_reviews_count'].value > 0){
+                                        _score + ( (doc['total_reviews_count'].value * 0.0001) / doc['avg_rating'].value) 
+                                    } else {
+                                        0
+                                    }
+                                    "
+                                ],
+                                'order' => 'desc'
                             ]
                         ],
-                    
-                        'should' => [
-                            [
-                                'multi_match' => [
-                                    'query' => $query,
-                                    'fields' => $fields_should,
-                                    'operator' => 'and'
-                                ]
-                            ]
-                        ]
+    
+                        '_score',
+                        
                     ]
-                ]
             ]
         ];
         
