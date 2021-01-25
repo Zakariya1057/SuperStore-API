@@ -10,13 +10,36 @@ trait SearchTrait {
 
         $index = strtolower($index);
         $query = strtolower($query);
-
+        
         if($index == 'products'){
             $fields_match = ['name','description','brand','dietary_info'];
             $fields_should = ['name', 'weight','brand'];
+            $sort = [
+                    
+                [
+                    '_script' => [
+                        'type' => 'number',
+                        'script' => [
+                            'lang' => 'painless',
+                            'source' => "
+                            if(doc['avg_rating'].value > 0 && doc['total_reviews_count'].value > 0){
+                                _score + ( (doc['total_reviews_count'].value * 0.0001) / doc['avg_rating'].value) 
+                            } else {
+                                0
+                            }
+                            "
+                        ],
+                        'order' => 'desc'
+                    ]
+                ],
+
+                '_score',
+                
+            ];
         } else {
             $fields_match = ['name'];
             $fields_should = ['name', 'weight'];
+            $sort = [];
         }
 
         $params = [
@@ -33,7 +56,7 @@ trait SearchTrait {
                                     'multi_match' => [
                                         'query' => $query,
                                         'fields' => $fields_match,
-                                        'operator' => 'or',
+                                        'operator' => 'and',
                                         'fuzziness' => 'auto'
                                     ]
                                 ]
@@ -52,28 +75,7 @@ trait SearchTrait {
                         ],
                     ],
 
-                    'sort' => [
-                    
-                        [
-                            '_script' => [
-                                'type' => 'number',
-                                'script' => [
-                                    'lang' => 'painless',
-                                    'source' => "
-                                    if(doc['avg_rating'].value > 0 && doc['total_reviews_count'].value > 0){
-                                        _score + ( (doc['total_reviews_count'].value * 0.0001) / doc['avg_rating'].value) 
-                                    } else {
-                                        0
-                                    }
-                                    "
-                                ],
-                                'order' => 'desc'
-                            ]
-                        ],
-    
-                        '_score',
-                        
-                    ]
+                    'sort' => $sort
             ]
         ];
         

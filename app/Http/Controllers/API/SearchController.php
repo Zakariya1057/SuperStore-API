@@ -44,25 +44,35 @@ class SearchController extends Controller {
                 $types = [
                     'stores' => 2, 
                     'categories' => 3, 
-                    'products' => 5
+                    'products' => 13
                 ];
     
                 $total_items = 0;
 
                 foreach($types as $type => $limit){
-                    $response = $this->search($client, $type, $query, $type == 'products' && $total_items <= 3 ? 10 :  $limit);
+                    $response = $this->search($client, $type, $query, $type == 'products' && $total_items <= 3 ? 20 : $limit);
                     $results[$type] = [];
     
+                    $item_type = $type;
+                    $unique_names = [];
+
                     foreach($response['hits']['hits'] as $item){
                         $source = $item['_source'];
-    
+                        $name = trim($source['name']);
+
                         if($type == 'categories'){
-                            $type = $source['type'];
+                            $item_type = $source['type'];
                         }
                         
                         $total_items++;
-                        $results[$type][] = ['id' => $source['id'], 'name' => $source['name']];
+
+                        if(!key_exists($name, $unique_names)){
+                            $results[$item_type][] = ['id' => $source['id'], 'name' => $name];
+                            $unique_names[$name] = 1;
+                        }
+
                     }
+
                 }
     
             } catch(Exception $e){
