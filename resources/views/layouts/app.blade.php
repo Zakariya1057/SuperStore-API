@@ -50,7 +50,7 @@
     <!-- Footer -->
     <footer class="page-footer font-small blue">
         <!-- Copyright -->
-        <div class="footer-copyright text-center py-3">© 2020 Copyright: <span class="text-primaryt mr-4"> SuperStoreSite.com<span> · <a href="#">Privacy</a> · <a href="#">Terms & Conditions<a/> </div>
+        <div class="footer-copyright text-center py-3">© 2021 Copyright: <span class="text-primaryt mr-4"> SuperStoreSite.com<span> · <a href="#">Privacy</a> · <a href="#">Terms & Conditions<a/> </div>
         <!-- Copyright -->
     </footer>
     <!-- Footer -->

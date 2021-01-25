@@ -7,15 +7,13 @@
             <div class="row justify-content-center py-5">
                <div class="col-12">
                   <h2 class="text-center mb-4">Terms and Conditions</h2>
-                  <h3 id="privacy-policy-datenschutzerklärung"><strong>PRIVACY POLICY /&nbsp;</strong><strong>DATENSCHUTZERKLÄRUNG</strong></h3>
-                  <p><strong>English</strong></p>
-                  <p><strong>Privacy Policy SuperStore GmbH</strong></p>
-                  <p>We, SuperStore GmbH, Dessauer Str. 28-29, 10963 Berlin, are committed to protecting privacy of users of the SuperStore website, SuperStore application(s), and/or other related services (hereinafter collectively the “SuperStore Services” or the “Services”).</p>
-                  <p>For the purposes of this Privacy Policy, SuperStore GmbH is the “data controller” for all SuperStore Services.</p>
+                  <h3 id="privacy-policy-datenschutzerklärung"><strong>PRIVACY POLICY</strong></h3>
+                  <p>We, SuperStore, are committed to protecting privacy of users of the SuperStore website, SuperStore application(s), and/or other related services (hereinafter collectively the “SuperStore Services” or the “Services”).</p>
+                  <p>For the purposes of this Privacy Policy, SuperStore is the “data controller” for all SuperStore Services.</p>
                   <p>This Privacy Policy describes the types of personal and non-personal data we collect and how we use such data. &nbsp;This Privacy Policy is part of our General Terms and Conditions and applies to all SuperStore Services. Therefore, please make sure that you read and understand our Privacy Policy, as well as the General Terms and Conditions.</p>
                   <p>This Privacy Policy does not apply to any third-party websites, services or applications, even if they may be accessible through the SuperStore Services.</p>
                   <p>By using any of the SuperStore Services, you hereby warrant and represent that (i) you have read, understand and agree to this Privacy Policy, (ii) you are over 16 years of age (or are a parent or guardian with such authority to agree to this Privacy Policy for the benefit of an individual who is under 16 years of age). If you do not accept the terms set forth in this Privacy Policy and the consents associated therewith, please do not use our Services.</p>
-                  <p>Last revised: December 2018</p>
+                  <p>Last revised: January 2021</p>
                   <p><strong>1. What types and categories of data we collect, process and use?</strong></p>
                   <p>We collect, process and use personal and non-personal data.</p>
                   <p><strong>1.1 Personal and non-personal data</strong></p>
