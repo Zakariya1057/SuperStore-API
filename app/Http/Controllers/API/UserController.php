@@ -175,6 +175,7 @@ class UserController extends Controller {
             'data.current_password' => [],
             'data.type' => [],
             'data.send_notifications' => [],
+            'data.notification_token' =>  []
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
@@ -204,7 +205,13 @@ class UserController extends Controller {
            $value  = Hash::make($value);
         }
 
-        User::where('id',$user_id)->update([$data['type'] => $value ]);
+        $update_fields = [$data['type'] => $value ];
+
+        if($type == 'send_notifications'){
+            $update_fields['notification_token'] = $data['notification_token'] ?? null;
+        }
+
+        User::where('id',$user_id)->update($update_fields);
 
         return response()->json(['data' => ['status' => 'success']]);
 
