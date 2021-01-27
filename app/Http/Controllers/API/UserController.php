@@ -34,7 +34,7 @@ class UserController extends Controller {
             'data.password' => 'required|confirmed|string|min:8|max:255',
             'data.identifier' => '',
             'data.user_token' => '',
-            'data.notification_token' => 'required|string|max:255'
+            'data.notification_token' => ''
         ]);
 
         $data = $this->sanitizeAllFields($validated_data['data']);
