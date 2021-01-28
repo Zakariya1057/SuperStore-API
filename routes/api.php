@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\OptionalAuthentication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,9 +41,9 @@ Route::prefix('image')->group(function () {
     Route::get('/{type}/{name}', 'API\ImageController@show')->name('image.show');
 });
 
-Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
+Route::get('/home', 'API\HomeController@show')->middleware(OptionalAuthentication::class)->name('home.show');
 
-    Route::get('/home', 'API\HomeController@show')->name('home.show');
+Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
 
     Route::prefix('store')->group(function () {
         Route::get('/{store_id}', 'API\StoreController@show')->name('store.show');
