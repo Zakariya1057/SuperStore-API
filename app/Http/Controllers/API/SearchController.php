@@ -21,6 +21,12 @@ class SearchController extends Controller {
     use StoreTrait;
     use SearchTrait;
 
+    private $client;
+
+    public function __construct(){
+        $this->client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
+    }
+
     public function suggestions($query){
 
         $query = $this->sanitizeField($query);
@@ -40,17 +46,16 @@ class SearchController extends Controller {
 
             try {
 
-                $client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
                 $types = [
                     'stores' => 2, 
                     'categories' => 3, 
-                    'products' => 13
+                    'products' => 8
                 ];
     
                 $total_items = 0;
 
                 foreach($types as $type => $limit){
-                    $response = $this->search($client, $type, $query, $type == 'products' && $total_items <= 3 ? 20 : $limit);
+                    $response = $this->search($this->client, $type, $query, $type == 'products' && $total_items <= 3 ? 12 : $limit);
                     $results[$type] = [];
     
                     $item_type = $type;
@@ -117,6 +122,8 @@ class SearchController extends Controller {
             'data.dietary' => '',  // Halal, Vegetarian
             'data.child_category' => '',
             'data.brand' => '',
+
+            'data.text_search' => ''
         ]);
 
         $data = $validated_data['data'];
@@ -133,7 +140,26 @@ class SearchController extends Controller {
         $child_category = $data['child_category'] ?? '';
         $brand = $data['brand'] ?? '';
 
-        $cache_key = "search_results_type:{$type}_detail:{$detail}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}";
+        $text_search = $data['text_search'] ?? false;
+
+        if($text_search){
+            // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
+            $list_id = [];
+
+            $search_type = preg_replace('/child_|parent_/i','',$type);
+
+            $response = $this->search($this->client, $search_type, html_entity_decode($detail, ENT_QUOTES), 30);
+
+            foreach($response['hits']['hits'] as $item){
+                $source = $item['_source'];
+                $name = trim($source['name']);
+                $list_id[ $source['id'] ] = $name;
+            }
+
+            $list_id = array_keys($list_id);
+        }
+
+        $cache_key = "search_results_type:{$type}_detail:{$detail}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
@@ -172,12 +198,22 @@ class SearchController extends Controller {
                 ->groupBy('products.id')
                 ->withCasts($casts);
                 
-                if($type == 'products'){
-                    $base_query = $base_query->where('products.name', 'like', "$detail%");
-                } elseif($type == 'child_categories'){
-                    $base_query = $base_query->where('child_categories.name',$detail);
-                } elseif($type == 'parent_categories'){
-                    $base_query = $base_query->where('parent_categories.name', $detail);
+                if($text_search){
+                    if($type == 'products'){
+                        $base_query = $base_query->whereIn('products.id', $list_id);
+                    } elseif($type == 'child_categories'){
+                        $base_query = $base_query->where('child_categories.id',$list_id);
+                    } elseif($type == 'parent_categories'){
+                        $base_query = $base_query->where('parent_categories.id', $list_id);
+                    }
+                } else {
+                    if($type == 'products'){
+                        $base_query = $base_query->where('products.name', 'like', "$detail%");
+                    } elseif($type == 'child_categories'){
+                        $base_query = $base_query->where('child_categories.name',$detail);
+                    } elseif($type == 'parent_categories'){
+                        $base_query = $base_query->where('parent_categories.name', $detail);
+                    }
                 }
     
                 if(key_exists('sort', $data) && key_exists('order', $data)){
