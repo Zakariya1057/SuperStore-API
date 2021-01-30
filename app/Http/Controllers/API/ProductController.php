@@ -41,29 +41,34 @@ class ProductController extends Controller {
             throw new Exception('No product found.', 404);
         }
 
-        $user_id = $request->user()->id;
+
+        $product->ingredients;
+
+        if (count($product->reviews) > 0){
+            $product->reviews[0]->name = $product->reviews[0]->user->name;
+        }
         
-        // $product_details = Cache::remember('product_'.$product->id, 86400, function () use($product) {
+        $recommended = Recommended::where([ ['recommended.product_id',$product->id] ])
+        ->join('products','products.id','recommended_product_id')
+        ->withCasts(
+            $product->casts
+        )->get();
 
-            $product->ingredients;
+        $product->recommended = $recommended;
+        
+        $user = $request->user();
 
-            if (count($product->reviews) > 0){
-                $product->reviews[0]->name = $product->reviews[0]->user->name;
-            }
-           
-            $recommended = Recommended::where([ ['recommended.product_id',$product->id] ])
-            ->join('products','products.id','recommended_product_id')
-            ->withCasts(
-                $product->casts
-            )->get();
-    
-            $product->recommended = $recommended;
-           
-            $product->favourite = FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product->id] ])->exists();
-            $product->monitoring = MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product->id] ])->exists();
-            
-            // return $product;
-        // });
+        $favourite = $monitoring = null;
+
+        if(!is_null($user)){
+            $user_id = $user->id;
+
+            $favourite = FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product->id] ])->exists();
+            $monitoring = MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product->id] ])->exists();
+        }
+        
+        $product->favourite = $favourite;
+        $product->monitoring = $monitoring;
 
         return response()->json(['data' => $product]);
     }

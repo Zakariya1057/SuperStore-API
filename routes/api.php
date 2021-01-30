@@ -41,9 +41,9 @@ Route::prefix('image')->group(function () {
     Route::get('/{type}/{name}', 'API\ImageController@show')->name('image.show');
 });
 
-Route::get('/home', 'API\HomeController@show')->middleware(OptionalAuthentication::class)->name('home.show');
 
-Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
+Route::middleware(OptionalAuthentication::class)->group(function () { # Optional Authentication
+    Route::get('/home', 'API\HomeController@show')->name('home.show');
 
     Route::prefix('store')->group(function () {
         Route::get('/{store_id}', 'API\StoreController@show')->name('store.show');
@@ -53,21 +53,33 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
         Route::get('{store_type_id}', 'API\GroceryController@categories')->name('grocery.categories');
         Route::get('products/{store_type_id}', 'API\GroceryController@products')->name('grocery.products');
     });
+
+    Route::get('/favourites', 'API\FavouriteController@index')->name('favourite.index');
+
+    Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
+    
+    Route::prefix('search')->group(function () {
+        Route::get('/suggestions/{query}', 'API\SearchController@suggestions')->name('search.suggestions');
+        Route::post('/results', 'API\SearchController@results')->name('search.results');
+    });
+
+});
+
+Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
     
     Route::prefix('product/{product}')->group(function () {
-        Route::get('/', 'API\ProductController@show')->name('product.show');
+        Route::get('/', 'API\ProductController@show')->withoutMiddleware('auth:sanctum')->middleware(OptionalAuthentication::class)->name('product.show');
     
         Route::post('/review/create', 'API\ReviewController@create')->name('review.create');
         Route::post('/review/delete', 'API\ReviewController@delete')->name('review.delete');
         
-        Route::get('/reviews', 'API\ReviewController@index')->name('review.index');
+        Route::get('/reviews', 'API\ReviewController@index')->withoutMiddleware('auth:sanctum')->middleware(OptionalAuthentication::class)->name('review.index');
         Route::get('/review', 'API\ReviewController@show')->name('review.show');
     
         Route::post('/favourite', 'API\FavouriteController@update')->name('favourite.update');
         Route::post('/monitor', 'API\MonitoredController@update')->name('monitor.update');
     });
     
-    Route::get('/favourites', 'API\FavouriteController@index')->name('favourite.index');
     
     Route::prefix('list')->group(function () {
         Route::get('/', 'API\ListController@index')->name('list.index');
@@ -83,13 +95,6 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
             Route::post('/update', 'API\GroceryListController@update')->name('list_item.update');
             Route::post('/delete', 'API\GroceryListController@delete')->name('list_item.delete');
         });
-    });
-    
-    Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
-    
-    Route::prefix('search')->group(function () {
-        Route::get('/suggestions/{query}', 'API\SearchController@suggestions')->name('search.suggestions');
-        Route::post('/results', 'API\SearchController@results')->name('search.results');
     });
 
 });

@@ -9,7 +9,10 @@ use App\Traits\MonitoringTrait;
 use App\Traits\PromotionTrait;
 use App\Traits\StoreTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
+use Laravel\Sanctum\SanctumServiceProvider;
+
 class HomeController extends Controller {
     use StoreTrait;
     use MonitoringTrait;
@@ -20,9 +23,13 @@ class HomeController extends Controller {
     public function show(Request $request){
         $user = $request->user();
 
-        $data['monitoring'] = $this->monitoring_products($user->id);
-        $data['lists'] = $this->lists_progress($user->id);
-        $data['groceries'] = $this->grocery_items($user->id);
+        if(!is_null($user)){
+            $data['monitoring'] = $this->monitoring_products($user->id);
+            $data['lists'] = $this->lists_progress($user->id);
+            $data['groceries'] = $this->grocery_items($user->id);
+        } else {
+            $data['monitoring'] = $data['lists'] = $data['groceries'] = [];
+        }
 
         $cache_key = 'home_page';
 
