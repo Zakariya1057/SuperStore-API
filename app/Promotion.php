@@ -22,8 +22,6 @@ class Promotion extends Model
             'products.*',            
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
-            'promotions.id as promotion_id',
-            'promotions.name as promotion'
         )->groupBy('products.id')->withCasts($this->casts);
     }
 }
