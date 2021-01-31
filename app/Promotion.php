@@ -4,13 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Casts\HTMLDecode;
-use App\Casts\PromotionCalculator;
 
 class Promotion extends Model
 {
     public $casts = [
-        'name' => HTMLDecode::class,
-        'promotion' => PromotionCalculator::class
+        'name' => HTMLDecode::class
     ];
 
     public function products() {
