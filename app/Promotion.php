@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use App\Casts\HTMLDecode;
 use App\Casts\PromotionCalculator;
-use App\Casts\Image;
+
 class Promotion extends Model
 {
     public $casts = [
@@ -14,10 +14,6 @@ class Promotion extends Model
     ];
 
     public function products() {
-        $product = new Product();
-
-        $this->casts['product'] = $product->casts;
-
         return $this->hasMany('App\Product','promotion_id')
         ->join('promotions','promotions.id','products.promotion_id')
         ->join('category_products','category_products.product_id','products.id')
