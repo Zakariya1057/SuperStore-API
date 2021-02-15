@@ -56,7 +56,7 @@ trait SearchTrait {
                                     'multi_match' => [
                                         'query' => $query,
                                         'fields' => $fields_match,
-                                        'operator' => 'and',
+                                        'operator' => 'or',
                                         'fuzziness' => 'auto'
                                     ]
                                 ]
