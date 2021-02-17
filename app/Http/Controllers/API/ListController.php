@@ -42,19 +42,17 @@ class ListController extends Controller {
         $store_type_id = $data['store_type_id'];
         $identifier = $data['identifier'];
 
-        if( GroceryList::where('identifier',$identifier)->exists() ){
-            throw new Exception('List with identifier found in database.', 409);
+        if( !GroceryList::where('identifier',$identifier)->exists() ){
+            $list = new GroceryList();
+            $list->name = $list_name;
+            $list->store_type_id = $store_type_id;
+            $list->user_id = $user_id;
+            $list->identifier = $identifier;
+            $list->save();
+    
+            $this->update_list_items($list->id, $items, 'overwrite');
+            $this->update_list($list);
         }
-
-        $list = new GroceryList();
-        $list->name = $list_name;
-        $list->store_type_id = $store_type_id;
-        $list->user_id = $user_id;
-        $list->identifier = $identifier;
-        $list->save();
-
-        $this->update_list_items($list->id, $items, 'overwrite');
-        $this->update_list($list);
     
         return $this->index($request);
 
