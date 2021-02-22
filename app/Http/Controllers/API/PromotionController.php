@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Promotion;
+use App\Models\Promotion;
 use App\Http\Controllers\Controller;
 use App\Services\PromotionService;
 use App\Services\SanitizeService;

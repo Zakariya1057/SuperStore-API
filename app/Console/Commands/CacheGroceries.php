@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\GrandParentCategory;
+use App\Models\GrandParentCategory;
 use App\Traits\GroceryTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;

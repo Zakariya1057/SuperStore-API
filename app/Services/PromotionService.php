@@ -2,9 +2,16 @@
 
 namespace App\Services;
 
-use App\Promotion;
+use App\Models\FeaturedItem;
+use App\Models\Promotion;
 
 class PromotionService {
+
+    public function store_promotions($store_id){
+        $promotion = new Promotion();
+        return FeaturedItem::select('promotions.id as promotion_id', 'name as promotion')->whereRaw('type = "promotions"')->join('promotions','promotions.id','featured_id')->withCasts($promotion->casts)->limit(10)->get()->pluck('promotion')->toArray();
+    }
+
     public function details(Promotion $promotion){
 
         if(is_null($promotion)){

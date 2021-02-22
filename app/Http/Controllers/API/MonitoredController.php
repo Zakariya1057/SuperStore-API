@@ -4,23 +4,22 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\MonitoredProduct;
+use App\Models\MonitoredProduct;
+use App\Services\MonitoringService;
 use App\Services\SanitizeService;
-use App\Traits\MonitoringTrait;
 
 class MonitoredController extends Controller {
     
-    use MonitoringTrait;
+    private $sanitize_service, $monitoring_serve;
 
-    private $sanitize_service;
-
-    function __construct(SanitizeService $sanitize_service){
+    function __construct(SanitizeService $sanitize_service, MonitoringService $monitoring_serve){
         $this->sanitize_service = $sanitize_service;
+        $this->monitoring_serve = $monitoring_serve;
     }
 
     public function index(Request $request){
         $user_id = $request->user()->id;
-        $products = $this->monitoring_products($user_id);
+        $products = $this->monitoring_serve->monitoring_products($user_id);
         return response()->json(['data' => $products ]);
     }
 

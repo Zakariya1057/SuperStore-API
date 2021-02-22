@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Services;
 
 use App\Models\User;
 use Carbon\Carbon;
@@ -12,8 +12,7 @@ use \Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-trait UserTrait {
-
+class UserService {
     public function validate_field($data, $type,$user_id=false){
 
         $type_validations = [
@@ -80,7 +79,7 @@ trait UserTrait {
         return JWT::decode($token, JWK::parseKeySet($response), ['RS256']);
     }
 
-    private function validate_apple_login($data){
+    public function validate_apple_login($data){
         $token = $data['user_token'];
         $token_data = $this->get_token_data($token);
 
@@ -103,7 +102,7 @@ trait UserTrait {
     }
 
 
-    private function create_token($user, $notification_token = null){
+    public function create_token($user, $notification_token = null){
         $token = $user->createToken($user->id)->plainTextToken;
 
         User::where('notification_token', $notification_token)->update(['notification_token' => NULL]);
@@ -121,7 +120,5 @@ trait UserTrait {
         User::where('id', $user->id)->update($update_fields);
         return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email,'send_notifications' => $send_notifications];
     }
-
 }
-
 ?>

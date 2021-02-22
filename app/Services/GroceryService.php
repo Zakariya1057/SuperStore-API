@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Traits;
+namespace App\Services;
 
 use App\Casts\HTMLDecode;
 use App\Models\Product;
 use App\Models\ChildCategory;
-use App\GrandParentCategory;
-use App\FeaturedItem;
-use App\Models\GroceryList;
+use App\Models\GrandParentCategory;
+use App\Models\FeaturedItem;
 
-trait GroceryTrait {
-
+class GroceryService {
+    
     public function grocery_categories($store_type_id){
 
         $grand_parent_categories = GrandParentCategory::where('store_type_id', $store_type_id)->get();
@@ -35,9 +34,7 @@ trait GroceryTrait {
         ->join('products', 'products.id', 'category_products.product_id')
         ->select(
             'products.*',
-
             'child_categories.id as child_category_id','child_categories.name as child_category_name',
-
             'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name'
         )
         ->withCasts( $casts )
@@ -86,10 +83,6 @@ trait GroceryTrait {
         return $results;
     }
 
-    public function lists_progress($user_id){
-        return GroceryList::where('user_id', $user_id)->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')->limit(4)->get();
-    }
-
     public function featured_items(){
         $product = new Product();
         return FeaturedItem::select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
@@ -102,5 +95,4 @@ trait GroceryTrait {
     }
 
 }
-
 ?>

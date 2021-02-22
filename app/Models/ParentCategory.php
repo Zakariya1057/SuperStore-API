@@ -1,13 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Casts\HTMLDecode;
 
 class ParentCategory extends Model
 {
-    // public $visible = ['id', 'name','child_categories'];
     
     protected $casts = [
         'name' => HTMLDecode::class,

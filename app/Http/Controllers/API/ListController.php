@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers\API;
 
-use App\GroceryList;
-use App\GroceryListItem;
-use App\Traits\GroceryListTrait;
+use App\Models\GroceryList;
+use App\Models\GroceryListItem;
 use App\Http\Controllers\Controller;
+use App\Services\ListService;
 use App\Services\SanitizeService;
 use Exception;
 use Illuminate\Http\Request;
 
 class ListController extends Controller {
 
-    use GroceryListTrait;
+    private $sanitize_service, $list_service;
 
-    private $sanitize_service;
-
-    function __construct(SanitizeService $sanitize_service){
+    function __construct(SanitizeService $sanitize_service, ListService $list_service){
         $this->sanitize_service = $sanitize_service;
+        $this->list_service = $list_service;
     }
 
     public function index(Request $request){
@@ -54,8 +53,8 @@ class ListController extends Controller {
             $list->identifier = $identifier;
             $list->save();
     
-            $this->update_list_items($list->id, $items, 'overwrite');
-            $this->update_list($list);
+            $this->list_service->update_list_items($list->id, $items, 'overwrite');
+            $this->list_service->update_list($list);
         }
     
         return $this->index($request);
@@ -66,7 +65,7 @@ class ListController extends Controller {
         $user_id = $request->user()->id;
 
         $list_id = $this->sanitize_service->sanitizeField($list_id);
-        $list = $this->show_list($list_id, $user_id);
+        $list = $this->list_service->show_list($list_id, $user_id);
 
         if($list instanceOf Request){
             return $list;
@@ -135,8 +134,8 @@ class ListController extends Controller {
                     'store_type_id' => $store_type_id
                 ]);
     
-                $this->update_list_items($list_id, $items, $mode);
-                $this->update_list($list);
+                $this->list_service->update_list_items($list_id, $items, $mode);
+                $this->list_service->update_list($list);
             }
 
         }
@@ -155,12 +154,10 @@ class ListController extends Controller {
         $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ])->get()->first();
 
         if($list){
-
             GroceryListItem::where([['list_id', $list->id]])
             ->update([
                 'ticked_off' => 0
             ]);
-
         }
 
         return response()->json(['data' => ['status' => 'success']]);

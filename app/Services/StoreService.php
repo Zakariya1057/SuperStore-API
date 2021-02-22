@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Traits;
+namespace App\Services;
 
-use App\OpeningHour;
+use App\Models\OpeningHour;
 use App\Models\Store;
-use App\StoreLocation;
+use App\Models\StoreLocation;
 use App\Models\StoreType;
 use Carbon\Carbon;
 
-trait StoreTrait {
+class StoreService {
 
     public function stores_by_type($store_type_id,$opening_hours=true){
 
@@ -86,5 +86,4 @@ trait StoreTrait {
     }
 
 }
-
 ?>

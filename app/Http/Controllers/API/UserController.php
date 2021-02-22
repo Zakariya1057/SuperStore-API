@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
-use App\FavouriteProducts;
-use App\GroceryList;
-use App\GroceryListItem;
-use App\User;
+use App\Models\FavouriteProducts;
+use App\Models\GroceryList;
+use App\Models\GroceryListItem;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
-use App\MonitoredProduct;
-use App\Review;
+use App\Models\MonitoredProduct;
+use App\Models\Review;
 use App\Services\SanitizeService;
 use App\Services\UserService;
-use App\StoreType;
+use App\Models\StoreType;
 use App\Traits\GroceryListTrait;
 use Carbon\Carbon;
 use Exception;
@@ -41,12 +41,12 @@ class UserController extends Controller {
             'data.user_token' => '',
             'data.notification_token' => ''
         ]);
-
+        
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $identifier = $data['identifier'] ?? '';
         $user_token = $data['user_token'] ?? '';
-        $notification_token = $data['notification_token'];
+        $notification_token = $data['notification_token'] ?? null;
         
         $user_data = [
             'name' => $data['name'],
@@ -82,7 +82,11 @@ class UserController extends Controller {
             throw new Exception('Email address belongs to another user.', 422);
         }
 
-        
+        // If duplicate notification token found. Remove other notification token from user.
+        if(!is_null($notification_token) && User::where('notification_token', $notification_token)->exists() ){
+            User::where('notification_token', $notification_token)->update(['notification_token' => null]);
+        }
+
         $user = User::create($user_data);
 
         try {
@@ -122,7 +126,7 @@ class UserController extends Controller {
             Log::error('Failed To Create Starting List: '.$e->getMessage());
         }
        
-        $token_data = $this->create_token($user, $notification_token);
+        $token_data = $this->user_service->create_token($user, $notification_token);
         return response()->json(['data' => $token_data]);
 
     }
@@ -210,10 +214,16 @@ class UserController extends Controller {
            $value  = Hash::make($value);
         }
 
-        $update_fields = [$data['type'] => $value ];
+        $update_fields = [ $data['type'] => $value ];
 
         if($type == 'send_notifications'){
             $update_fields['notification_token'] = $data['notification_token'] ?? null;
+        }
+
+        if($type == 'email'){
+           if(User::where('email',$value)->exists()){
+            throw new Exception('Email used by another user.', 422);
+           }
         }
 
         User::where('id',$user_id)->update($update_fields);

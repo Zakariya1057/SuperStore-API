@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Traits;
+namespace App\Services;
 
 use App\Models\MonitoredProduct;
 use App\Models\Product;
 
-trait MonitoringTrait {
-
-    protected function monitoring_products($user_id){
+class MonitoringService {
+    public function monitoring_products($user_id){
         $product = new Product();
 
         $products =  MonitoredProduct::where([ ['user_id', $user_id] ])
@@ -27,7 +26,5 @@ trait MonitoringTrait {
         return $products;
 
     }
-
 }
-
 ?>

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Store;
+use App\Models\Store;
 use App\Traits\StoreTrait;
 use Exception;
 use App\Casts\Image;

@@ -3,7 +3,7 @@
 namespace App\Traits;
 
 use App\FeaturedItem;
-use App\Promotion;
+use App\Models\Promotion;
 
 trait PromotionTrait {
 

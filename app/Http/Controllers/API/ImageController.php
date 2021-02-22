@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Services\ImageService;
 use App\Services\SanitizeService;
-use App\Traits\ImageTrait;
 
 class ImageController extends Controller {
 
-    use ImageTrait;
+    private $sanitize_service, $image_service;
 
-    private $sanitize_service;
-
-    function __construct(SanitizeService $sanitize_service){
+    function __construct(SanitizeService $sanitize_service, ImageService $image_service){
         $this->sanitize_service = $sanitize_service;
+        $this->image_service = $image_service;
     }
     
     public function show($type,$name){
@@ -21,7 +20,7 @@ class ImageController extends Controller {
         $type = $this->sanitize_service->sanitizeField($type);
         $name = $this->sanitize_service->sanitizeField($name);
         
-        $image = $this->get_image($name, $type);
+        $image = $this->image_service->get_image($name, $type);
 
         return response($image, 200)->header('Content-Type', 'image/gif');
 

@@ -2,19 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Traits\GroceryListTrait;
-use App\Traits\GroceryTrait;
-use App\Traits\PromotionTrait;
-use App\Traits\StoreTrait;
+use App\Services\GroceryService;
+use App\Services\PromotionService;
+use App\Services\StoreService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
 class CacheHome extends Command
 {
-    use StoreTrait;
-    use PromotionTrait;
-    use GroceryListTrait;
-    use GroceryTrait;
-
     /**
      * The name and signature of the console command.
      *
@@ -34,9 +28,14 @@ class CacheHome extends Command
      *
      * @return void
      */
-    public function __construct()
-    {
+
+    private $store_service, $grocery_service, $promotion_service;
+
+    function __construct(GroceryService $grocery_service, StoreService $store_service, PromotionService $promotion_service){
         parent::__construct();
+        $this->store_service = $store_service;
+        $this->promotion_service = $promotion_service;
+        $this->grocery_service = $grocery_service;
     }
 
     /**
@@ -46,14 +45,14 @@ class CacheHome extends Command
      */
     public function handle()
     {
-        $this->info('Weekly Home Cache Start');
+        $this->info('---- Weekly Home Cache Start ----');
 
         $cache_key = 'home_page';
 
-        $featured_items = $this->featured_items();
-        $stores = $this->stores_by_type(1,false);
-        $categories = $this->home_categories();
-        $promotions = $this->store_promotions(1);
+        $featured_items = $this->grocery_service->featured_items();
+        $stores = $this->store_service->stores_by_type(1,false);
+        $categories = $this->grocery_service->home_categories();
+        $promotions = $this->promotion_service->store_promotions(1);
 
         $data = [
             'stores' => $stores,
@@ -65,7 +64,7 @@ class CacheHome extends Command
         Redis::set($cache_key, json_encode($data));
         Redis::expire($cache_key, 604800);
 
-        $this->info('Weekly Home Cache Complete');
+        $this->info('---- Weekly Home Cache Complete ----');
         
     }
 }

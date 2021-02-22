@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Review;
+use App\Models\Review;
 use App\Http\Controllers\Controller;
 use App\Services\SanitizeService;
 

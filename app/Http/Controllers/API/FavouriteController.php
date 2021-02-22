@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
-use App\FavouriteProducts;
-use App\Product;
+use App\Models\FavouriteProducts;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\SanitizeService;

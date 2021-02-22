@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\GrandParentCategory;
-use App\Product;
+use App\Models\Product;
 use App\Traits\GroceryTrait;
 use App\Traits\ImageTrait;
 use Illuminate\Console\Command;

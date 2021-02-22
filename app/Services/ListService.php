@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Services;
 
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
@@ -11,9 +11,9 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-trait GroceryListTrait {
+class ListService {
 
-    protected function update_list($list){
+    public function update_list($list){
         
         if($list instanceOf GroceryList){
 
@@ -136,7 +136,7 @@ trait GroceryListTrait {
 
     }
 
-    protected function show_list($list_id, $user_id){
+    public function show_list($list_id, $user_id){
 
         $product = new Product();
 
@@ -212,7 +212,7 @@ trait GroceryListTrait {
         return $list;
     }
 
-    public function grocery_items($user_id){
+    public function list_items($user_id){
         $product = new Product();
         return GroceryList::where('user_id', $user_id)
         ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
@@ -224,7 +224,7 @@ trait GroceryListTrait {
         ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
     }
 
-    protected function item_price($product_id,$quantity=1){
+    public function item_price($product_id,$quantity=1){
         $product = Product::where('products.id',$product_id)->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->select('products.price', 'promotions.id as promotion_id','promotions.name as promotion')->withCasts(['promotion' => PromotionCalculator::class])->get()->first();
     
         $price = $product->price;
@@ -258,7 +258,7 @@ trait GroceryListTrait {
 
     }
 
-    protected function update_list_items($list_id, $items,$mode){
+    public function update_list_items($list_id, $items,$mode){
         // Delete all list items, create new ones
         $mode = strtolower($mode);
 
@@ -329,6 +329,9 @@ trait GroceryListTrait {
 
     }
 
-}
+    public function lists_progress($user_id){
+        return GroceryList::where('user_id', $user_id)->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')->limit(4)->get();
+    }
 
+}
 ?>

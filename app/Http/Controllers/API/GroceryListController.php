@@ -2,23 +2,22 @@
 
 namespace App\Http\Controllers\API;
 
-use App\CategoryProduct;
+use App\Models\CategoryProduct;
 use App\Http\Controllers\Controller;
-use App\GroceryList;
-use App\GroceryListItem;
+use App\Models\GroceryList;
+use App\Models\GroceryListItem;
+use App\Services\ListService;
 use App\Services\SanitizeService;
-use App\Traits\GroceryListTrait;
 use Exception;
 use Illuminate\Http\Request;
 
 class GroceryListController extends Controller {
 
-    use GroceryListTrait;
+    private $sanitize_service, $list_service;
 
-    private $sanitize_service;
-
-    function __construct(SanitizeService $sanitize_service){
+    function __construct(SanitizeService $sanitize_service, ListService $list_service){
         $this->sanitize_service = $sanitize_service;
+        $this->list_service = $list_service;
     }
 
     public function create($list_id, Request $request){
@@ -39,7 +38,7 @@ class GroceryListController extends Controller {
 
         $list = GroceryList::where('id', $list_id)->first();
 
-        $total_price = $this->item_price($product_id, $quantity);
+        $total_price = $this->list_service->item_price($product_id, $quantity);
 
         if($list){
             GroceryListItem::updateOrCreate(
@@ -59,7 +58,7 @@ class GroceryListController extends Controller {
             throw new Exception('No list found.', 409);
         }
 
-        $this->update_list($list);
+        $this->list_service->update_list($list);
         
         // Set off message queue to update list total.
         return response()->json(['data' => ['status' => 'success']]);
@@ -88,7 +87,7 @@ class GroceryListController extends Controller {
                 GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])->delete();
             } else {
 
-                $total_price = $this->item_price($data['product_id'], $data['quantity']);
+                $total_price = $this->list_service->item_price($data['product_id'], $data['quantity']);
                 $ticked_off = strtolower($data['ticked_off']) == 'true' ? 1 : 0;
     
                 GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])
@@ -103,7 +102,7 @@ class GroceryListController extends Controller {
         }
 
         // If quantity change, update list total with job
-        $this->update_list($list);
+        $this->list_service->update_list($list);
 
         // If all products ticked off, then change status to complete
         return response()->json(['data' => ['status' => 'success']]);
@@ -124,7 +123,7 @@ class GroceryListController extends Controller {
 
         $list = GroceryList::where([ [ 'id',$list_id], ['user_id', $user_id] ])->first();
 
-        $this->update_list($list);
+        $this->list_service->update_list($list);
 
         return response()->json(['data' => ['status' => 'success']]);
     }

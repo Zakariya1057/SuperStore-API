@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
-use App\ChildCategory;
-use App\ParentCategory;
-use App\Product;
-use App\StoreType;
+use App\Models\ChildCategory;
+use App\Models\ParentCategory;
+use App\Models\Product;
+use App\Models\StoreType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\SanitizeService;
-use App\Traits\SearchTrait;
+use App\Services\SearchService;
 use App\Traits\StoreTrait;
 use Exception;
 use Elasticsearch\ClientBuilder;
@@ -18,12 +18,12 @@ use Illuminate\Support\Facades\Redis;
 class SearchController extends Controller {
 
     use StoreTrait;
-    use SearchTrait;
 
-    private $client, $sanitize_service;
+    private $client, $sanitize_service, $search_service;
 
-    function __construct(SanitizeService $sanitize_service){
+    function __construct(SanitizeService $sanitize_service, SearchService $search_service){
         $this->sanitize_service = $sanitize_service;
+        $this->search_service = $search_service;
         $this->client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
     }
 
@@ -55,7 +55,7 @@ class SearchController extends Controller {
                 $total_items = 0;
 
                 foreach($types as $type => $limit){
-                    $response = $this->search($this->client, $type, $query, $type == 'products' && $total_items <= 3 ? 12 : $limit);
+                    $response = $this->search_service->search($this->client, $type, $query, $type == 'products' && $total_items <= 3 ? 12 : $limit);
                     $results[$type] = [];
     
                     $item_type = $type;
@@ -148,7 +148,7 @@ class SearchController extends Controller {
 
             $search_type = preg_replace('/child_|parent_/i','',$type);
 
-            $response = $this->search($this->client, $search_type, html_entity_decode($detail, ENT_QUOTES), 30);
+            $response = $this->search_service->search($this->client, $search_type, html_entity_decode($detail, ENT_QUOTES), 30);
 
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Product;
-use App\Recommended;
-use App\FavouriteProducts;
+use App\Models\Product;
+use App\Models\Recommended;
+use App\Models\FavouriteProducts;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\MonitoredProduct;
+use App\Models\MonitoredProduct;
 use App\Services\SanitizeService;
 use Exception;
 

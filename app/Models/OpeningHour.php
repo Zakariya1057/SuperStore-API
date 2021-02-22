@@ -1,9 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Casts\HTMLDecode;
 class OpeningHour extends Model
 {
     public $casts = [
