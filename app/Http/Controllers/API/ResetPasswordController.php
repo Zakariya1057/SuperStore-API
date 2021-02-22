@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Services\MailService;
 use App\Services\SanitizeService;
-use App\Traits\MailTrait;
+use App\Services\UserService;
 use App\Traits\UserTrait;
 use App\User;
 use Carbon\Carbon;
@@ -15,14 +16,13 @@ use Illuminate\Support\Facades\Log;
 
 class ResetPasswordController extends Controller {
     
-    private $sanitize_service;
+    private $sanitize_service, $mail_service, $user_service;
 
-    function __construct(SanitizeService $sanitize_service){
+    function __construct(SanitizeService $sanitize_service, MailService $mail_service, UserService $user_service){
         $this->sanitize_service = $sanitize_service;
+        $this->mail_service = $mail_service;
+        $this->user_service = $user_service;
     }
-
-    use MailTrait;
-    use UserTrait;
 
     // Reset Password -> Send code
     // Validate -> Validate code
@@ -45,7 +45,7 @@ class ResetPasswordController extends Controller {
         } else {
             $code = mt_rand(1000000,9999999);
             User::where('id', $user->id)->update(['remember_token' => $code, 'token_sent_at' => Carbon::now()]);
-            $this->mail_reset_password($user->email,$code,$user->name);
+            $this->mail_service->send_reset_email($user->email,$code,$user->name);
         }
 
         return response()->json(['data' => ['status' => 'success']]);
@@ -109,7 +109,7 @@ class ResetPasswordController extends Controller {
         $user->tokens()->delete();
         $token = $user->createToken($user->id)->plainTextToken;
 
-        $token_data = $this->create_token($user, $notification_token);
+        $token_data = $this->user_service->create_token($user, $notification_token);
         return response()->json(['data' => $token_data]);
 
     }

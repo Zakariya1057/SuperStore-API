@@ -11,9 +11,9 @@ use App\Http\Controllers\Controller;
 use App\MonitoredProduct;
 use App\Review;
 use App\Services\SanitizeService;
+use App\Services\UserService;
 use App\StoreType;
 use App\Traits\GroceryListTrait;
-use App\Traits\UserTrait;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -22,13 +22,13 @@ use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller {
 
-    use UserTrait;
     use GroceryListTrait;
 
-    private $sanitize_service;
+    private $sanitize_service, $user_service;
 
-    function __construct(SanitizeService $sanitize_service){
+    function __construct(SanitizeService $sanitize_service, UserService $user_service){
         $this->sanitize_service = $sanitize_service;
+        $this->user_service = $user_service;
     }
 
     public function register(Request $request){
@@ -61,14 +61,14 @@ class UserController extends Controller {
         if( $identifier != "" && $user_token != ""){
             // Apple Login
 
-            if(!$this->validate_apple_login($data)){
+            if(!$this->user_service->validate_apple_login($data)){
                 throw new Exception('Invalid user data provided.', 422);
             } else {
                 $apple_user = User::where('identifier', $identifier)->get()->first();
 
                 // User Found In Database. Or user exists with that email.
                 if( !is_null($apple_user) || $userExists){
-                    $token_data = $this->create_token($apple_user ?? $user, $notification_token);
+                    $token_data = $this->user_service->create_token($apple_user ?? $user, $notification_token);
                     return response()->json(['data' => $token_data]);
                 } else {
                     $user_data['identifier'] = $identifier;
@@ -109,7 +109,7 @@ class UserController extends Controller {
                 $item->quantity = 1;
                 $item->ticked_off = false;
 
-                $price =  $this->item_price($product_id);
+                $price = $this->item_price($product_id);
                 $total_price += $price;
                 $item->total_price = $price;
 
@@ -148,7 +148,7 @@ class UserController extends Controller {
 
         if (Hash::check($data['password'], $user->password)) {
             $user->tokens()->delete();
-            $token_data = $this->create_token($user, $notification_token);
+            $token_data = $this->user_service->create_token($user, $notification_token);
             return response()->json(['data' => $token_data]);
         } else {
 
@@ -201,7 +201,7 @@ class UserController extends Controller {
             $data['send_notifications'] = (bool)$data['send_notifications'] ?? null;
         }
 
-        $error = $this->validate_field($data,$type,$request->user()->id);
+        $error = $this->user_service->validate_field($data,$type,$request->user()->id);
         if($error){
             return $error;
         }
