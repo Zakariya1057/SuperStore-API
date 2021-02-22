@@ -2,16 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\GrandParentCategory;
 use App\Models\Product;
-use App\Traits\GroceryTrait;
-use App\Traits\ImageTrait;
+use App\Services\ImageService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 
 class CacheImages extends Command
 {
-    use ImageTrait;
 
     /**
      * The name and signature of the console command.
@@ -32,9 +28,12 @@ class CacheImages extends Command
      *
      * @return void
      */
-    public function __construct()
+    private $image_service;
+
+    public function __construct(ImageService $image_service)
     {
         parent::__construct();
+        $this->image_service = $image_service;
     }
 
     /**
@@ -56,8 +55,8 @@ class CacheImages extends Command
             $product = Product::where('id', $i)->get()->first();
             $site_product_id = $product->site_product_id;
 
-            $this->get_image("{$site_product_id}_small.jpg",'products',true);
-            $this->get_image("{$site_product_id}_large.jpg",'products',true);
+            $this->image_service->get_image("{$site_product_id}_small.jpg",'products',true);
+            $this->image_service->get_image("{$site_product_id}_large.jpg",'products',true);
         }
 
         $this->info('Image Caching Complete');

@@ -10,20 +10,19 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\SanitizeService;
 use App\Services\SearchService;
-use App\Traits\StoreTrait;
+use App\Services\StoreService;
 use Exception;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 class SearchController extends Controller {
 
-    use StoreTrait;
+    private $client, $sanitize_service, $search_service, $store_service;
 
-    private $client, $sanitize_service, $search_service;
-
-    function __construct(SanitizeService $sanitize_service, SearchService $search_service){
+    function __construct(SanitizeService $sanitize_service, SearchService $search_service, StoreService $store_service){
         $this->sanitize_service = $sanitize_service;
         $this->search_service = $search_service;
+        $this->store_service = $store_service;
         $this->client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
     }
 
@@ -178,7 +177,7 @@ class SearchController extends Controller {
             $casts = $product->casts;
     
             if($type == 'stores'){
-                $stores = $this->stores_by_type($detail);
+                $stores = $this->store_service->stores_by_type($detail);
                 $results['stores'] = $stores;
             } else {
     

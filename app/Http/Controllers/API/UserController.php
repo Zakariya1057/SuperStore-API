@@ -13,7 +13,6 @@ use App\Models\Review;
 use App\Services\SanitizeService;
 use App\Services\UserService;
 use App\Models\StoreType;
-use App\Traits\GroceryListTrait;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -21,8 +20,6 @@ use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller {
-
-    use GroceryListTrait;
 
     private $sanitize_service, $user_service;
 
@@ -90,10 +87,7 @@ class UserController extends Controller {
         $user = User::create($user_data);
 
         try {
-            // Create default starting list for new users.
-
-            $total_price = 0;
-
+            // Create new shopping list for new user
             $uuid = Uuid::uuid4();
             $identifier = $uuid->toString();
     
@@ -102,26 +96,7 @@ class UserController extends Controller {
             $list->user_id = $user->id;
             $list->identifier = $identifier;
             $list->save();
-    
-            $products = [1,2,3,4];
-    
-            foreach($products as $product_id){
-                $item = new GroceryListItem();
-                $item->list_id = $list->id;
-                $item->product_id = $product_id;
-                $item->parent_category_id = 1;
-                $item->quantity = 1;
-                $item->ticked_off = false;
 
-                $price = $this->item_price($product_id);
-                $total_price += $price;
-                $item->total_price = $price;
-
-                $item->save();
-            }
-
-            $list->total_price = $total_price;
-            $list->save();
         } catch(Exception $e) {
             Log::error('Failed To Create Starting List: '.$e->getMessage());
         }

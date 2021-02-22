@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Store;
-use App\Traits\StoreTrait;
 use Exception;
 use App\Casts\Image;
 use App\Http\Controllers\Controller;
 use App\Services\SanitizeService;
 
 class StoreController extends Controller {
-    
-    use StoreTrait;
 
     private $sanitize_service;
 

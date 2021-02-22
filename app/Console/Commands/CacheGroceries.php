@@ -3,13 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\GrandParentCategory;
-use App\Traits\GroceryTrait;
+use App\Services\GroceryService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
 class CacheGroceries extends Command
 {
-    use GroceryTrait;
 
     /**
      * The name and signature of the console command.
@@ -30,9 +29,12 @@ class CacheGroceries extends Command
      *
      * @return void
      */
-    public function __construct()
+    private $grocery_service;
+
+    public function __construct(GroceryService $grocer_service)
     {
         parent::__construct();
+        $this->grocery_service = $grocer_service;
     }
 
     /**
@@ -62,7 +64,7 @@ class CacheGroceries extends Command
 
             foreach($child_categories as $child_category){
                     $this->info('Caching Product Categories For: '.$child_category->name);
-                    $product_categories = $this->grocery_products($child_category->id);
+                    $product_categories = $this->grocery_service->grocery_products($child_category->id);
                     Cache::put('category_products_'.$child_category->id, $product_categories);
             }
         }
