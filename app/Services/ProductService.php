@@ -10,7 +10,7 @@ use App\Models\Recommended;
 
 class ProductService {
 
-    public function fetch(int $product_id, $user): ?Product {
+    public function get(int $product_id, $user): ?Product {
 
         $product = new Product();
         $casts = $product->casts;

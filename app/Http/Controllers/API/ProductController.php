@@ -27,12 +27,12 @@ class ProductController extends Controller {
 
         $product_id = $this->sanitize_service->sanitizeField($product_id);
 
-        $product = $this->product_service->fetch($product_id, $user);
+        $product = $this->product_service->get($product_id, $user);
 
         if(!$product){
             throw new Exception('No product found.', 404);
         }
-        
+
         return response()->json(['data' => $product]);
     }
 
