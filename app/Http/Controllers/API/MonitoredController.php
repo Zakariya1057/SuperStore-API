@@ -5,13 +5,18 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\MonitoredProduct;
+use App\Services\SanitizeService;
 use App\Traits\MonitoringTrait;
-use App\Traits\SanitizeTrait;
 
 class MonitoredController extends Controller {
     
     use MonitoringTrait;
-    use SanitizeTrait;
+
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
 
     public function index(Request $request){
         $user_id = $request->user()->id;
@@ -26,7 +31,7 @@ class MonitoredController extends Controller {
             'data.monitor' => 'required',
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $monitor = strtolower($data['monitor']);
 

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Services\SanitizeService;
 use App\Traits\MailTrait;
-use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use App\User;
 use Carbon\Carbon;
@@ -15,9 +15,14 @@ use Illuminate\Support\Facades\Log;
 
 class ResetPasswordController extends Controller {
     
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
+
     use MailTrait;
     use UserTrait;
-    use SanitizeTrait;
 
     // Reset Password -> Send code
     // Validate -> Validate code
@@ -29,7 +34,7 @@ class ResetPasswordController extends Controller {
             'data.email' => 'required|email|max:255',
         ]);
 
-        $validated_data = $this->sanitizeAllFields($validated_data);
+        $validated_data = $this->sanitize_service->sanitizeAllFields($validated_data);
 
         $data = $validated_data['data'];
 
@@ -54,7 +59,7 @@ class ResetPasswordController extends Controller {
             'data.code' => 'required|integer'
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $user = User::where([['email',$data['email']], ['remember_token', $data['code']] ])->get()->first();
         if(is_null($user)){
@@ -78,7 +83,7 @@ class ResetPasswordController extends Controller {
             'data.notification_token' => ''
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $notification_token = $data['notification_token'];
 

@@ -9,9 +9,7 @@ use App\Traits\MonitoringTrait;
 use App\Traits\PromotionTrait;
 use App\Traits\StoreTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
-use Laravel\Sanctum\SanctumServiceProvider;
 
 class HomeController extends Controller {
     use StoreTrait;

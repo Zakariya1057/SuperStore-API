@@ -8,19 +8,23 @@ use App\FavouriteProducts;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\MonitoredProduct;
+use App\Services\SanitizeService;
 use Exception;
-use App\Traits\SanitizeTrait;
 
 class ProductController extends Controller {
 
-    use SanitizeTrait;
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
 
     public function show(Request $request, $product_id){
 
         $product = new Product();
         $casts = $product->casts;
 
-        $product_id = $this->sanitizeField($product_id);
+        $product_id = $this->sanitize_service->sanitizeField($product_id);
 
         $product = Product::where('products.id',$product_id)
         ->select(

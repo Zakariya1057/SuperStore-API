@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\API;
 
-use Aws\S3\S3Client;
 use App\Http\Controllers\Controller;
+use App\Services\SanitizeService;
 use App\Traits\ImageTrait;
-use Exception;
-use Illuminate\Support\Facades\Storage;
-use App\Traits\SanitizeTrait;
-use Illuminate\Support\Facades\Redis;
 
 class ImageController extends Controller {
 
-    use SanitizeTrait;
     use ImageTrait;
 
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
+    
     public function show($type,$name){
         
-        $type = $this->sanitizeField($type);
-        $name = $this->sanitizeField($name);
+        $type = $this->sanitize_service->sanitizeField($type);
+        $name = $this->sanitize_service->sanitizeField($name);
         
         $image = $this->get_image($name, $type);
 

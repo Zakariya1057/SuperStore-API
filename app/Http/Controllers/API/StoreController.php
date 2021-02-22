@@ -7,17 +7,22 @@ use App\Traits\StoreTrait;
 use Exception;
 use App\Casts\Image;
 use App\Http\Controllers\Controller;
-use App\Traits\SanitizeTrait;
+use App\Services\SanitizeService;
 
 class StoreController extends Controller {
     
     use StoreTrait;
-    use SanitizeTrait;
+
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
 
     public function show($store_id)
     {
 
-        $store_id = $this->sanitizeField($store_id);
+        $store_id = $this->sanitize_service->sanitizeField($store_id);
 
         $store = Store::select('stores.*', 'store_types.large_logo', 'store_types.small_logo')
         ->where('stores.id', $store_id)

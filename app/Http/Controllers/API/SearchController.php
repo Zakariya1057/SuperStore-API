@@ -8,7 +8,7 @@ use App\Product;
 use App\StoreType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Traits\SanitizeTrait;
+use App\Services\SanitizeService;
 use App\Traits\SearchTrait;
 use App\Traits\StoreTrait;
 use Exception;
@@ -17,19 +17,19 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 class SearchController extends Controller {
 
-    use SanitizeTrait;
     use StoreTrait;
     use SearchTrait;
 
-    private $client;
+    private $client, $sanitize_service;
 
-    public function __construct(){
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
         $this->client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
     }
 
     public function suggestions($query){
 
-        $query = $this->sanitizeField($query);
+        $query = $this->sanitize_service->sanitizeField($query);
 
         $results = [
             'stores' => [],
@@ -128,7 +128,7 @@ class SearchController extends Controller {
 
         $data = $validated_data['data'];
 
-        $data = $this->sanitizeAllFields($data);
+        $data = $this->sanitize_service->sanitizeAllFields($data);
 
         $detail = $data['detail'];
         $type = strtolower($data['type']);

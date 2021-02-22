@@ -6,18 +6,22 @@ use App\GroceryList;
 use App\GroceryListItem;
 use App\Traits\GroceryListTrait;
 use App\Http\Controllers\Controller;
+use App\Services\SanitizeService;
 use Exception;
 use Illuminate\Http\Request;
-use App\Traits\SanitizeTrait;
 
 class ListController extends Controller {
 
     use GroceryListTrait;
-    use SanitizeTrait;
+
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
 
     public function index(Request $request){
         //Use user_id to get all lists for user
-
         $user_id = $request->user()->id;
         $lists = GroceryList::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
         return response()->json(['data' => $lists]);
@@ -34,7 +38,7 @@ class ListController extends Controller {
             'data.items' => ''
         ]);
         
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $items = $data['items'] ?? [];
 
@@ -61,7 +65,7 @@ class ListController extends Controller {
     public function show(Request $request, $list_id){
         $user_id = $request->user()->id;
 
-        $list_id = $this->sanitizeField($list_id);
+        $list_id = $this->sanitize_service->sanitizeField($list_id);
         $list = $this->show_list($list_id, $user_id);
 
         if($list instanceOf Request){
@@ -81,7 +85,7 @@ class ListController extends Controller {
             'data.identifier' => 'required',
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
 
@@ -105,7 +109,7 @@ class ListController extends Controller {
             'data.mode' => ''
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $items = $data['items'] ?? [];
 
@@ -145,7 +149,7 @@ class ListController extends Controller {
 
         $user_id = $request->user()->id;
 
-        $list_id = $this->sanitizeField($list_id);
+        $list_id = $this->sanitize_service->sanitizeField($list_id);
 
         //Make sure that list belongs to user
         $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ])->get()->first();

@@ -6,11 +6,15 @@ use App\FavouriteProducts;
 use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Traits\SanitizeTrait;
+use App\Services\SanitizeService;
 
 class FavouriteController extends Controller {
-    
-    use SanitizeTrait;
+
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
 
     public function index(Request $request){
         $user_id = $request->user()->id;
@@ -35,7 +39,7 @@ class FavouriteController extends Controller {
             'data.favourite' => 'required',
         ]);
 
-        $favourite = strtolower( $this->sanitizeField($validated_data['data']['favourite']) );
+        $favourite = strtolower( $this->sanitize_service->sanitizeField($validated_data['data']['favourite']) );
 
         if ($favourite == 'true') {
             if( !FavouriteProducts::where([ ['user_id', $user_id], ['product_id', $product_id] ])->exists()) {

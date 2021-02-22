@@ -6,15 +6,20 @@ use App\CategoryProduct;
 use App\Http\Controllers\Controller;
 use App\GroceryList;
 use App\GroceryListItem;
+use App\Services\SanitizeService;
 use App\Traits\GroceryListTrait;
 use Exception;
 use Illuminate\Http\Request;
-use App\Traits\SanitizeTrait;
 
 class GroceryListController extends Controller {
 
     use GroceryListTrait;
-    use SanitizeTrait;
+
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
 
     public function create($list_id, Request $request){
 
@@ -24,7 +29,7 @@ class GroceryListController extends Controller {
             'data.ticked_off' => ''
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
         $product_id = $data['product_id'];
 
         $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
@@ -69,7 +74,7 @@ class GroceryListController extends Controller {
             'data.ticked_off' => 'required'
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $user_id = $request->user()->id;
 
@@ -109,7 +114,7 @@ class GroceryListController extends Controller {
             'data.product_id' => 'required',
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $product_id = $data['product_id'];
 

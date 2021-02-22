@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\MonitoredProduct;
 use App\Review;
+use App\Services\SanitizeService;
 use App\StoreType;
 use App\Traits\GroceryListTrait;
-use App\Traits\SanitizeTrait;
 use App\Traits\UserTrait;
 use Carbon\Carbon;
 use Exception;
@@ -23,8 +23,13 @@ use Ramsey\Uuid\Uuid;
 class UserController extends Controller {
 
     use UserTrait;
-    use SanitizeTrait;
     use GroceryListTrait;
+
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
 
     public function register(Request $request){
 
@@ -37,7 +42,7 @@ class UserController extends Controller {
             'data.notification_token' => ''
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $identifier = $data['identifier'] ?? '';
         $user_token = $data['user_token'] ?? '';
@@ -131,7 +136,7 @@ class UserController extends Controller {
             'data.notification_token' => ''
         ]);
         
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
         
         $notification_token = $data['notification_token'];
 
@@ -178,7 +183,7 @@ class UserController extends Controller {
             'data.notification_token' =>  []
         ]);
 
-        $data = $this->sanitizeAllFields($validated_data['data']);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         if(!key_exists('type',$data)){
             throw new Exception('Field Type required.', 422);
