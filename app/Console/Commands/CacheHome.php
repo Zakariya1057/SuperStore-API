@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Services\CategoryService;
 use App\Services\GroceryService;
+use App\Services\ProductService;
 use App\Services\PromotionService;
 use App\Services\StoreService;
 use Illuminate\Console\Command;
@@ -29,13 +31,14 @@ class CacheHome extends Command
      * @return void
      */
 
-    private $store_service, $grocery_service, $promotion_service;
+    private $store_service, $category_service, $promotion_service, $product_service;
 
-    function __construct(GroceryService $grocery_service, StoreService $store_service, PromotionService $promotion_service){
+    function __construct(CategoryService $category_service, StoreService $store_service, PromotionService $promotion_service, ProductService $product_service){
         parent::__construct();
         $this->store_service = $store_service;
         $this->promotion_service = $promotion_service;
-        $this->grocery_service = $grocery_service;
+        $this->category_service = $category_service;
+        $this->product_service = $product_service;
     }
 
     /**
@@ -49,10 +52,10 @@ class CacheHome extends Command
 
         $cache_key = 'home_page';
 
-        $featured_items = $this->grocery_service->featured_items();
+        $featured_items = $this->product_service->featured();
         $stores = $this->store_service->stores_by_type(1,false);
-        $categories = $this->grocery_service->home_categories();
-        $promotions = $this->promotion_service->store_promotions(1);
+        $categories = $this->category_service->featured();
+        $promotions = $this->promotion_service->featured(1);
 
         $data = [
             'stores' => $stores,

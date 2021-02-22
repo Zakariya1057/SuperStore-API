@@ -8,7 +8,8 @@ use App\Models\ChildCategory;
 use App\Models\GrandParentCategory;
 use App\Models\FeaturedItem;
 
-class GroceryService {
+
+class CategoryService {
     
     public function grocery_categories($store_type_id){
 
@@ -62,7 +63,7 @@ class GroceryService {
 
     }
 
-    public function home_categories(){
+    public function featured(){
 
         $product = new Product();
         $casts = $product->casts;
@@ -81,17 +82,6 @@ class GroceryService {
         }
 
         return $results;
-    }
-
-    public function featured_items(){
-        $product = new Product();
-        return FeaturedItem::select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
-        ->whereRaw('type = "products"')
-        ->join('products', 'products.id','=','featured_id')
-        ->join('category_products','category_products.product_id','products.id')
-        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
-        ->orderBy('featured_items.updated_at', 'DESC')
-        ->limit(10)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
     }
 
 }

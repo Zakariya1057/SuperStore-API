@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Services\CategoryService;
 use App\Services\GroceryService;
 use App\Services\ListService;
 use App\Services\MonitoringService;
+use App\Services\ProductService;
 use App\Services\PromotionService;
 use App\Services\SanitizeService;
 use App\Services\StoreService;
@@ -14,15 +16,16 @@ use Illuminate\Support\Facades\Redis;
 
 class HomeController extends Controller {
 
-    private $sanitize_service, $list_service, $monitoring_service, $store_service, $grocery_service, $promotion_service;
+    private $sanitize_service, $list_service, $monitoring_service, $store_service, $category_service, $promotion_service, $product_service;
 
-    function __construct(SanitizeService $sanitize_service, ListService $list_service, GroceryService $grocery_service, MonitoringService $monitoring_service, StoreService $store_service, PromotionService $promotion_service){
+    function __construct(SanitizeService $sanitize_service, ListService $list_service, CategoryService $category_service, MonitoringService $monitoring_service, StoreService $store_service, PromotionService $promotion_service, ProductService $product_service){
         $this->sanitize_service = $sanitize_service;
         $this->list_service = $list_service;
         $this->store_service = $store_service;
         $this->monitoring_service = $monitoring_service;
         $this->promotion_service = $promotion_service;
-        $this->grocery_service = $grocery_service;
+        $this->category_service = $category_service;
+        $this->product_service = $product_service;
     }
 
     public function show(Request $request){
@@ -47,10 +50,10 @@ class HomeController extends Controller {
             $data['promotions'] = $retrieved_data['promotions'];
         } else {
 
-            $data['featured'] = $this->grocery_service->featured_items();
+            $data['featured'] = $this->product_service->featured();
             $data['stores'] = $this->store_service->stores_by_type(1,false);
-            $data['categories'] = $this->grocery_service->home_categories();
-            $data['promotions'] = $this->promotion_service->store_promotions(1);
+            $data['categories'] = $this->category_service->featured();
+            $data['promotions'] = $this->promotion_service->featured(1);
     
             Redis::set($cache_key, json_encode($data));
             Redis::expire($cache_key, 604800);

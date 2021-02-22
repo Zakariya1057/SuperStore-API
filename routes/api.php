@@ -50,8 +50,8 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
     });
     
     Route::prefix('grocery')->group(function () {
-        Route::get('{store_type_id}', 'API\GroceryController@categories')->name('grocery.categories');
-        Route::get('products/{store_type_id}', 'API\GroceryController@products')->name('grocery.products');
+        Route::get('{store_type_id}', 'API\CategoryController@categories')->name('grocery.categories');
+        Route::get('products/{store_type_id}', 'API\CategoryController@products')->name('grocery.products');
     });
 
     Route::get('/favourites', 'API\FavouriteController@index')->name('favourite.index');

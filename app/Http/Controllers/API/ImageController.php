@@ -23,10 +23,5 @@ class ImageController extends Controller {
         $image = $this->image_service->get_image($name, $type);
 
         return response($image, 200)->header('Content-Type', 'image/gif');
-
-    }
-
-    private function image_name($id, $size,$type){
-        return "$type/{$id}_{$size}.jpg";
     }
 }
