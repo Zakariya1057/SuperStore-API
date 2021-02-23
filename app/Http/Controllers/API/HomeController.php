@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Services\CategoryService;
-use App\Services\GroceryService;
 use App\Services\ListService;
 use App\Services\MonitoringService;
 use App\Services\ProductService;

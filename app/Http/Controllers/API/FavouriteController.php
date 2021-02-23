@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\FavouriteProducts;
-use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\FavouriteService;
@@ -35,7 +33,7 @@ class FavouriteController extends Controller {
 
         $product_id = $this->sanitize_service->sanitizeField($product_id);
         $favourite = (bool)$this->sanitize_service->sanitizeField($validated_data['data']['favourite']);
-        
+
         $this->favourite_service->update($user_id, $product_id, $favourite);
 
         return response()->json(['data' => ['status' => 'success']]);

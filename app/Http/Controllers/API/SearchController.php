@@ -2,19 +2,11 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\ChildCategory;
-use App\Models\ParentCategory;
-use App\Models\Product;
-use App\Models\StoreType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\SanitizeService;
 use App\Services\SearchService;
 use App\Services\StoreService;
-use Exception;
-use Elasticsearch\ClientBuilder;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 class SearchController extends Controller {
 
     private $sanitize_service, $search_service, $store_service;
