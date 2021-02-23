@@ -3,29 +3,22 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\MailService;
 use App\Services\SanitizeService;
-use App\Services\UserService;
-use App\Models\User;
-use Carbon\Carbon;
-use Exception;
+use App\Services\UserResetService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 
 class ResetPasswordController extends Controller {
     
-    private $sanitize_service, $mail_service, $user_service;
+    private $sanitize_service, $user_reset_service;
 
-    function __construct(SanitizeService $sanitize_service, MailService $mail_service, UserService $user_service){
+    function __construct(SanitizeService $sanitize_service, UserResetService $user_reset_service){
         $this->sanitize_service = $sanitize_service;
-        $this->mail_service = $mail_service;
-        $this->user_service = $user_service;
+        $this->user_reset_service = $user_reset_service;
     }
 
-    // Reset Password -> Send code
-    // Validate -> Validate code
-    // New Password -> Update Password & Send code
+    // 1. Reset Password -> Send code
+    // 2. Validate -> Validate code
+    // 3. New Password -> Update Password & Send code
 
     public function send_code(Request $request){
 
@@ -37,15 +30,7 @@ class ResetPasswordController extends Controller {
 
         $data = $validated_data['data'];
 
-        $user = User::where('email',$data['email'])->get()->first();
-
-        if(is_null($user)){
-            Log::error('No user found with email: '. $data['email']);
-        } else {
-            $code = mt_rand(1000000,9999999);
-            User::where('id', $user->id)->update(['remember_token' => $code, 'token_sent_at' => Carbon::now()]);
-            $this->mail_service->send_reset_email($user->email,$code,$user->name);
-        }
+        $this->user_reset_service->send_code($data);
 
         return response()->json(['data' => ['status' => 'success']]);
 
@@ -60,15 +45,7 @@ class ResetPasswordController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $user = User::where([['email',$data['email']], ['remember_token', $data['code']] ])->get()->first();
-        if(is_null($user)){
-            throw new Exception('Invalid code.', 422);
-        }
-
-        $token_time_diff = Carbon::createFromFormat('Y-m-d H:i:s', $user->token_sent_at)->diffInHours(NOW());
-        if($token_time_diff >= 4){
-            throw new Exception('Code expired please try sending another email.', 422);
-        }
+        $this->user_reset_service->validate_code($data);
 
         return response()->json(['data' => ['status' => 'success']]);
     }
@@ -85,30 +62,11 @@ class ResetPasswordController extends Controller {
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $notification_token = $data['notification_token'];
-
-        $user = User::where('email', $data['email'])->get()->first();
-
-        if(!$user){
-            // This really shouldnt happen
-            return response()->json(['data' => ['status' => 'success']]);
-        }
-
-        $token_time_diff = Carbon::createFromFormat('Y-m-d H:i:s', $user->token_sent_at)->diffInHours(NOW());
-
-        if($token_time_diff){
-            throw new Exception('Code expired please try again.', 422);
-        }
-        
-        User::where([ ['email', $data['email']],['remember_token', $data['code']] ])->update([
-            'remember_token' => null,
-            'password' => Hash::make($data['password']),
-        ]);
-
+        $user = $this->user_reset_service->update_password($data);
         
         $user->tokens()->delete();
-        $token = $user->createToken($user->id)->plainTextToken;
+        $token_data = $this->user_reset_service->create_token($user, $notification_token);
 
-        $token_data = $this->user_service->create_token($user, $notification_token);
         return response()->json(['data' => $token_data]);
 
     }

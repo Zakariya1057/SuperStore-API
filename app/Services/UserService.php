@@ -2,123 +2,161 @@
 
 namespace App\Services;
 
+use App\Models\FavouriteProducts;
+use App\Models\GroceryList;
+use App\Models\GroceryListItem;
+use App\Models\MonitoredProduct;
+use App\Models\Review;
+use App\Models\StoreType;
 use App\Models\User;
-use Carbon\Carbon;
 use Exception;
-use Firebase\JWT\JWK;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use \Firebase\JWT\JWT;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Uuid;
 
-class UserService {
-    public function validate_field($data, $type,$user_id=false){
+class UserService extends UserAuthService {
 
-        $type_validations = [
-            'name' => ['field' => 'name', 'validation' => 'required|string|max:255'],
-            'notification_token' => ['field' => 'notification_token', 'validation' => 'required|string|max:255'],
-            'code' => ['field' => 'code', 'validation' => 'required|integer'],
-            'email' => ['field' => 'email', 'validation' => 'required|email|max:255'],
-            'password' => ['field' => 'password', 'validation' => 'required|string'],
-            'edit_password' => ['field' => 'password', 'validation' => 'required|string|min:8|confirmed'],
-            'new_password' => ['field' => 'password', 'validation' => 'required|string|min:8|confirmed'],
-            'send_notifications' => ['field' => 'send_notifications', 'validation' => 'required|boolean'],
+    public function login($data): ?User{
+
+        $user = User::where('email', $data['email'])->get()->first();
+
+        if(!$user){
+            throw new Exception('Email address doesn\'t belongs to any user.', 404);
+        }
+
+        if (Hash::check($data['password'], $user->password)) {
+            return $user;
+        } else {
+
+            if(!is_null($user->identifier)){
+                throw new Exception('Your account is connected to Apple. Use the Apple button to log in.', 422);
+            } else {
+                throw new Exception('Incorrect password.', 404);
+            }
+            
+        }
+
+    }
+
+    public function register($data): ?User {
+
+        $identifier = $data['identifier'] ?? '';
+        $user_token = $data['user_token'] ?? '';
+        $notification_token = $data['notification_token'] ?? null;
+        
+        $user_data = [
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'notification_token' => $data['notification_token']
         ];
-        
-        if(!key_exists($type,$type_validations)){
-            throw new Exception('Unknown Type: '. $type, 422);
-        }
 
-        $validation = $type_validations[$type]['validation'];
-        $field = $type_validations[$type]['field'];
+        $user = User::where('email', $data['email'])->get()->first();
+        $userExists = !is_null($user);
 
-        if(!key_exists($field, $data)){
-            throw new Exception("The $field field must be included.", 422);
-        } else {
-            $validator = Validator::make($data, [$field => $validation]);
-            if($validator->fails()) {
-                throw new Exception($validator->errors()->get($field)[0], 422);
+        if( $identifier != "" && $user_token != ""){
+            // Apple Login
+
+            if(!$this->validate_apple_login($data)){
+                throw new Exception('Invalid user data provided.', 422);
+            } else {
+                $apple_user = User::where('identifier', $identifier)->get()->first();
+
+                // User Found In Database. Or user exists with that email.
+                if( !is_null($apple_user) || $userExists){
+                    $token_data = $this->create_token($apple_user ?? $user, $notification_token);
+                    return response()->json(['data' => $token_data]);
+                } else {
+                    $user_data['identifier'] = $identifier;
+                }
+
             }
+
+        }
+
+        if($userExists){
+            throw new Exception('Email address belongs to another user.', 422);
+        }
+
+        // If duplicate notification token found. Remove other notification token from user.
+        if(!is_null($notification_token) && User::where('notification_token', $notification_token)->exists() ){
+            User::where('notification_token', $notification_token)->update(['notification_token' => null]);
+        }
+
+        $user = User::create($user_data);
+
+        // Create new shopping list for new user
+        $uuid = Uuid::uuid4();
+        GroceryList::create([
+            'name' => 'LShopping List',
+            'user_id' => $user->id,
+            'identifier' => $uuid->toString()
+        ]);
+
+
+        return $user;
+
+    }
+
+    public function delete($user){
+        if(StoreType::where('user_id', $user->id)->exists()){
+            throw new Exception('Failed to delete store account.', 402);
+        }
+
+        $reviews = Review::where('user_id', $user->id)->join('products', 'products.id', 'reviews.product_id')->groupBy('products.store_type_id')->get();
+
+        foreach($reviews as $review){
+            Review::where('user_id', $user->id)->update(['user_id' => $review->store_type_id]);
+        }
+
+        $lists = GroceryList::where('user_id', $user->id)->get();
+
+        foreach($lists as $list){
+            GroceryListItem::where('list_id', $list->id)->delete();
+            $list->delete();
         }
         
+        FavouriteProducts::where('user_id', $user->id)->delete();
+        MonitoredProduct::where('user_id', $user->id)->delete();
+
+        User::where('id', $user->id)->delete();
+    }
+
+    public function update($data, $user_id){
+        $type = $data['type'];
+        $value = $data[ $data['type'] ];
+
+        if($type == 'password'){
+            $type = 'edit_password';
+        }
+
+        if($type == 'send_notifications'){
+            $data['send_notifications'] = (bool)$data['send_notifications'] ?? null;
+        }
+
+        $error = $this->validate_field($data,$type, $user_id);
+        if($error){
+            return $error;
+        }
+
         if($type == 'edit_password'){
-            // Make sure passwords match up correctly
-            if(!key_exists('current_password', $data)){
-                throw new Exception('The current password field must be included.', 422);
-            }
-
-            if($data['current_password'] == ''){
-                throw new Exception("Current password required", 422);
-            }
-
-            $current_password = $data['current_password'];
-            $new_password = $data['password'];
-
-            $password_results = User::where('id', $user_id)->select('password')->get()->first();
-            if(!$password_results){
-                throw new Exception('No user found.', 422);
-            }
-
-            if($current_password == $new_password){
-                throw new Exception('New password must be different to current password.', 422);
-            }
-
-            if (!Hash::check($current_password, $password_results->password)) {
-                throw new Exception('Incorrect current password.', 422);
-            }
-
+           $value  = Hash::make($value);
         }
 
+        $update_fields = [ $data['type'] => $value ];
+
+        if($type == 'send_notifications'){
+            $update_fields['notification_token'] = $data['notification_token'] ?? null;
+        }
+
+        if($type == 'email'){
+           if(User::where('email',$value)->exists()){
+            throw new Exception('Email used by another user.', 422);
+           }
+        }
+
+        User::where('id',$user_id)->update($update_fields);
     }
 
-    private function get_token_data($token){
-        // Get Apple Public Key
-        $response = Http::get('https://appleid.apple.com/auth/keys')->json();
-        // Decode Apple Login Token.
-        return JWT::decode($token, JWK::parseKeySet($response), ['RS256']);
-    }
-
-    public function validate_apple_login($data){
-        $token = $data['user_token'];
-        $token_data = $this->get_token_data($token);
-
-        if(strtolower($token_data->aud) != strtolower(env('APP_BUNDLE_IDENTIFIER'))){
-            Log::error('Invalid App Bundle Identifier. Potential breaking attempt.');
-            return false;
-        }
-
-        if(strtolower($token_data->email) != strtolower($data['email'])){
-            Log::error('Token email and given email not matching. Potential breaking attempt.');
-            return false;
-        }
-
-        if(strtolower($token_data->sub) != strtolower($data['identifier'])){
-            Log::error('Token user id and given user id not matching. Potential breaking attempt.');
-            return false;
-        }
-
-        return true;
-    }
-
-
-    public function create_token($user, $notification_token = null){
-        $token = $user->createToken($user->id)->plainTextToken;
-
-        User::where('notification_token', $notification_token)->update(['notification_token' => NULL]);
-
-        $update_fields = ['logged_in_at' => Carbon::now(), 'notification_token' => $notification_token];
-
-        if(is_null($notification_token)){
-            $update_fields['send_notifications'] = 0;
-            $send_notifications = false;
-        } else {
-            $update_fields['send_notifications'] = 1;
-            $send_notifications = true;
-        }
-
-        User::where('id', $user->id)->update($update_fields);
-        return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email,'send_notifications' => $send_notifications];
-    }
 }
 ?>
