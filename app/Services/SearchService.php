@@ -14,10 +14,11 @@ use Illuminate\Support\Facades\Redis;
 
 class SearchService {
 
-    private $client;
+    private $client, $store_service;
 
-    public function __construct(){
+    public function __construct(StoreService $store_service){
         $this->client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
+        $this->store_service = $store_service;
     }
 
     public function suggestions($query){

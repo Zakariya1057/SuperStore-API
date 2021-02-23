@@ -3,17 +3,19 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Services\LoggerService;
 use App\Services\SanitizeService;
 use App\Services\UserResetService;
 use Illuminate\Http\Request;
 
 class ResetPasswordController extends Controller {
     
-    private $sanitize_service, $user_reset_service;
+    private $sanitize_service, $user_reset_service, $logger_service;
 
-    function __construct(SanitizeService $sanitize_service, UserResetService $user_reset_service){
+    function __construct(SanitizeService $sanitize_service, UserResetService $user_reset_service, LoggerService $logger_service){
         $this->sanitize_service = $sanitize_service;
         $this->user_reset_service = $user_reset_service;
+        $this->logger_service = $logger_service;
     }
 
     // 1. Reset Password -> Send code
@@ -21,6 +23,8 @@ class ResetPasswordController extends Controller {
     // 3. New Password -> Update Password & Send code
 
     public function send_code(Request $request){
+
+        $this->logger_service->log('reset password.send_code', $request);
 
         $validated_data = $request->validate([
             'data.email' => 'required|email|max:255',
@@ -38,6 +42,8 @@ class ResetPasswordController extends Controller {
 
     public function validate_code(Request $request){
 
+        $this->logger_service->log('reset password.validate_code', $request);
+
         $validated_data = $request->validate([
             'data.email' => 'required|email|max:255',
             'data.code' => 'required|integer'
@@ -51,6 +57,8 @@ class ResetPasswordController extends Controller {
     }
 
     public function new_password(Request $request){
+
+        $this->logger_service->log('reset password.new_password', $request);
 
         $validated_data = $request->validate([
             'data.code' => 'required|integer',

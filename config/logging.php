@@ -1,5 +1,6 @@
 <?php
 
+use App\Logger\CustomLogFiles;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -47,11 +48,25 @@ return [
             'level' => 'debug',
         ],
 
+        // 'daily' => [
+        //     'driver' => 'daily',
+        //     'path' => storage_path('logs/laravel.log'),
+        //     'level' => 'debug',
+        //     'days' => 14,
+        // ],
+
+        'request' => [
+            'driver' => 'daily',
+            'tap' => [App\Logger\RequestLogFiles::class],
+            'path' => storage_path('logs/laravel.log'),
+            'level' => 'debug'
+        ],
+        
         'daily' => [
             'driver' => 'daily',
+            'tap' => [App\Logger\CustomLogFiles::class],
             'path' => storage_path('logs/laravel.log'),
-            'level' => 'debug',
-            'days' => 14,
+            'level' => 'debug'
         ],
 
         'slack' => [

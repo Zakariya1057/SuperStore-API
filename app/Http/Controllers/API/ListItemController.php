@@ -4,19 +4,23 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Services\ListItemService;
+use App\Services\LoggerService;
 use App\Services\SanitizeService;
 use Illuminate\Http\Request;
 
 class ListItemController extends Controller {
 
-    private $sanitize_service, $list_item_service;
+    private $sanitize_service, $list_item_service, $logger_service;
 
-    function __construct(SanitizeService $sanitize_service, ListItemService $list_item_service){
+    function __construct(SanitizeService $sanitize_service, ListItemService $list_item_service, LoggerService $logger_service){
         $this->sanitize_service = $sanitize_service;
         $this->list_item_service = $list_item_service;
+        $this->logger_service = $logger_service;
     }
 
     public function create($list_id, Request $request){
+
+        $this->logger_service->log('list item.create', $request);
 
         $validated_data = $request->validate([
             'data.product_id' => 'required',
@@ -35,6 +39,9 @@ class ListItemController extends Controller {
     
     public function update($list_id, Request $request){
         // Item ticked off, or quantity changed
+
+        $this->logger_service->log('list item.update', $request);
+
         $validated_data = $request->validate([
             'data.product_id' => 'required',
             'data.quantity' => 'required',
@@ -52,6 +59,9 @@ class ListItemController extends Controller {
     }
 
     public function delete($list_id, Request $request){
+
+        $this->logger_service->log('list item.delete', $request);
+
         $validated_data = $request->validate([
             'data.product_id' => 'required',
         ]);

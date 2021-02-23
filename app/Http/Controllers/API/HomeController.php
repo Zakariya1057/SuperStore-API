@@ -5,19 +5,31 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Services\CategoryService;
 use App\Services\ListService;
+use App\Services\LoggerService;
 use App\Services\MonitoringService;
 use App\Services\ProductService;
 use App\Services\PromotionService;
 use App\Services\SanitizeService;
 use App\Services\StoreService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class HomeController extends Controller {
 
-    private $sanitize_service, $list_service, $monitoring_service, $store_service, $category_service, $promotion_service, $product_service;
+    private $sanitize_service, $list_service, $monitoring_service, $store_service, $category_service, $promotion_service, $product_service, $logger_service;
 
-    function __construct(SanitizeService $sanitize_service, ListService $list_service, CategoryService $category_service, MonitoringService $monitoring_service, StoreService $store_service, PromotionService $promotion_service, ProductService $product_service){
+    function __construct(
+        SanitizeService $sanitize_service, 
+        ListService $list_service, 
+        CategoryService $category_service, 
+        MonitoringService $monitoring_service, 
+        StoreService $store_service, 
+        PromotionService $promotion_service, 
+        ProductService $product_service,
+        LoggerService $logger_service
+        ){
+
         $this->sanitize_service = $sanitize_service;
         $this->list_service = $list_service;
         $this->store_service = $store_service;
@@ -25,11 +37,14 @@ class HomeController extends Controller {
         $this->promotion_service = $promotion_service;
         $this->category_service = $category_service;
         $this->product_service = $product_service;
+        $this->logger_service = $logger_service;
     }
 
     public function show(Request $request){
         $user = $request->user();
 
+        $this->logger_service->log('home.show', $request);
+        
         if(!is_null($user)){
             $data['monitoring'] = $this->monitoring_service->monitoring_products($user->id);
             $data['lists'] = $this->list_service->lists_progress($user->id);

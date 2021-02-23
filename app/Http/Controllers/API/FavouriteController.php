@@ -5,20 +5,23 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\FavouriteService;
+use App\Services\LoggerService;
 use App\Services\SanitizeService;
 
 class FavouriteController extends Controller {
 
-    private $sanitize_service, $favourite_service;
+    private $sanitize_service, $favourite_service, $logger_service;
 
-    function __construct(SanitizeService $sanitize_service, FavouriteService $favourite_service){
+    function __construct(SanitizeService $sanitize_service, FavouriteService $favourite_service, LoggerService $logger_service){
         $this->sanitize_service = $sanitize_service;
         $this->favourite_service = $favourite_service;
+        $this->logger_service = $logger_service;
     }
 
     public function index(Request $request){
         $user_id = $request->user()->id;
 
+        $this->logger_service->log('favourite.index', $request);
         $products = $this->favourite_service->products($user_id);
 
         return response()->json(['data' => $products ]);
@@ -26,6 +29,8 @@ class FavouriteController extends Controller {
 
     public function update($product_id, Request $request){
         $user_id = $request->user()->id;
+
+        $this->logger_service->log('favourite.update', $request);
 
         $validated_data = $request->validate([
             'data.favourite' => 'required|bool',

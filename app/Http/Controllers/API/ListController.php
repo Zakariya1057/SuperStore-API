@@ -6,21 +6,26 @@ use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Http\Controllers\Controller;
 use App\Services\ListService;
+use App\Services\LoggerService;
 use App\Services\SanitizeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class ListController extends Controller {
 
-    private $sanitize_service, $list_service;
+    private $sanitize_service, $list_service, $logger_service;
 
-    function __construct(SanitizeService $sanitize_service, ListService $list_service){
+    function __construct(SanitizeService $sanitize_service, ListService $list_service, LoggerService $logger_service){
         $this->sanitize_service = $sanitize_service;
         $this->list_service = $list_service;
+        $this->logger_service = $logger_service;
     }
 
     public function index(Request $request){
         $user_id = $request->user()->id;
+
+        $this->logger_service->log('list.index', $request);
+
         $lists = GroceryList::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
         return response()->json(['data' => $lists]);
     }
@@ -28,6 +33,8 @@ class ListController extends Controller {
     public function create(Request $request){
 
         $user_id = $request->user()->id;
+
+        $this->logger_service->log('list.create', $request);
 
         $validated_data = $request->validate([
             'data.name' => 'required|max:255',
@@ -47,6 +54,8 @@ class ListController extends Controller {
     public function show(Request $request, $list_id){
         $user_id = $request->user()->id;
 
+        $this->logger_service->log('list.show', $request);
+
         $list_id = $this->sanitize_service->sanitizeField($list_id);
         $list = $this->list_service->show_list($list_id, $user_id);
 
@@ -61,6 +70,8 @@ class ListController extends Controller {
     public function delete(Request $request){
         // Delete shopping list and all shopping items within
         $user_id = $request->user()->id;
+
+        $this->logger_service->log('list.delete', $request);
 
         $validated_data = $request->validate([
             'data.identifier' => 'required',
@@ -78,6 +89,8 @@ class ListController extends Controller {
     public function update(Request $request){
         // Item ticked off, or quantity changed
         $user_id = $request->user()->id;
+
+        $this->logger_service->log('list.update', $request);
 
         $validated_data = $request->validate([
             'data.identifier' => 'required',
@@ -98,6 +111,8 @@ class ListController extends Controller {
     public function restart(Request $request, $list_id){
 
         $user_id = $request->user()->id;
+
+        $this->logger_service->log('list.restart', $request);
 
         $list_id = $this->sanitize_service->sanitizeField($list_id);
 
