@@ -17,6 +17,7 @@ class AuthHeader
     public function handle($request, Closure $next)
     {
         $request->headers->set('Authorization',$request->header('X-Authorization'));
+        $request->headers->remove('X-Authorization');
         return $next($request);
     }
 
