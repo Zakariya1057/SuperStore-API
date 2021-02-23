@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\GroceryListChangedEvent;
 use App\Models\CategoryProduct;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class ListItemService extends ListSharedService {
     
@@ -39,7 +41,7 @@ class ListItemService extends ListSharedService {
             throw new Exception('No list found.', 409);
         }
 
-        $this->update_list($list);
+        event(new GroceryListChangedEvent($list));
     }
 
     public function update($list_id, $data, $user_id){
@@ -68,15 +70,14 @@ class ListItemService extends ListSharedService {
 
         }
 
-        // If quantity change, update list total with job
-        $this->update_list($list);
+        event(new GroceryListChangedEvent($list));
 
     }
 
     public function delete(int $list_id, int $product_id, int $user_id){
         GroceryListItem::where([ ['list_id',$list_id], ['product_id',$product_id, ['user_id', $user_id]] ])->delete();
         $list = GroceryList::where([ [ 'id',$list_id], ['user_id', $user_id] ])->first();
-        $this->update_list($list);
+        event(new GroceryListChangedEvent($list));
     }
 }
 ?>

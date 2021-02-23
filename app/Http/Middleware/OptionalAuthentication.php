@@ -31,7 +31,6 @@ class OptionalAuthentication extends Middleware
         
                 $request->merge(['user' => $user ]);
         
-                // add this
                 $request->setUserResolver(function () use ($user) {
                     return $user;
                 });

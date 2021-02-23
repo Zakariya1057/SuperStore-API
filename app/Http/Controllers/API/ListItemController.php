@@ -7,7 +7,7 @@ use App\Services\ListItemService;
 use App\Services\SanitizeService;
 use Illuminate\Http\Request;
 
-class GroceryListController extends Controller {
+class ListItemController extends Controller {
 
     private $sanitize_service, $list_item_service;
 

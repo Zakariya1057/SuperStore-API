@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use Exception;
@@ -25,7 +26,7 @@ class ListService extends ListSharedService {
             ]);
 
             $this->update_list_items($list->id, $items, 'overwrite');
-            $this->update_list($list);
+            event(new GroceryListChangedEvent($list));
         }
     }
 
@@ -56,7 +57,7 @@ class ListService extends ListSharedService {
                 ]);
     
                 $this->update_list_items($list_id, $items, $mode);
-                $this->update_list($list);
+                event(new GroceryListChangedEvent($list));
             }
 
         }

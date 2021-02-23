@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Http\Controllers\Controller;
 use App\Services\ListService;
 use App\Services\SanitizeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ListController extends Controller {
 
