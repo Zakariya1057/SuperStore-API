@@ -10,6 +10,9 @@
     "require": {
         "php": "^7.2.5",
         "aws/aws-sdk-php": "^3.151",
+        "doctrine/dbal": "^3.0",
+        "elasticsearch/elasticsearch": "^7.0",
+        "enlightn/enlightn": "^1.7",
         "fideloper/proxy": "^4.2",
         "fproject/php-jwt": "^4.0",
         "fruitcake/laravel-cors": "^2.0",
@@ -22,11 +25,10 @@
         "laravel/ui": "^2.1",
         "lcobucci/jwt": "^3.3",
         "paragonie/random_compat": "2.*",
+        "predis/predis": "^1.1",
         "ramsey/uuid": "^4.1",
         "symfony/http-client": "^5.1",
-        "webup/laravel-sendinblue": "^3.0",
-        "elasticsearch/elasticsearch": "^7.0",
-        "predis/predis": "^1.1"
+        "webup/laravel-sendinblue": "^3.0"
     },
     "require-dev": {
         "facade/ignition": "^2.0",
