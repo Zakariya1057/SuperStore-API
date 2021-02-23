@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ReviewService {
 
-    public function reviews($product_id): Collection{
+    public function reviews($product_id): Collection {
         return Review::where('product_id', $product_id)
         ->join('users','users.id','reviews.user_id')
         ->select('reviews.*','users.name')

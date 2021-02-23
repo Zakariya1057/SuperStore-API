@@ -88,11 +88,10 @@ class UserService extends UserAuthService {
         // Create new shopping list for new user
         $uuid = Uuid::uuid4();
         GroceryList::create([
-            'name' => 'LShopping List',
+            'name' => 'Shopping List',
             'user_id' => $user->id,
             'identifier' => $uuid->toString()
         ]);
-
 
         return $user;
 

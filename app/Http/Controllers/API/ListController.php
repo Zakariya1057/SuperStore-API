@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\GroceryList;
-use App\Models\GroceryListItem;
 use App\Http\Controllers\Controller;
 use App\Services\ListService;
 use App\Services\SanitizeService;
-use Exception;
 use Illuminate\Http\Request;
 
 class ListController extends Controller {
@@ -20,7 +18,6 @@ class ListController extends Controller {
     }
 
     public function index(Request $request){
-        //Use user_id to get all lists for user
         $user_id = $request->user()->id;
         $lists = GroceryList::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
         return response()->json(['data' => $lists]);
@@ -39,23 +36,7 @@ class ListController extends Controller {
         
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $items = $data['items'] ?? [];
-
-        $list_name = $data['name'];
-        $store_type_id = $data['store_type_id'];
-        $identifier = $data['identifier'];
-
-        if( !GroceryList::where('identifier',$identifier)->exists() ){
-            $list = new GroceryList();
-            $list->name = $list_name;
-            $list->store_type_id = $store_type_id;
-            $list->user_id = $user_id;
-            $list->identifier = $identifier;
-            $list->save();
-    
-            $this->list_service->update_list_items($list->id, $items, 'overwrite');
-            $this->list_service->update_list($list);
-        }
+        $this->list_service->create($data, $user_id);
     
         return $this->index($request);
 
@@ -77,7 +58,6 @@ class ListController extends Controller {
 
     public function delete(Request $request){
         // Delete shopping list and all shopping items within
-
         $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
@@ -86,18 +66,15 @@ class ListController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
+        $identifier = $data['identifier'];
 
-        GroceryListItem::where('list_id',$list->id)->delete();
-
-        GroceryList::where([ ['id',$list->id], ['user_id', $user_id] ])->delete();
+        $this->list_service->delete($identifier, $user_id);
 
         return response()->json(['data' => ['status' => 'success']]);
     }
 
     public function update(Request $request){
         // Item ticked off, or quantity changed
-
         $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
@@ -110,35 +87,7 @@ class ListController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $items = $data['items'] ?? [];
-
-        $name = $data['name'];
-        $store_type_id = $data['store_type_id'];
-        $mode = $data['mode'] ?? '';
-
-        $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
-
-        if(is_null($list)){
-            throw new Exception('No list found.', 404);
-        } else {
-
-            $list_id = $list->id;
-
-            if($mode == 'delete'){
-                GroceryListItem::where('list_id', $list_id)->delete();
-                GroceryList::where('id', $list_id)->delete();
-            } else {
-                GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])
-                ->update([
-                    'name' => $name,
-                    'store_type_id' => $store_type_id
-                ]);
-    
-                $this->list_service->update_list_items($list_id, $items, $mode);
-                $this->list_service->update_list($list);
-            }
-
-        }
+        $this->list_service->update($data, $user_id);
 
         // If all products ticked off, then change status to complete
         return response()->json(['data' => ['status' => 'success']]);
@@ -150,15 +99,7 @@ class ListController extends Controller {
 
         $list_id = $this->sanitize_service->sanitizeField($list_id);
 
-        //Make sure that list belongs to user
-        $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ])->get()->first();
-
-        if($list){
-            GroceryListItem::where([['list_id', $list->id]])
-            ->update([
-                'ticked_off' => 0
-            ]);
-        }
+        $this->list_service->reset($list_id, $user_id);
 
         return response()->json(['data' => ['status' => 'success']]);
         

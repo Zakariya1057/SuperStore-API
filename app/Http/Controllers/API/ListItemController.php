@@ -2,22 +2,18 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\CategoryProduct;
 use App\Http\Controllers\Controller;
-use App\Models\GroceryList;
-use App\Models\GroceryListItem;
-use App\Services\ListService;
+use App\Services\ListItemService;
 use App\Services\SanitizeService;
-use Exception;
 use Illuminate\Http\Request;
 
 class GroceryListController extends Controller {
 
-    private $sanitize_service, $list_service;
+    private $sanitize_service, $list_item_service;
 
-    function __construct(SanitizeService $sanitize_service, ListService $list_service){
+    function __construct(SanitizeService $sanitize_service, ListItemService $list_item_service){
         $this->sanitize_service = $sanitize_service;
-        $this->list_service = $list_service;
+        $this->list_item_service = $list_item_service;
     }
 
     public function create($list_id, Request $request){
@@ -29,36 +25,8 @@ class GroceryListController extends Controller {
         ]);
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
-        $product_id = $data['product_id'];
 
-        $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
-       
-        $quantity = $data['quantity'] ?? 1;
-        $ticked_off = strtolower($data['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
-
-        $list = GroceryList::where('id', $list_id)->first();
-
-        $total_price = $this->list_service->item_price($product_id, $quantity);
-
-        if($list){
-            GroceryListItem::updateOrCreate(
-                [
-                    'list_id' => $list_id, 
-                    'product_id' =>  $product_id
-                ],
-    
-                [
-                    'parent_category_id' => $parent_category_id, 
-                    'quantity' => $quantity,
-                    'ticked_off' =>  $ticked_off,
-                    'total_price' => $total_price
-                ]
-            );
-        } else {
-            throw new Exception('No list found.', 409);
-        }
-
-        $this->list_service->update_list($list);
+        $this->list_item_service->create($list_id, $data);
         
         // Set off message queue to update list total.
         return response()->json(['data' => ['status' => 'success']]);
@@ -77,32 +45,7 @@ class GroceryListController extends Controller {
 
         $user_id = $request->user()->id;
 
-        $list = GroceryList::where([ [ 'id',$list_id], ['user_id', $user_id] ])->first();
-
-        if($list){
-
-            $quantity = $data['quantity'];
-
-            if($quantity == 0){
-                GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])->delete();
-            } else {
-
-                $total_price = $this->list_service->item_price($data['product_id'], $data['quantity']);
-                $ticked_off = strtolower($data['ticked_off']) == 'true' ? 1 : 0;
-    
-                GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])
-                ->update([
-                    'quantity' => $quantity,
-                    'ticked_off' => $ticked_off,
-                    'total_price' => $total_price
-                ]);
-
-            }
-
-        }
-
-        // If quantity change, update list total with job
-        $this->list_service->update_list($list);
+        $this->list_item_service->update($list_id, $data, $user_id);
 
         // If all products ticked off, then change status to complete
         return response()->json(['data' => ['status' => 'success']]);
@@ -116,14 +59,9 @@ class GroceryListController extends Controller {
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $product_id = $data['product_id'];
-
         $user_id = $request->user()->id;
 
-        GroceryListItem::where([ ['list_id',$list_id], ['product_id',$product_id, ['user_id', $user_id]] ])->delete();
-
-        $list = GroceryList::where([ [ 'id',$list_id], ['user_id', $user_id] ])->first();
-
-        $this->list_service->update_list($list);
+        $this->list_item_service->delete($list_id, $product_id, $user_id);
 
         return response()->json(['data' => ['status' => 'success']]);
     }

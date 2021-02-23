@@ -2,22 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\FavouriteProducts;
-use App\Models\GroceryList;
-use App\Models\GroceryListItem;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
-use App\Models\MonitoredProduct;
-use App\Models\Review;
 use App\Services\SanitizeService;
 use App\Services\UserService;
-use App\Models\StoreType;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller {
 
