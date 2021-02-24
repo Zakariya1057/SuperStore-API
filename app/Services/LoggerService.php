@@ -20,7 +20,7 @@ class LoggerService {
 
         $log_data = $logged_in ? [ ['id' => $user->id, 'name' => $user->name, 'email' => $user->email], ['url' => $url, 'body' => $body] ] : ['url' => $url, 'body' => $body];
 
-        Log::channel('request')->info("$ip_address | $route REQUEST", $log_data);
+        Log::channel('request')->debug("$ip_address | $route REQUEST", $log_data);
     }
 }
 
