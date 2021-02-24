@@ -243,6 +243,7 @@ class SearchService {
 
         return $base_query;
     }
+
     //////////////////    Filter Results   //////////////////
 
     private function search_sort($data, Builder $base_query){
@@ -303,7 +304,7 @@ class SearchService {
         return $base_query;
     }
 
-    //////////////////     Filter Results   //////////////////
+    //////////////////    Filter Results   //////////////////
 
     private function paginate_results(Builder $base_query, $limit = 100){
         $results = [];
@@ -325,8 +326,11 @@ class SearchService {
 
         return $results;
     }
+
+
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
 
+    
     private function elastic_search(Client $client, $index, $query, $limit=10): Array{
 
         $index = strtolower($index);

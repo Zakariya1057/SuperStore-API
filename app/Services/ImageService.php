@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Aws\S3\S3Client;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class ImageService {
@@ -25,7 +26,6 @@ class ImageService {
                     'credentials' => $aws_config->credentials
                 ]);	
                     
-                // Get the object.
                 $result = $s3->getObject([
                     'Bucket' => $aws_config->bucket,
                     'Key'    => "$type/$name"
@@ -36,6 +36,7 @@ class ImageService {
                 Redis::set($cache_key, base64_encode($image));
 
             } catch(Exception $e){
+                Log::error("Image not found: Name: {$name}, Type: {$type}");
                 $image = file_get_contents(__DIR__.'/../../public/img/no_image.png');
             }
 
