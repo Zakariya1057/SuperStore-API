@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
+use App\Models\Product;
 use Exception;
 
 class ListService extends ListSharedService {
@@ -82,6 +83,28 @@ class ListService extends ListSharedService {
             GroceryListItem::where('list_id',$list->id)->delete();
             GroceryList::where([ ['id',$list->id], ['user_id', $user_id] ])->delete();
         }
+    }
+
+
+    // Additional Functionality
+    public function recent_items($user_id){
+        
+        $product = new Product();
+
+        return GroceryList::where('user_id', $user_id)
+        ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+        ->join('grocery_list_items','grocery_list_items.list_id','grocery_lists.id')
+        ->join('products', 'products.id','=','grocery_list_items.product_id')
+        ->orderBy('grocery_lists.updated_at', 'DESC')
+        ->join('category_products','category_products.product_id','products.id')
+        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
+        ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
+    }
+
+    public function lists_progress($user_id){
+        return GroceryList::where('user_id', $user_id)
+        ->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')
+        ->limit(4)->get();
     }
 }
 ?>

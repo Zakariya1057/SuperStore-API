@@ -13,128 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class ListSharedService {
 
-    public function update_list($list){
-        
-        if($list instanceOf GroceryList){
-
-            $product = new Product();
-            $casts = $product->casts;
-
-            $items =  GroceryListItem::
-            join('products','products.id','grocery_list_items.product_id')
-            ->leftJoin('promotions','promotions.id','products.promotion_id')
-            ->where('list_id',$list->id)
-            ->select(
-                'products.id as product_id',
-                'grocery_list_items.quantity as product_quantity',
-                'products.price as product_price',
-                'grocery_list_items.total_price',
-                'grocery_list_items.ticked_off',
-                'promotions.id as promotion_id',
-                'promotions.name as promotion'
-            )
-            ->withCasts($casts)
-            ->get();
-
-            $status = 'Not Started';
-
-            $total_price = 0;
-
-            $total_items = count($items);
-            $ticked_off_items = 0;
-
-            $promotions = [];
-
-            foreach($items as $item){
-
-                if(!is_null($item->promotion)){
-                    $promotion = (object)$item->promotion;
-
-                    if(key_exists($promotion->id,$promotions)){
-                        $promotions[$promotion->id]['products'][] = $item;
-                    } else {
-                        $promotions[$promotion->id] = [
-                            'details' => $promotion,
-                            'products' => [$item],
-                         ];
-                    }
-                }
-
-                $total_price += $item->total_price;
-
-                if($item->ticked_off == 1){
-                    $ticked_off_items++;
-                }
-            }
-
-            $new_total_price = 0;
-
-            $update = ['old_total_price' => NULL, 'total_price' => $total_price, 'status' => $status];
-
-            foreach($promotions as $promotion){
-                $promotion = (object)$promotion;
-
-                $promotion_details = $promotion->details;
-                $products = $promotion->products;
-
-                $total_quantity = 0;
-
-                foreach($products as $product){
-                    $total_quantity += $product->product_quantity;
-                }
-
-                $quantity = $promotion_details->quantity;
-
-                $new_total = 0;
-
-                if($total_quantity >= $quantity){
-
-                    $highest_price = 0;
-                    $previous_total_price = 0;
-
-                    // Get the most expensive item
-                    foreach($products as $product){
-                        $previous_total_price = $previous_total_price + $product->total_price;
-
-                        if($product->product_price > $highest_price){
-                            $highest_price = $product->product_price;
-                        }
-                    }
-                    
-                    $remainder = ($total_quantity % $promotion_details->quantity);
-                    $goes_into_fully = floor($total_quantity / $promotion_details->quantity);
-
-                    if( !is_null($promotion_details->for_quantity)){
-                        $new_total = ( $goes_into_fully * ( $promotion_details->for_quantity * $highest_price)) + ($remainder * $highest_price);
-                    } else {
-                        Log::debug("($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);");
-                        $new_total = ($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);
-                    }
-
-                    $new_total_price = ($total_price - $previous_total_price) + $new_total;
-
-                    if($new_total != $previous_total_price){
-                        $update['old_total_price'] = $total_price;
-                        $update['total_price'] = $new_total_price;
-                    }
-
-                }
-
-            }
-
-            if($ticked_off_items == $total_items){
-                $update['status'] = 'Completed';
-            } elseif($ticked_off_items > 0){
-                $update['status'] = 'In Progress';
-            }
-
-            DB::transaction(function () use($list, $update){
-                GroceryList::where('id',$list->id)->update($update);
-            }, 5);
-            
-        }
-
-    }
+    ////////////////////////////////////////////    SELECT List    //////////////////////////////////////////// 
 
     public function show_list($list_id, $user_id){
 
@@ -212,20 +91,13 @@ class ListSharedService {
         return $list;
     }
 
-    public function list_items($user_id){
-        $product = new Product();
-        return GroceryList::where('user_id', $user_id)
-        ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
-        ->join('grocery_list_items','grocery_list_items.list_id','grocery_lists.id')
-        ->join('products', 'products.id','=','grocery_list_items.product_id')
-        ->orderBy('grocery_lists.updated_at', 'DESC')
-        ->join('category_products','category_products.product_id','products.id')
-        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
-        ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
-    }
-
     public function item_price($product_id,$quantity=1){
-        $product = Product::where('products.id',$product_id)->leftJoin('promotions', 'promotions.id','=','products.promotion_id')->select('products.price', 'promotions.id as promotion_id','promotions.name as promotion')->withCasts(['promotion' => PromotionCalculator::class])->get()->first();
+
+        $product = Product::where('products.id',$product_id)
+        ->select('products.price', 'promotions.id as promotion_id','promotions.name as promotion')
+        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
+        ->withCasts(['promotion' => PromotionCalculator::class])
+        ->get()->first();
     
         $price = $product->price;
         $total = 0;
@@ -258,6 +130,156 @@ class ListSharedService {
 
     }
 
+    ////////////////////////////////////////////    SELECT List    //////////////////////////////////////////// 
+
+
+
+    ////////////////////////////////////////////    UPDATE List    //////////////////////////////////////////// 
+
+    public function update_list(GroceryList $list){
+        
+        $product = new Product();
+        $casts = $product->casts;
+
+        $items =  GroceryListItem::
+        join('products','products.id','grocery_list_items.product_id')
+        ->leftJoin('promotions','promotions.id','products.promotion_id')
+        ->where('list_id',$list->id)
+        ->select(
+            'products.id as product_id',
+            'grocery_list_items.quantity as product_quantity',
+            'products.price as product_price',
+            'grocery_list_items.total_price',
+            'grocery_list_items.ticked_off',
+            'promotions.id as promotion_id',
+            'promotions.name as promotion'
+        )
+        ->withCasts($casts)
+        ->get();
+
+        $list_data = $this->group_list_items($items);
+
+        $promotions = $list_data['promotions'];
+        $total_price = $list_data['total_price'];
+        $ticked_off_items = $list_data['ticked_off_items'];
+
+
+        $update = [];
+
+        $price_data = $this->parse_promotion_data($promotions, $total_price);
+
+        $update['old_total_price'] = $price_data['old_total_price'];
+        $update['total_price'] = $price_data['total_price'];
+
+        $update['status'] = $this->get_list_status(count($items), $ticked_off_items);
+
+        DB::transaction(function () use($list, $update){
+            GroceryList::where('id',$list->id)->update($update);
+        }, 5);
+        
+    }
+
+    private function parse_promotion_data($promotions, $total_price): array {
+
+        $new_total_price = 0;
+        $data = ['total_price' => $total_price, 'old_total_price' => null];
+
+        // For All Products Within Promotion Group
+        foreach($promotions as $promotion){
+            $promotion = (object)$promotion;
+
+            $promotion_details = $promotion->details;
+            $products = $promotion->products;
+
+            $total_quantity = 0;
+
+            foreach($products as $product){
+                $total_quantity += $product->product_quantity;
+            }
+
+            $quantity = $promotion_details->quantity;
+
+            $new_total = 0;
+
+            if($total_quantity >= $quantity){
+
+                $highest_price = 0;
+                $previous_total_price = 0;
+
+                // Get the most expensive item
+                foreach($products as $product){
+                    $previous_total_price = $previous_total_price + $product->total_price;
+
+                    if($product->product_price > $highest_price){
+                        $highest_price = $product->product_price;
+                    }
+                }
+                
+                $remainder = ($total_quantity % $promotion_details->quantity);
+                $goes_into_fully = floor($total_quantity / $promotion_details->quantity);
+
+                if( !is_null($promotion_details->for_quantity)){
+                    $new_total = ( $goes_into_fully * ( $promotion_details->for_quantity * $highest_price)) + ($remainder * $highest_price);
+                } else {
+                    $new_total = ($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);
+                }
+
+                $new_total_price = ($total_price - $previous_total_price) + $new_total;
+
+                if($new_total < $previous_total_price){
+                    $data['old_total_price'] = $total_price;
+                    $data['total_price'] = $new_total_price;
+                }
+
+            }
+
+        }
+
+        return $data;
+
+    }
+
+    private function group_list_items($items): array{
+
+        $promotions = [];
+        $total_price = 0;
+        $ticked_off_items = 0;
+
+        foreach($items as $item){
+
+            if(!is_null($item->promotion)){
+                $promotion = (object)$item->promotion;
+
+                if(key_exists($promotion->id,$promotions)){
+                    $promotions[$promotion->id]['products'][] = $item;
+                } else {
+                    $promotions[$promotion->id] = [
+                        'details' => $promotion,
+                        'products' => [$item],
+                    ];
+                }
+            }
+
+            $total_price += $item->total_price;
+
+            if($item->ticked_off == 1){
+                $ticked_off_items++;
+            }
+        }
+
+        return ['promotions' => $promotions, 'total_price' => $total_price, 'ticked_off_items' => $ticked_off_items];
+    }
+
+    private function get_list_status(int $total_items, int $ticked_off_items): string { 
+        if($ticked_off_items == $total_items){
+            return 'Completed';
+        } elseif($ticked_off_items > 0){
+            return 'In Progress';
+        } else {
+            return 'Not Started';
+        }
+    }
+
     public function update_list_items($list_id, $items,$mode){
         // Delete all list items, create new ones
         $mode = strtolower($mode);
@@ -267,57 +289,11 @@ class ListSharedService {
         try {
 
             if($mode == 'overwrite'){
-
-                GroceryListItem::where('list_id', $list_id)->delete();
-    
-                foreach($items as $item){
-        
-                    $quantity = $item['quantity'] ?? 1;
-                    $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
-                    $product_id = $item['product_id'];
-                    $total_price = $this->item_price($product_id, $quantity);
-        
-                    $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
-                    
-                    GroceryListItem::create(
-                        [
-                            'list_id' => $list_id, 
-                            'product_id' =>  $product_id,
-                            'parent_category_id' => $parent_category_id, 
-                            'quantity' => $quantity,
-                            'ticked_off' =>  $ticked_off,
-                            'total_price' => $total_price
-                        ]
-                    );
-        
-                }
-    
+                $this->overwrite_list_items($list_id, $items);
             } else if ($mode == 'append') {
-    
-                foreach($items as $item){
-        
-                    $quantity = $item['quantity'] ?? 1;
-                    $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
-                    $product_id = $item['product_id'];
-                    $total_price = $this->item_price($product_id, $quantity);
-        
-                    $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
-                    
-                    GroceryListItem::insertOrIgnore(
-                        [
-                            'list_id' => $list_id, 
-                            'product_id' =>  $product_id,
-                            'parent_category_id' => $parent_category_id, 
-                            'quantity' => $quantity,
-                            'ticked_off' =>  $ticked_off,
-                            'total_price' => $total_price
-                        ]
-                    );
-        
-                }
-    
+                $this->append_list_items($list_id, $items);
             } else {
-                // throw new Exception('Unknown Update List Type Mode: '.$mode);
+                Log::error('Unknown Update List Type Mode: '.$mode);
             }
     
         } catch(Exception $e) {
@@ -329,9 +305,57 @@ class ListSharedService {
 
     }
 
-    public function lists_progress($user_id){
-        return GroceryList::where('user_id', $user_id)->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')->limit(4)->get();
+    private function append_list_items($list_id, $items){
+        foreach($items as $item){
+        
+            $quantity = $item['quantity'] ?? 1;
+            $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+            $product_id = $item['product_id'];
+            $total_price = $this->item_price($product_id, $quantity);
+
+            $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+            
+            GroceryListItem::insertOrIgnore(
+                [
+                    'list_id' => $list_id, 
+                    'product_id' =>  $product_id,
+                    'parent_category_id' => $parent_category_id, 
+                    'quantity' => $quantity,
+                    'ticked_off' =>  $ticked_off,
+                    'total_price' => $total_price
+                ]
+            );
+
+        }
     }
+
+    private function overwrite_list_items($list_id, $items){
+        GroceryListItem::where('list_id', $list_id)->delete();
+    
+        foreach($items as $item){
+
+            $quantity = $item['quantity'] ?? 1;
+            $ticked_off = strtolower($item['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+            $product_id = $item['product_id'];
+            $total_price = $this->item_price($product_id, $quantity);
+
+            $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+            
+            GroceryListItem::create(
+                [
+                    'list_id' => $list_id, 
+                    'product_id' =>  $product_id,
+                    'parent_category_id' => $parent_category_id, 
+                    'quantity' => $quantity,
+                    'ticked_off' =>  $ticked_off,
+                    'total_price' => $total_price
+                ]
+            );
+
+        }
+    }
+
+    ////////////////////////////////////////////    Update List    //////////////////////////////////////////// 
 
 }
 ?>

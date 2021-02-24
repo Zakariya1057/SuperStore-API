@@ -48,7 +48,7 @@ class HomeController extends Controller {
         if(!is_null($user)){
             $data['monitoring'] = $this->monitoring_service->monitoring_products($user->id);
             $data['lists'] = $this->list_service->lists_progress($user->id);
-            $data['groceries'] = $this->list_service->list_items($user->id);
+            $data['groceries'] = $this->list_service->recent_items($user->id);
         } else {
             $data['monitoring'] = $data['lists'] = $data['groceries'] = [];
         }
