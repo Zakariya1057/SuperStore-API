@@ -19,7 +19,7 @@ class ListSharedService {
 
         $product = new Product();
 
-        $list = GroceryList::where([ [ 'id', $list_id],['user_id', $user_id] ])->first();
+        $list = GroceryList::where([ ['id', $list_id],['user_id', $user_id] ])->first();
 
         if(!$list){
             throw new Exception('No list found for user.', 404);
@@ -30,7 +30,7 @@ class ListSharedService {
         $casts = $product->casts ?? [];
         $casts['promotion'] = PromotionCalculator::class;
 
-        $list_items = GroceryListItem::where([ ['list_id', $list->id] ])
+        $items = GroceryListItem::where([ ['list_id', $list->id] ])
         ->select([
             'grocery_list_items.id as id',
             'grocery_list_items.product_id as product_id',
@@ -61,34 +61,39 @@ class ListSharedService {
         )
         ->get();
 
+        $list->categories = $this->group_by_categories($items);
+
+        return $list;
+    }
+
+    private function group_by_categories($items){
         $categories = [];
 
-        foreach($list_items as $list_item){
+        foreach($items as $item){
 
-            $category_id = $list_item->category_id;
-            $category_name = html_entity_decode($list_item->category_name, ENT_QUOTES);
-            $aisle_name = $list_item->aisle_name;
+            $category_id = $item->category_id;
+            $category_name = html_entity_decode($item->category_name, ENT_QUOTES);
+            $aisle_name = $item->aisle_name;
             
-            unset($list_item->category_name);
-            unset($list_item->aisle_name);
-            unset($list_item->category_id);
+            unset($item->category_name);
+            unset($item->aisle_name);
+            unset($item->category_id);
             
             if(key_exists($category_name, $categories)){
-                $categories[$category_name]['items'][] = $list_item;
+                $categories[$category_name]['items'][] = $item;
             } else {
                 $categories[$category_name] = [ 
                     'id' => $category_id,
                     'name' =>  $category_name,
                     'aisle_name' => $aisle_name,
-                    'items' => [$list_item]
+                    'items' => [$item]
                 ];
             }
             
         }
 
-        $list->categories = array_values($categories);
+        return array_values($categories);
 
-        return $list;
     }
 
     public function item_price($product_id,$quantity=1){
@@ -163,7 +168,7 @@ class ListSharedService {
         $total_price = $list_data['total_price'];
         $ticked_off_items = $list_data['ticked_off_items'];
 
-
+        
         $update = [];
 
         $price_data = $this->parse_promotion_data($promotions, $total_price);
