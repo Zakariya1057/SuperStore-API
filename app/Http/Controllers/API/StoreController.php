@@ -42,7 +42,7 @@ class StoreController extends Controller {
             throw new Exception('No store found.', 404);
         }
 
-        return $store;
+        return response()->json(['data' => $store]);
     }
 
 }

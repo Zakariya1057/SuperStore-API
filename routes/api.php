@@ -21,7 +21,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::any('/', function () {
     return response()->json(['data' => ['status' => 'success']]);
-});
+})->name('api.home');
 
 Route::prefix('user')->group(function () {
     Route::post('/register', 'API\UserController@register')->name('user.register');

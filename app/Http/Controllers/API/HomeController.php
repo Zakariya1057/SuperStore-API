@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\CategoryService;
 use App\Services\ListService;
 use App\Services\LoggerService;

@@ -31,7 +31,7 @@ class UserService extends UserAuthService {
             if(!is_null($user->identifier)){
                 throw new Exception('Your account is connected to Apple. Use the Apple button to log in.', 422);
             } else {
-                throw new Exception('Incorrect password.', 404);
+                throw new Exception('Incorrect password.', 401);
             }
             
         }

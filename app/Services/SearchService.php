@@ -165,9 +165,7 @@ class SearchService {
         $cached_results = Redis::get($cache_key);
         if($cached_results){
             $results = json_decode($cached_results);
-            Log::debug('Retrieved');
         } else {
-            Log::debug('Fetched');
             $product = new Product();
         
             $casts = $product->casts;
@@ -330,7 +328,7 @@ class SearchService {
 
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
 
-    
+
     private function elastic_search(Client $client, $index, $query, $limit=10): Array{
 
         $index = strtolower($index);
