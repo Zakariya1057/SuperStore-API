@@ -46,7 +46,7 @@ class ResetPasswordController extends Controller {
 
         $validated_data = $request->validate([
             'data.email' => 'required|email|max:255',
-            'data.code' => 'required|integer'
+            'data.code' => 'required'
         ]);
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
