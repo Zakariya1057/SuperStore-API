@@ -54,33 +54,38 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         Route::get('products/{store_type_id}', 'API\CategoryController@products')->name('grocery.products');
     });
 
-    Route::get('/favourites', 'API\FavouriteController@index')->name('favourite.index');
-
     Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
     
     Route::prefix('search')->group(function () {
         Route::get('/suggestions/{query}', 'API\SearchController@suggestions')->name('search.suggestions');
-        Route::post('/results', 'API\SearchController@results')->name('search.results');
+
+        Route::prefix('results')->group(function () {
+            Route::post('store', 'API\SearchController@store_results')->name('search.store_results');
+            Route::post('product', 'API\SearchController@product_results')->name('search.product_results');
+            Route::post('promotion', 'API\SearchController@promotion_results')->name('search.promotion_results');
+        });
     });
 
 });
 
 Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
     
+    Route::get('/favourites', 'API\FavouriteController@index')->name('favourite.index');
+
     Route::prefix('product/{product}')->group(function () {
         Route::get('/', 'API\ProductController@show')->withoutMiddleware('auth:sanctum')->middleware(OptionalAuthentication::class)->name('product.show');
-    
-        Route::post('/review/create', 'API\ReviewController@create')->name('review.create');
-        Route::post('/review/delete', 'API\ReviewController@delete')->name('review.delete');
-        
-        Route::get('/reviews', 'API\ReviewController@index')->withoutMiddleware('auth:sanctum')->middleware(OptionalAuthentication::class)->name('review.index');
-        Route::get('/review', 'API\ReviewController@show')->name('review.show');
     
         Route::post('/favourite', 'API\FavouriteController@update')->name('favourite.update');
         Route::post('/monitor', 'API\MonitoredController@update')->name('monitor.update');
     });
     
-    
+    Route::prefix('review/{product}')->group(function () {
+        Route::get('/show', 'API\ReviewController@show')->name('review.show');
+        Route::get('/', 'API\ReviewController@index')->withoutMiddleware('auth:sanctum')->middleware(OptionalAuthentication::class)->name('review.index');
+        Route::post('/create', 'API\ReviewController@create')->name('review.create');
+        Route::post('/delete', 'API\ReviewController@delete')->name('review.delete');
+    });
+
     Route::prefix('list')->group(function () {
         Route::get('/', 'API\ListController@index')->name('list.index');
         Route::post('/create', 'API\ListController@create')->name('list.create');
