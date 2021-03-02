@@ -35,10 +35,11 @@ class UserController extends Controller {
             'data.notification_token' => ''
         ]);
         
-        $notification_token = $data['notification_token'] ?? null;
-
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+        
         $user = $this->user_service->register($data);
+
+        $notification_token = $data['notification_token'] ?? null;
 
         $token_data = $this->user_service->create_token($user, $notification_token);
         return response()->json(['data' => $token_data]);

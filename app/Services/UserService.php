@@ -64,8 +64,7 @@ class UserService extends UserAuthService {
 
                 // User Found In Database. Or user exists with that email.
                 if( !is_null($apple_user) || $userExists){
-                    $token_data = $this->create_token($apple_user ?? $user, $notification_token);
-                    return response()->json(['data' => $token_data]);
+                    return $apple_user ?? $user;
                 } else {
                     $user_data['identifier'] = $identifier;
                 }
