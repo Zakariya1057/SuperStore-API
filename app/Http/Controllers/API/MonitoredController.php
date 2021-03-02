@@ -39,9 +39,9 @@ class MonitoredController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $monitor = strtolower($data['monitor']);
+        $monitor = $data['monitor'];
 
-        if ($monitor == 'true') {
+        if ($monitor) {
             if( !MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product_id] ])->exists()) {
                 $favourite = new MonitoredProduct();
                 $favourite->product_id = $product_id;
