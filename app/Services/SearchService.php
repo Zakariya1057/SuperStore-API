@@ -122,9 +122,11 @@ class SearchService {
 
 
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
-    public function results($data){
 
-        $detail = $data['detail'];
+    // Products
+    public function product_results($data){
+
+        $query = $data['query'];
         $type = strtolower($data['type']);
 
         $sort = $data['sort'] ?? '';
@@ -142,7 +144,7 @@ class SearchService {
 
             $search_type = preg_replace('/child_|parent_/i','',$type);
 
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($detail, ENT_QUOTES), 30);
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), 30);
 
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
@@ -153,11 +155,10 @@ class SearchService {
             $list_id = array_keys($list_id);
         }
 
-        $cache_key = "search_results_type:{$type}_detail:{$detail}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}";
+        $cache_key = "product_search_results_{$query}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
-            'stores' => [],
             'products' => [],
             'filter' => null
         );
@@ -169,45 +170,38 @@ class SearchService {
             $product = new Product();
         
             $casts = $product->casts;
-    
-            if($type == 'stores'){
-                $stores = $this->store_service->stores_by_type($detail);
-                $results['stores'] = $stores;
+
+            $base_query = ParentCategory::
+            select(
+                'products.*',
+                'parent_categories.id as parent_category_id',
+                'parent_categories.name as parent_category_name',
+                'child_categories.id as child_category_id',
+                'child_categories.name as child_category_name',
+                'promotions.name as promotion'
+            )
+            ->join('category_products','category_products.parent_category_id','parent_categories.id')
+            ->join('products','products.id','category_products.product_id')
+            ->join('child_categories','child_categories.id','category_products.child_category_id')
+            ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
+            ->groupBy('products.id')
+            ->withCasts($casts);
+            
+            if($text_search){
+                $base_query = $this->text_search_where($list_id, $type, $base_query);
             } else {
-    
-                $base_query = ParentCategory::
-                select(
-                    'products.*',
-                    'parent_categories.id as parent_category_id',
-                    'parent_categories.name as parent_category_name',
-                    'child_categories.id as child_category_id',
-                    'child_categories.name as child_category_name',
-                    'promotions.name as promotion'
-                )
-                ->join('category_products','category_products.parent_category_id','parent_categories.id')
-                ->join('products','products.id','category_products.product_id')
-                ->join('child_categories','child_categories.id','category_products.child_category_id')
-                ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
-                ->groupBy('products.id')
-                ->withCasts($casts);
-                
-                if($text_search){
-                    $base_query = $this->text_search_where($list_id, $type, $base_query);
-                } else {
-                    $base_query = $this->search_where($type, $detail, $base_query);
-                }   
-    
-                $base_query = $this->search_sort($data, $base_query);
-                $base_query = $this->search_dietary($data, $base_query);
-                $base_query = $this->search_brand($data, $base_query);
-                $base_query = $this->search_category($data, $base_query);
+                $base_query = $this->search_where($type, $query, $base_query);
+            }   
 
-                $pagination_data = $this->paginate_results($base_query);
+            $base_query = $this->search_sort($data, $base_query);
+            $base_query = $this->search_dietary($data, $base_query);
+            $base_query = $this->search_brand($data, $base_query);
+            $base_query = $this->search_category($data, $base_query);
 
-                $results['products'] = $pagination_data['products'];
-                $results['paginate'] = $pagination_data['paginate'];
+            $pagination_data = $this->paginate_results($base_query);
 
-            }
+            $results['products'] = $pagination_data['products'];
+            $results['paginate'] = $pagination_data['paginate'];
 
             Redis::set($cache_key, json_encode($results));
             Redis::expire($cache_key, 86400);
@@ -215,8 +209,32 @@ class SearchService {
         }
 
         return $results;
-
     }
+
+    // Stores
+    public function store_results($store_type_id){
+
+        $cache_key = "stores_search_results_{$store_type_id}";
+
+        $cached_results = Redis::get($cache_key);
+
+        if($cached_results){
+            return json_decode($cached_results);
+        } else {
+            $results = ['stores' => $this->store_service->stores_by_type($store_type_id)];
+
+            Redis::set($cache_key, json_encode($results));
+            Redis::expire($cache_key, 86400);
+
+            return $results;
+        }
+    }
+
+    // Promotion
+    public function promotion_results($query){
+    
+    }
+
 
     private function search_where($type, $detail, Builder $base_query){
         if($type == 'products'){
@@ -245,7 +263,7 @@ class SearchService {
     //////////////////    Filter Results   //////////////////
 
     private function search_sort($data, Builder $base_query){
-        if(key_exists('sort', $data) && key_exists('order', $data)){
+        if(key_exists('sort', $data) && key_exists('order', $data) && !is_null($data['order'])){
             $sort = strtolower($data['sort']);
             $order = strtoupper($data['order']);
 
@@ -272,7 +290,7 @@ class SearchService {
     }
 
     private function search_dietary($data, Builder $base_query){
-        if(key_exists('dietary', $data)){
+        if(key_exists('dietary', $data) && !is_null($data['dietary'])){
             $dietary_list = explode(',',$data['dietary']);
 
             foreach($dietary_list as $dietary){
@@ -285,7 +303,7 @@ class SearchService {
     }
 
     private function search_brand($data, Builder $base_query){
-        if(key_exists('brand', $data)){
+        if(key_exists('brand', $data) && !is_null($data['brand'])){
             $brand = $data['brand'];
             $base_query = $base_query->where('brand',$brand);
         }
@@ -294,7 +312,7 @@ class SearchService {
     }
 
     private function search_category($data, Builder $base_query){
-        if(key_exists('child_category', $data)){
+        if(key_exists('child_category', $data) && !is_null($data['child_category'])){
             $category = $data['child_category'];
             $base_query = $base_query->where('child_categories.name',$category);
         }

@@ -24,11 +24,11 @@ class SearchController extends Controller {
         return response()->json(['data' => $results]);
     }
 
-    public function results(Request $request){
+    public function product_results(Request $request){
 
         $validated_data = $request->validate([
-            'data.type' => 'required',
-            'data.detail' => 'required',
+            'data.query' => 'required',
+            'data.type'  => 'required',
 
             'data.sort' => '', // Rating, Price, Sugar, etc.
             'data.order' => '', // asc/desc
@@ -44,11 +44,57 @@ class SearchController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($data);
 
-        $this->logger_service->log('search.results',$request);
+        $this->logger_service->log('search.product_results',$request);
 
-        $results = $this->search_service->results($data);
+        $results = $this->search_service->product_results($data);
 
         return response()->json(['data' => $results]);
+
+    }
+
+    public function store_results(Request $request){
+
+        $validated_data = $request->validate([
+            'data.store_type_id' => 'required'
+        ]);
+
+        $data = $validated_data['data'];
+
+        $data = $this->sanitize_service->sanitizeAllFields($data);
+
+        $this->logger_service->log('search.store_results',$request);
+
+        $results = $this->search_service->store_results($data['store_type_id']);
+
+        return response()->json(['data' => $results]);
+
+    }
+
+    public function promotion_results(Request $request){
+
+        // $validated_data = $request->validate([
+        //     'data.type' => 'required',
+        //     'data.detail' => 'required',
+
+        //     'data.sort' => '', // Rating, Price, Sugar, etc.
+        //     'data.order' => '', // asc/desc
+
+        //     'data.dietary' => '', // Halal, Vegetarian
+        //     'data.child_category' => '',
+        //     'data.brand' => '',
+
+        //     'data.text_search' => ''
+        // ]);
+
+        // $data = $validated_data['data'];
+
+        // $data = $this->sanitize_service->sanitizeAllFields($data);
+
+        // $this->logger_service->log('search.results',$request);
+
+        // $results = $this->search_service->results($data);
+
+        // return response()->json(['data' => $results]);
 
     }
     
