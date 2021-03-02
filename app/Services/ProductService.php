@@ -49,7 +49,7 @@ class ProductService {
 
         $product->recommended = $recommended;
 
-        $favourite = $monitoring = null;
+        $favourite = $monitoring = false;
 
         if(!is_null($user)){
             $user_id = $user->id;
