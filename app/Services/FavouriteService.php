@@ -19,7 +19,8 @@ class FavouriteService {
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->withCasts(
             $product->casts
-        )->orderBy('favourite_products.created_at','DESC')->get();
+        )->groupBy('products.id')
+        ->orderBy('favourite_products.created_at','DESC')->get();
 
         return $products;
 
