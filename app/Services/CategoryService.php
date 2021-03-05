@@ -15,7 +15,7 @@ class CategoryService {
         $grand_parent_categories = GrandParentCategory::where('store_type_id', $store_type_id)->get();
 
         foreach($grand_parent_categories as $category){
-            $category->child_categories;
+            $category->parent_categories;
         }
 
         return $grand_parent_categories;

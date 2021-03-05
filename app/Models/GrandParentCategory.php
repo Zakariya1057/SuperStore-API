@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class GrandParentCategory extends Model
 {
-    public $visible = ['id', 'name','child_categories'];
+    public $visible = ['id', 'name','parent_categories'];
 
     protected $casts = [
         'name' => HTMLDecode::class
     ];
 
-    public function child_categories() {
+    public function parent_categories() {
         return $this->hasMany('App\ParentCategory','parent_category_id');
     }
 }
