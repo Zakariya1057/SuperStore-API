@@ -47,7 +47,7 @@ class ListController extends Controller {
 
         $this->list_service->create($data, $user_id);
     
-        return $this->index($request);
+        return response()->json(['data' => ['status' => 'success']]);
 
     }
 
