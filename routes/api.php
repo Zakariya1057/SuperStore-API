@@ -26,8 +26,9 @@ Route::any('/', function () {
 Route::prefix('user')->group(function () {
     Route::post('/register', 'API\UserController@register')->name('user.register');
     Route::post('/login', 'API\UserController@login')->name('user.login');
-    Route::post('/logout', 'API\UserController@logout')->name('user.logout')->middleware('auth:sanctum');
     Route::post('/update', 'API\UserController@update')->name('user.update')->middleware('auth:sanctum');
+
+    Route::post('/logout', 'API\UserController@logout')->name('user.logout')->middleware('auth:sanctum');
     Route::post('/delete', 'API\UserController@delete')->name('user.delete')->middleware('auth:sanctum');
 
     Route::prefix('reset')->group(function () {
@@ -50,8 +51,8 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
     });
     
     Route::prefix('grocery')->group(function () {
-        Route::get('{store_type_id}', 'API\CategoryController@categories')->name('grocery.categories');
-        Route::get('products/{store_type_id}', 'API\CategoryController@products')->name('grocery.products');
+        Route::get('categories/{store_type_id}', 'API\CategoryController@categories')->name('grocery.categories');
+        Route::get('products/{parent_cateogy_id}', 'API\CategoryController@products')->name('grocery.products');
     });
 
     Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
