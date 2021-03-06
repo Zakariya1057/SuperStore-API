@@ -52,19 +52,13 @@ class SearchController extends Controller {
 
     }
 
-    public function store_results(Request $request){
+    public function store_results($store_type_id, Request $request){
 
-        $validated_data = $request->validate([
-            'data.store_type_id' => 'required'
-        ]);
-
-        $data = $validated_data['data'];
-
-        $data = $this->sanitize_service->sanitizeAllFields($data);
+        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
 
         $this->logger_service->log('search.store_results',$request);
 
-        $results = $this->search_service->store_results($data['store_type_id']);
+        $results = $this->search_service->store_results($store_type_id);
 
         return response()->json(['data' => $results]);
 

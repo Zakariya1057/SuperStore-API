@@ -221,7 +221,7 @@ class SearchService {
         if($cached_results){
             return json_decode($cached_results);
         } else {
-            $results = ['stores' => $this->store_service->stores_by_type($store_type_id)];
+            $results = $this->store_service->stores_by_type($store_type_id);
 
             Redis::set($cache_key, json_encode($results));
             Redis::expire($cache_key, 86400);
@@ -248,13 +248,13 @@ class SearchService {
         return $base_query;
     }
 
-    private function text_search_where($list_id, $type, Builder $base_query){
+    private function text_search_where($item_id, $type, Builder $base_query){
         if($type == 'products'){
-            $base_query = $base_query->whereIn('products.id', $list_id);
+            $base_query = $base_query->whereIn('products.id', $item_id);
         } elseif($type == 'child_categories'){
-            $base_query = $base_query->where('child_categories.id',$list_id);
+            $base_query = $base_query->where('child_categories.id',$item_id);
         } elseif($type == 'parent_categories'){
-            $base_query = $base_query->where('parent_categories.id', $list_id);
+            $base_query = $base_query->where('parent_categories.id', $item_id);
         }
 
         return $base_query;
