@@ -38,20 +38,19 @@ class ListService extends ListSharedService {
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
         $mode = $data['mode'] ?? '';
+        $list_id = $data['list_id'];
 
-        $list = GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])->get()->first();
+        $list = GroceryList::where([['id', $list_id],['user_id', $user_id]])->get()->first();
 
         if(is_null($list)){
             throw new Exception('No list found.', 404);
         } else {
 
-            $list_id = $list->id;
-
             if($mode == 'delete'){
                 GroceryListItem::where('list_id', $list_id)->delete();
                 GroceryList::where('id', $list_id)->delete();
             } else {
-                GroceryList::where([['identifier',$data['identifier']],['user_id', $user_id]])
+                GroceryList::where([['id', $list_id ],['user_id', $user_id]])
                 ->update([
                     'name' => $name,
                     'store_type_id' => $store_type_id
@@ -76,8 +75,8 @@ class ListService extends ListSharedService {
         }
     }
 
-    public function delete($identifier, $user_id){
-        $list = GroceryList::where([['identifier',$identifier],['user_id', $user_id]])->get()->first();
+    public function delete($list_id, $user_id){
+        $list = GroceryList::where([['id', $list_id],['user_id', $user_id]])->get()->first();
 
         if($list){
             GroceryListItem::where('list_id',$list->id)->delete();

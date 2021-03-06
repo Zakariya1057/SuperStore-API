@@ -24,8 +24,7 @@ class ListItemController extends Controller {
 
         $validated_data = $request->validate([
             'data.product_id' => 'required',
-            'data.quantity' => '',
-            'data.ticked_off' => ''
+            'data.parent_category_id' => 'required'
         ]);
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);

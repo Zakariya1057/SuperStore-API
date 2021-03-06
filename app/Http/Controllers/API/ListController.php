@@ -74,14 +74,14 @@ class ListController extends Controller {
         $this->logger_service->log('list.delete', $request);
 
         $validated_data = $request->validate([
-            'data.identifier' => 'required',
+            'data.list_id' => 'required',
         ]);
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $identifier = $data['identifier'];
+        $list_id = $data['list_id'];
 
-        $this->list_service->delete($identifier, $user_id);
+        $this->list_service->delete($list_id, $user_id);
 
         return response()->json(['data' => ['status' => 'success']]);
     }
@@ -93,7 +93,7 @@ class ListController extends Controller {
         $this->logger_service->log('list.update', $request);
 
         $validated_data = $request->validate([
-            'data.identifier' => 'required',
+            'data.list_id' => 'required',
             'data.store_type_id' => 'required',
             'data.name' => 'required',
             'data.items' => '',
@@ -108,13 +108,18 @@ class ListController extends Controller {
         return response()->json(['data' => ['status' => 'success']]);
     }
 
-    public function restart(Request $request, $list_id){
+    public function restart(Request $request){
 
         $user_id = $request->user()->id;
 
+        $validated_data = $request->validate([
+            'data.list_id' => 'required'
+        ]);
+
         $this->logger_service->log('list.restart', $request);
 
-        $list_id = $this->sanitize_service->sanitizeField($list_id);
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+        $list_id = $data['list_id'];
 
         $this->list_service->reset($list_id, $user_id);
 

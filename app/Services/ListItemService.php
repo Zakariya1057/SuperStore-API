@@ -13,11 +13,12 @@ class ListItemService extends ListSharedService {
     
     public function create($list_id, $data){
         $product_id = $data['product_id'];
+        $parent_category_id = $data['parent_category_id'];
 
-        $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
+        // $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
        
         $quantity = $data['quantity'] ?? 1;
-        $ticked_off = strtolower($data['ticked_off'] ?? 'false') == 'true' ? 1 : 0;
+        $ticked_off = (bool)$data['ticked_off'];
 
         $list = GroceryList::where('id', $list_id)->first();
 
@@ -50,14 +51,15 @@ class ListItemService extends ListSharedService {
 
         if($list){
 
+            $product_id = $data['product_id'];
             $quantity = $data['quantity'];
+            $ticked_off = $data['ticked_off'];
 
             if($quantity == 0){
                 GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])->delete();
             } else {
 
-                $total_price = $this->item_price($data['product_id'], $data['quantity']);
-                $ticked_off = strtolower($data['ticked_off']) == 'true' ? 1 : 0;
+                $total_price = $this->item_price($product_id, $quantity);
     
                 GroceryListItem::where([['list_id',$list_id],['product_id', $data['product_id']]])
                 ->update([
