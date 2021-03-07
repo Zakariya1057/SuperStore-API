@@ -17,6 +17,7 @@ class UserAuthService {
 
         $type_validations = [
             'name' => ['field' => 'name', 'validation' => 'required|string|max:255'],
+            'store_type_id' => ['field' => 'store_type_id', 'validation' => 'required|integer'],
             'notification_token' => ['field' => 'notification_token', 'validation' => 'required|string|max:255'],
             'code' => ['field' => 'code', 'validation' => 'required|integer'],
             'email' => ['field' => 'email', 'validation' => 'required|email|max:255'],
@@ -117,7 +118,16 @@ class UserAuthService {
         }
 
         User::where('id', $user->id)->update($update_fields);
-        return ['id' => $user->id, 'token' => $token, 'name' => $user->name, 'email' => $user->email,'send_notifications' => $send_notifications];
+        
+        return [
+            'id' => $user->id, 
+            'token' => $token, 
+            'name' => $user->name, 
+            'email' => $user->email,
+            'store_type_id' => (int)$user->store_type_id,
+            'send_notifications' => $send_notifications
+        ];
+
     }
 }
 ?>

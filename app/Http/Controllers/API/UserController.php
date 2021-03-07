@@ -29,6 +29,7 @@ class UserController extends Controller {
         $validated_data = $request->validate([
             'data.name' => 'required|string|max:255',
             'data.email' => 'required|email|max:255',
+            'data.store_type_id' => 'required',
             'data.password' => 'required|confirmed|string|min:8|max:255',
             'data.identifier' => '',
             'data.user_token' => '',
@@ -83,8 +84,9 @@ class UserController extends Controller {
         $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
-            'data.email' => [],
             'data.name' => [],
+            'data.email' => [],
+            'data.store_type_id' => [],
             'data.password' => [],
             'data.password_confirmation' => [],
             'data.current_password' => [],
