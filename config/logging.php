@@ -59,14 +59,16 @@ return [
             'driver' => 'daily',
             'tap' => [App\Logger\RequestLogFiles::class],
             'path' => storage_path('logs/laravel.log'),
-            'level' => 'debug'
+            'level' => 'debug',
+            'permission' => '775'
         ],
         
         'daily' => [
             'driver' => 'daily',
             'tap' => [App\Logger\CustomLogFiles::class],
             'path' => storage_path('logs/laravel.log'),
-            'level' => 'debug'
+            'level' => 'debug',
+            'permission' => '775'
         ],
 
         'slack' => [
