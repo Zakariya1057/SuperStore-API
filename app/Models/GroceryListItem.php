@@ -13,6 +13,8 @@ class GroceryListItem extends Model
     public $casts = [
         'total_price' => 'double',
         'ticked_off' => 'Bool',
+        
         'created_at' => 'datetime:d F Y',
+        'updated_at' => 'datetime:d F Y',
     ];
 }

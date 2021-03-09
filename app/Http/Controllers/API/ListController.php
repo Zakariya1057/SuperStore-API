@@ -22,11 +22,13 @@ class ListController extends Controller {
     }
 
     public function index(Request $request){
-        $user_id = $request->user()->id;
+        $user = $request->user();
+        $user_id = $user->id;
+        $store_type_id = $user->store_type_id;
 
-        $this->logger_service->log('list.index', $request);
+        $this->logger_service->log('list.index.'.$store_type_id, $request);
 
-        $lists = GroceryList::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
+        $lists = GroceryList::where([ ['user_id', $user_id],['store_type_id', $store_type_id] ])->orderBy('created_at', 'DESC')->get();
         return response()->json(['data' => $lists]);
     }
 
@@ -39,15 +41,15 @@ class ListController extends Controller {
         $validated_data = $request->validate([
             'data.name' => 'required|max:255',
             'data.identifier' => 'required',
-            'data.store_type_id' => 'required',
+            'data.store_type_id' => 'required|integer',
             'data.items' => ''
         ]);
         
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $this->list_service->create($data, $user_id);
+        $list = $this->list_service->create($data, $user_id);
     
-        return response()->json(['data' => ['status' => 'success']]);
+        return response()->json(['data' => $list]);
 
     }
 

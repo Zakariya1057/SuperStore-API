@@ -3,29 +3,26 @@
 namespace App\Services;
 
 use App\Events\GroceryListChangedEvent;
-use App\Models\CategoryProduct;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
+use App\Models\Product;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 class ListItemService extends ListSharedService {
     
     public function create($list_id, $data){
         $product_id = $data['product_id'];
         $parent_category_id = $data['parent_category_id'];
-
-        // $parent_category_id = CategoryProduct::where('product_id', $product_id)->select('parent_category_id')->first()->parent_category_id;
        
         $quantity = $data['quantity'] ?? 1;
-        $ticked_off = (bool)$data['ticked_off'];
 
         $list = GroceryList::where('id', $list_id)->first();
 
         $total_price = $this->item_price($product_id, $quantity);
 
         if($list){
-            GroceryListItem::updateOrCreate(
+            
+            $list_item = GroceryListItem::updateOrCreate(
                 [
                     'list_id' => $list_id, 
                     'product_id' =>  $product_id
@@ -34,15 +31,27 @@ class ListItemService extends ListSharedService {
                 [
                     'parent_category_id' => $parent_category_id, 
                     'quantity' => $quantity,
-                    'ticked_off' =>  $ticked_off,
+                    'ticked_off' =>  false,
                     'total_price' => $total_price
                 ]
             );
+
+            $list_item->product_id = (int)$product_id;
+
+            $product_details = Product::where('id', $product_id)->first();
+
+            if($product_details){
+                $list_item->name = $product_details->name;
+                $list_item->price = $product_details->price;
+            }
+
         } else {
             throw new Exception('No list found.', 409);
         }
 
         event(new GroceryListChangedEvent($list));
+
+        return $list_item;
     }
 
     public function update($list_id, $data, $user_id){

@@ -29,10 +29,10 @@ class ListItemController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $this->list_item_service->create($list_id, $data);
+        $list_item = $this->list_item_service->create($list_id, $data);
         
         // Set off message queue to update list total.
-        return response()->json(['data' => ['status' => 'success']]);
+        return response()->json(['data' => $list_item]);
 
     }
     

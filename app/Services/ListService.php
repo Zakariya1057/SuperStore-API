@@ -22,12 +22,15 @@ class ListService extends ListSharedService {
             $list = GroceryList::create([
                 'name' => $list_name,
                 'user_id' => $user_id,
+                'status' => 'Not Started',
                 'store_type_id' => $store_type_id,
                 'identifier' => $identifier
             ]);
 
             $this->update_list_items($list->id, $items, 'overwrite');
             event(new GroceryListChangedEvent($list));
+
+            return GroceryList::whereId($list->id)->get()->first();
         }
     }
 
@@ -65,13 +68,15 @@ class ListService extends ListSharedService {
     }
 
     public function reset($list_id, $user_id){
-        $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ])->get()->first();
+        $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ]);
 
-        if($list){
-            GroceryListItem::where([['list_id', $list->id]])
+        if($list->exists()){
+            GroceryListItem::where([['list_id', $list_id]])
             ->update([
                 'ticked_off' => 0
             ]);
+
+            $list->update(['status' => 'Not Started']);
         }
     }
 
