@@ -54,19 +54,20 @@ class CacheGroceries extends Command
 
         // Top cache, store all grand parent categories and their child categories
         foreach($grand_parent_categories as $grand_parent_category){
-            $parent_categories = $grand_parent_category->child_categories;
+            $parent_categories = $grand_parent_category->parent_categories;
             $parent_categories_details[$grand_parent_category->name] = $parent_categories;
         }
 
         Cache::put('categories_'.$store_type_id, $grand_parent_categories);
 
+        // Cache all parent categories, with their products
         foreach($parent_categories_details as $grand_parent_category_name => $child_categories){
             $this->info('Caching Categories For: '.$grand_parent_category_name);
 
             foreach($child_categories as $child_category){
-                    $this->info('Caching Product Categories For: '.$child_category->name);
-                    $product_categories = $this->category_service->grocery_products($child_category->id);
-                    Cache::put('category_products_'.$child_category->id, $product_categories);
+                $this->info('Caching Product Categories For: '.$child_category->name);
+                $product_categories = $this->category_service->grocery_products($child_category->id);
+                Cache::put('category_products_'.$child_category->id, $product_categories);
             }
         }
 
