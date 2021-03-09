@@ -17,9 +17,22 @@ class SearchController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function suggestions($query, Request $request){
-        $query = $this->sanitize_service->sanitizeField($query);
-        $results = $this->search_service->suggestions($query);
+    public function suggestions(Request $request){
+
+        $validated_data = $request->validate([
+            'data.query' => 'required',
+            'data.store_type_id' => 'required'
+        ]);
+        
+        $data = $validated_data['data'];
+
+        $data = $this->sanitize_service->sanitizeAllFields($data);
+        
+        $query = $data['query'];
+        $store_type_id = $data['store_type_id'];
+
+        $results = $this->search_service->suggestions($query, $store_type_id);
+
         $this->logger_service->log('search.suggestions',$request);
         return response()->json(['data' => $results]);
     }

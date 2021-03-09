@@ -58,7 +58,7 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
     Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
     
     Route::prefix('search')->group(function () {
-        Route::get('/suggestions/{query}', 'API\SearchController@suggestions')->name('search.suggestions');
+        Route::post('/suggestions', 'API\SearchController@suggestions')->name('search.suggestions');
 
         Route::prefix('results')->group(function () {
             Route::get('stores/{store_type_id}', 'API\SearchController@store_results')->name('search.store_results');
@@ -92,9 +92,10 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
         Route::post('/create', 'API\ListController@create')->name('list.create');
         Route::post('/delete', 'API\ListController@delete')->name('list.delete');
         Route::post('/update', 'API\ListController@update')->name('list.update');
+        Route::post('/restart', 'API\ListController@restart')->name('list.restart');
         
         Route::get('/{id}', 'API\ListController@show')->name('list.show');
-        Route::post('{id}/restart', 'API\ListController@restart')->name('list.restart');
+        
     
         Route::prefix('{id}/item')->group(function () {
             Route::post('/create', 'API\ListItemController@create')->name('list_item.create');
