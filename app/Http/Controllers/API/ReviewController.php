@@ -37,7 +37,7 @@ class ReviewController extends Controller {
 
         $review = $this->review_service->create($user, $product_id, $data);
 
-        return response()->json(['data' => [$review]]);
+        return response()->json(['data' => $review]);
 
     }
 
