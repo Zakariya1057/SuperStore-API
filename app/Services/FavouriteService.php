@@ -22,6 +22,10 @@ class FavouriteService {
         )->groupBy('products.id')
         ->orderBy('favourite_products.created_at','DESC')->get();
 
+        foreach($products as $product){
+            $product->favourite = true;
+        }
+        
         return $products;
 
     }
