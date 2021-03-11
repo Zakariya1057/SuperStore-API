@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GrandParentCategory extends Model
 {
-    public $visible = ['id', 'name','parent_categories'];
+    public $visible = ['id', 'name','parent_categories', 'store_type_id'];
 
     protected $casts = [
         'name' => HTMLDecode::class
