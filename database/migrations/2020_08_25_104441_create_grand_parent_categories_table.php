@@ -19,13 +19,15 @@ class CreateGrandParentCategoriesTable extends Migration
             $table->id();
             $table->string('name')->unique();
 
-            $table->unsignedBigInteger('site_category_id')->unique();
+            $table->string('site_category_id');
             $table->unsignedBigInteger('store_type_id');
 
             $table->unsignedBigInteger('store_id')->nullable();
             
             $table->foreign('store_type_id')->references('id')->on('store_types');
+
             $table->index('name');
+            $table->index('site_category_id');
             
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

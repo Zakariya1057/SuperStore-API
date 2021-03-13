@@ -43,7 +43,7 @@ class HomeController extends Controller {
 
     public function show(Request $request){
         $user = $request->user();
-
+        
         $this->logger_service->log('home.show', $request);
         
         if(!is_null($user)){
@@ -72,12 +72,6 @@ class HomeController extends Controller {
     
             Redis::set($cache_key, json_encode($data));
             Redis::expire($cache_key, 604800);
-        }
-
-        foreach($data as $key => $value){
-            if($value == []){
-                $data[$key] = null;
-            }
         }
 
         return response()->json(['data' => $data]);

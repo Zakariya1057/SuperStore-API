@@ -20,7 +20,7 @@ class ProductController extends Controller {
     }
 
     public function show(Request $request, $product_id){
-
+        
         $user = $request->user();
 
         $product_id = $this->sanitize_service->sanitizeField($product_id);

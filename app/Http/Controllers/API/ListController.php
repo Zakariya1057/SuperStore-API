@@ -22,6 +22,7 @@ class ListController extends Controller {
     }
 
     public function index(Request $request){
+
         $user = $request->user();
         $user_id = $user->id;
         $store_type_id = $user->store_type_id;
@@ -55,7 +56,7 @@ class ListController extends Controller {
 
     public function show(Request $request, $list_id){
         $user_id = $request->user()->id;
-
+        
         $this->logger_service->log('list.show', $request);
 
         $list_id = $this->sanitize_service->sanitizeField($list_id);

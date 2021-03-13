@@ -72,7 +72,7 @@ class ProductService {
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->orderBy('featured_items.updated_at', 'DESC')
-        ->limit(10)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
+        ->limit(10)->groupBy('category_products.product_id')->withCasts($product->casts)->get() ?? [];
     }
 
 }

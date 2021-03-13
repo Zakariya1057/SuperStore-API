@@ -81,7 +81,7 @@ class StoreService {
             $store->location = $location;
         }
 
-        return $stores;
+        return $stores ?? [];
 
     }
 

@@ -87,7 +87,7 @@ class CategoryService {
             $results[] = $category; 
         }
 
-        return $results;
+        return $results ?? [];
     }
 
 }

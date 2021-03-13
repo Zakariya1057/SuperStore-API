@@ -18,24 +18,26 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('large_image')->nullable();
-            $table->string('small_image')->nullable();
+
             $table->text('description')->nullable();
+
+            $table->string('currency')->default('Pounds');
 
             $table->decimal('price', 6,2);
             $table->decimal('old_price', 6,2)->nullable();
 
             $table->boolean('is_on_sale')->nullable();
             $table->unsignedBigInteger('promotion_id')->nullable();
-            $table->unsignedBigInteger('site_product_id')->nullable();
+            $table->string('site_product_id')->nullable();
 
             $table->boolean('available')->default(1);
 
             $table->boolean('recommended_searched')->nullable();
             $table->boolean('reviews_searched')->nullable();
 
+            $table->string('brand')->nullable();
             $table->string('weight')->nullable();
-            $table->string('brand');
+            $table->string('manufacturer')->nullable();
             $table->text('storage')->nullable();
 
             $table->string('dietary_info', 500)->nullable();

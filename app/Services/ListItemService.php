@@ -21,20 +21,20 @@ class ListItemService extends ListSharedService {
         $total_price = $this->item_price($product_id, $quantity);
 
         if($list){
-            
-            $list_item = GroceryListItem::updateOrCreate(
-                [
-                    'list_id' => $list_id, 
-                    'product_id' =>  $product_id
-                ],
-    
-                [
+
+            $list_item = GroceryListItem::where([ ['list_id', $list_id], ['product_id', $product_id] ])->get()->first();
+
+            if(is_null($list_item)){
+                $list_item = GroceryListItem::create([
+                    'product_id' => $product_id,
+                    'list_id' => $list_id,
+
                     'parent_category_id' => $parent_category_id, 
                     'quantity' => $quantity,
                     'ticked_off' =>  false,
                     'total_price' => $total_price
-                ]
-            );
+                ]);
+            }
 
             $list_item->product_id = (int)$product_id;
 

@@ -59,7 +59,9 @@ class SearchController extends Controller {
 
         $this->logger_service->log('search.product_results',$request);
 
-        $results = $this->search_service->product_results($data);
+        $page = $this->sanitize_service->sanitizeField((int)$request->page ?? 1);
+
+        $results = $this->search_service->product_results($data, $page);
 
         return response()->json(['data' => $results]);
 

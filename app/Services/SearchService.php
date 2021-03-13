@@ -25,7 +25,7 @@ class SearchService {
 
     ///////////////////////////////////////////     Suggestions     ///////////////////////////////////////////
 
-    public function suggestions($query){
+    public function suggestions($query, $store_type_id){
         
         $results = [
             'stores' => [],
@@ -124,7 +124,7 @@ class SearchService {
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
 
     // Products
-    public function product_results($data){
+    public function product_results($data, $page = 1){
 
         $query = $data['query'];
         $type = strtolower($data['type']);
@@ -155,7 +155,7 @@ class SearchService {
             $list_id = array_keys($list_id);
         }
 
-        $cache_key = "product_search_results_{$query}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}";
+        $cache_key = "product_search_results_{$query}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}_page:$page";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
@@ -223,8 +223,10 @@ class SearchService {
         } else {
             $results = $this->store_service->stores_by_type($store_type_id);
 
-            Redis::set($cache_key, json_encode($results));
-            Redis::expire($cache_key, 86400);
+            if($results && count($results) > 0) {
+                Redis::set($cache_key, json_encode($results));
+                Redis::expire($cache_key, 86400);
+            }
 
             return $results;
         }
