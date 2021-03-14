@@ -30,5 +30,27 @@ class SanitizeService {
         
         return $string;
     }
+
+
+
+    
+
+    public function decodeAllFields($data){
+        $data = (array)$data;
+
+        foreach($data as $key => $value){
+            if(is_array($value)){
+                $data[$key] = $this->decodeAllFields($value);
+            } else {
+                $data[$key] = $this->decodeField($value);
+            }
+        }
+
+        return $data;
+    }
+
+    public function decodeField($string){
+        return html_entity_decode($string, ENT_QUOTES, 'UTF-8');
+    }
 }
 ?>

@@ -239,13 +239,15 @@ class SearchService {
 
 
     private function search_where($type, $detail, Builder $base_query){
-        if($type == 'products'){
-            $base_query = $base_query->where('products.name', 'like', "$detail%");
-        } elseif($type == 'child_categories'){
-            $base_query = $base_query->where('child_categories.name',$detail);
-        } elseif($type == 'parent_categories'){
-            $base_query = $base_query->where('parent_categories.name', $detail);
-        }
+        // if($type == 'products'){
+        //     $base_query = $base_query->where('products.name', 'like', "$detail%");
+        // } elseif($type == 'child_categories'){
+        //     $base_query = $base_query->where('child_categories.name',$detail);
+        // } elseif($type == 'parent_categories'){
+        //     $base_query = $base_query->where('parent_categories.name', $detail);
+        // }
+
+        $base_query->where('products.id', '=', 23);
 
         return $base_query;
     }

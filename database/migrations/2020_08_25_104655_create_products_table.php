@@ -19,7 +19,13 @@ class CreateProductsTable extends Migration
             $table->id();
             $table->string('name');
 
+            $table->string('large_image')->nullable();
+            $table->string('small_image')->nullable();
+
             $table->text('description')->nullable();
+
+            $table->json('features')->nullable();
+            $table->json('dimensions')->nullable();
 
             $table->string('currency')->default('Pounds');
 

@@ -10,6 +10,12 @@ use App\Models\Recommended;
 
 class ProductService {
 
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
+
     public function get(int $product_id, $user): ?Product {
 
         $product = new Product();
@@ -34,6 +40,7 @@ class ProductService {
             return null;
         }
 
+        $product->images;
 
         $product->ingredients;
 
@@ -41,6 +48,9 @@ class ProductService {
             $product->reviews[0]->name = $product->reviews[0]->user->name;
         }
         
+        $product->features = $this->sanitize_service->decodeAllFields($product->features);
+        $product->dimensions = $this->sanitize_service->decodeAllFields($product->dimensions);
+
         $recommended = Recommended::where([ ['recommended.product_id',$product->id] ])
         ->join('products','products.id','recommended_product_id')
         ->withCasts(

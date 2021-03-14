@@ -11,12 +11,17 @@ class Product extends Model
 {
     public $casts = [
         'name' => HTMLDecode::class,
+
+        'description' => HTMLDecode::class,
+        
+        'features' => 'json',
+        'dimensions' => 'json',
+
         'price' => 'double',
         'old_price' => 'double',
         'avg_rating' => 'double',
         'brand' => HTMLDecode::class,
 
-        'description' => HTMLDecode::class,
         'allergen_info' => HTMLDecode::class,
         'dietary_info' => HTMLDecode::class,
 
@@ -29,16 +34,20 @@ class Product extends Model
         'promotion' => PromotionCalculator::class
     ];
 
+    public function images(){
+        return $this->hasMany('App\Models\ProductImage');
+    }
+
     public function ingredients() {
-        return $this->hasMany('App\Ingredient');
+        return $this->hasMany('App\Models\Ingredient');
     }
 
     public function reviews() {
-        return $this->hasMany('App\Review')->orderBy('reviews.created_at','DESC')->limit(1);
+        return $this->hasMany('App\Models\Review')->orderBy('reviews.created_at','DESC')->limit(1);
     }
 
     public function promotion(){
-        return $this->belongsTo('App\Promotion');
+        return $this->belongsTo('App\Models\Promotion');
     }
 
 }

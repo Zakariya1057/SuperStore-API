@@ -24,7 +24,7 @@ class CreateProductImagesTable extends Migration
             $table->unsignedBigInteger('product_id');
 
             $table->foreign('product_id')->references('id')->on('products');
-            $table->unique(['size','product_id']);
+            $table->unique('name');
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
