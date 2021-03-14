@@ -48,8 +48,8 @@ class ProductService {
             $product->reviews[0]->name = $product->reviews[0]->user->name;
         }
         
-        $product->features = $this->sanitize_service->decodeAllFields($product->features);
-        $product->dimensions = $this->sanitize_service->decodeAllFields($product->dimensions);
+        $product->features = is_null($product->features) ? null : $this->sanitize_service->decodeAllFields($product->features);
+        $product->dimensions = is_null($product->dimensions) ? null : $this->sanitize_service->decodeAllFields($product->dimensions);
 
         $recommended = Recommended::where([ ['recommended.product_id',$product->id] ])
         ->join('products','products.id','recommended_product_id')
