@@ -19,6 +19,8 @@ class CreateStoreLocationsTable extends Migration
 
             $table->unsignedBigInteger('store_id');
 
+            $table->string('country');
+            $table->string('region')->nullable();
             $table->string('city');
             
             $table->string('address_line1');

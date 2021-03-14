@@ -17,8 +17,11 @@ class CreateStoresTable extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name')->unique();
+            $table->string('name');
             $table->text('description')->nullable();
+
+            $table->string('manager')->nullable();
+            $table->string('telephone')->nullable();
 
             $table->text('store_image')->nullable();
 
@@ -28,11 +31,11 @@ class CreateStoresTable extends Migration
 
             $table->timestamp('last_checked')->useCurrent();
 
-            $table->unsignedBigInteger('store_site_id')->unique();
+            $table->unsignedBigInteger('site_store_id')->unique();
             $table->unsignedBigInteger('store_type_id');
 
             $table->index('name');
-            $table->index('store_site_id');
+            $table->index('site_store_id');
 
             $table->foreign('store_type_id')->references('id')->on('store_types');
             $table->timestamp('created_at')->useCurrent();
