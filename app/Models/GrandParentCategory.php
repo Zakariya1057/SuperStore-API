@@ -14,6 +14,6 @@ class GrandParentCategory extends Model
     ];
 
     public function parent_categories() {
-        return $this->hasMany('App\ParentCategory','parent_category_id');
+        return $this->hasMany('App\Models\ParentCategory','parent_category_id');
     }
 }

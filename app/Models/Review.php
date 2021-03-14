@@ -16,6 +16,6 @@ class Review extends Model
     ];
 
     public function user() {
-        return $this->belongsTo('App\User')->select('name');
+        return $this->belongsTo('App\Models\User')->select('name');
     }
 }

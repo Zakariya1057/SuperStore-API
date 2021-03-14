@@ -14,12 +14,12 @@ class ParentCategory extends Model
     ];
 
     public function child_categories() {
-        return $this->hasMany('App\ChildCategory','child_category_id')->join('child_categories','child_categories.id','category_products.child_category_id');
+        return $this->hasMany('App\Models\ChildCategory','child_category_id')->join('child_categories','child_categories.id','category_products.child_category_id');
     }
 
     public function products() {
         $product = new Product();
-        return $this->hasMany('App\CategoryProduct','parent_category_id')
+        return $this->hasMany('App\Models\CategoryProduct','parent_category_id')
         ->join('products','products.id','category_products.product_id')
         ->select(
             'products.*'

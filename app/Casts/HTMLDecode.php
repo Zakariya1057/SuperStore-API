@@ -34,6 +34,7 @@ class HTMLDecode implements CastsAttributes
         $value = str_replace('\n', "\n", $value);
         $value = strip_tags($value);
         $value = preg_replace( "/\r/", '', $value);
+        
         return htmlentities($value, ENT_QUOTES,'UTF-8', false);
     }
 }

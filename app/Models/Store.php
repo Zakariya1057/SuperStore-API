@@ -33,14 +33,14 @@ class Store extends Model
     ];
 
     public function opening_hours() {
-        return $this->hasMany('App\OpeningHour');
+        return $this->hasMany('App\Models\OpeningHour');
     }
 
     public function facilities(){
-        return $this->hasMany('App\Facility');
+        return $this->hasMany('App\Models\Facility');
     }
     
     public function location(){
-        return $this->hasOne('App\StoreLocation');
+        return $this->hasOne('App\Models\StoreLocation');
     }
 }

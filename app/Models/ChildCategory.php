@@ -13,7 +13,7 @@ class ChildCategory extends Model
 
     public function products() {
         $product = new Product();
-        return $this->hasMany('App\CategoryProduct','child_category_id')
+        return $this->hasMany('App\Models\CategoryProduct','child_category_id')
         ->join('products','products.id','category_products.product_id')
         ->select(
             'products.*'
