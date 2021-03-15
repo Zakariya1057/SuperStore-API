@@ -27,6 +27,9 @@ class CreateUsersTable extends Migration
             $table->boolean('send_notifications')->default(1); // Send notification to user phone if enabled.
             $table->string('notification_token')->unique()->nullable();
 
+            $table->double('latitude', 10, 8);
+            $table->double('longitude', 10, 8);
+
             $table->rememberToken();
 
             $table->timestamp('token_sent_at')->nullable();
