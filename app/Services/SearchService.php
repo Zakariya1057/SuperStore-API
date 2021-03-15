@@ -34,7 +34,7 @@ class SearchService {
             'products' => []
         ];
 
-        $cache_key = 'search_suggestions_' . str_replace(' ','_', $query);
+        $cache_key = 'search_suggestions:' . str_replace(' ','_', $query) . '_store_type_id:' . $store_type_id;
 
         $cached_results = Redis::get($cache_key);
 
@@ -43,11 +43,11 @@ class SearchService {
         } else {
 
             try {
-                $results = $this->suggestions_by_group($query, $results);
+                $results = $this->suggestions_by_group($query, $results, $store_type_id);
             } catch(Exception $e){
                 // Backup search in case elasticsearch fails from now
                 Log::critical('Elasticsearch Error: ' . $e);
-                $results = $this->database_suggestions($query, $results);         
+                $results = $this->database_suggestions($query, $results, $store_type_id);         
             }
 
             Redis::set($cache_key, json_encode($results));
@@ -58,7 +58,7 @@ class SearchService {
         return $results;
     }
 
-    private function suggestions_by_group($query, $results){
+    private function suggestions_by_group($query, $results, $store_type_id){
         $types = [
             'stores' => 2, 
             'categories' => 3, 
@@ -68,7 +68,7 @@ class SearchService {
         $total_items = 0;
 
         foreach($types as $type => $limit){
-            $response = $this->elastic_search($this->client, $type, $query, $type == 'products' && $total_items <= 3 ? 12 : $limit);
+            $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $type == 'products' && $total_items <= 3 ? 12 : $limit);
             $results[$type] = [];
 
             $item_type = $type;
@@ -96,11 +96,10 @@ class SearchService {
         return $results;
     }
 
-    private function database_suggestions($query, $results){
-
-        $stores = StoreType::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(2)->get()->toArray();
-        $child_categories = ChildCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
-        $parent_categories = ParentCategory::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->limit(5)->get()->toArray();
+    private function database_suggestions($query, $results, $store_type_id){
+        $stores = StoreType::select('id','name')->where([ ['id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
+        $child_categories = ChildCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
+        $parent_categories = ParentCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
 
         if((count($child_categories) + count($parent_categories)) <= 3 ){
             $product_limit = 10;
@@ -108,7 +107,7 @@ class SearchService {
             $product_limit = 5;
         }
 
-        $products = Product::select('id','name')->where('name', 'like', "%$query%")->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
+        $products = Product::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
 
         $results['stores'] = $stores ?? [];
         $results['parent_categories'] = $parent_categories ?? [];
@@ -213,7 +212,7 @@ class SearchService {
 
     // Stores
     public function store_results($store_type_id){
-
+        
         $cache_key = "stores_search_results_{$store_type_id}";
 
         $cached_results = Redis::get($cache_key);
@@ -239,15 +238,15 @@ class SearchService {
 
 
     private function search_where($type, $detail, Builder $base_query){
-        // if($type == 'products'){
-        //     $base_query = $base_query->where('products.name', 'like', "$detail%");
-        // } elseif($type == 'child_categories'){
-        //     $base_query = $base_query->where('child_categories.name',$detail);
-        // } elseif($type == 'parent_categories'){
-        //     $base_query = $base_query->where('parent_categories.name', $detail);
-        // }
+        if($type == 'products'){
+            $base_query = $base_query->where('products.name', 'like', "$detail%");
+        } elseif($type == 'child_categories'){
+            $base_query = $base_query->where('child_categories.name',$detail);
+        } elseif($type == 'parent_categories'){
+            $base_query = $base_query->where('parent_categories.name', $detail);
+        }
 
-        $base_query->where('products.id', '=', 23);
+        // $base_query->where('products.id', '>', 0);
 
         return $base_query;
     }
@@ -351,7 +350,7 @@ class SearchService {
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
 
 
-    private function elastic_search(Client $client, $index, $query, $limit=10): Array{
+    private function elastic_search(Client $client, $index, $query, $store_type_id, $limit=10): Array{
 
         $index = strtolower($index);
         $query = strtolower($query);
@@ -395,28 +394,32 @@ class SearchService {
                     'query' => [
 
                         'bool' => [
-
                             'must' => [
+                                [
+                                    'match' => [
+                                        'store_type_id' => [ 
+                                            'query' => $store_type_id
+                                        ]
+                                    ]
+                                ],
+                    
                                 [
                                     'multi_match' => [
                                         'query' => $query,
                                         'fields' => $fields_match,
                                         'operator' => 'or',
                                         'fuzziness' => 'auto'
-                                    ]
-                                ]
+                                    ],
+                                ],
+
                             ],
-                        
                             'should' => [
-                                [
-                                    'multi_match' => [
-                                        'query' => $query,
-                                        'fields' => $fields_should,
-                                        'operator' => 'and'
-                                    ]
+                                'multi_match' => [
+                                    'query' => $query,
+                                    'fields' => $fields_should,
+                                    'operator' => 'and'
                                 ]
                             ]
-
                         ],
                     ],
 
