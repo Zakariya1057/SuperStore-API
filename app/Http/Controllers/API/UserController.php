@@ -107,6 +107,30 @@ class UserController extends Controller {
 
     }
 
+    public function location(Request $request){
+
+        $this->logger_service->log('user.location', $request);
+
+        $validated_data = $request->validate([
+            'data.latitude' => 'required',
+            'data.longitude' => 'required',
+        ]);
+
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+
+        $latitude = $data['latitude'];
+        $longitude = $data['longitude'];
+
+        $user_id = $request->user()->id;
+
+        User::where('id', $user_id)->update([
+            'latitude' => $latitude,
+            'longitude' => $longitude
+        ]);
+
+        return response()->json(['data' => ['status' => 'success']]);
+    }
+
     public function delete(Request $request){
         $user = $request->user();
 
