@@ -40,6 +40,8 @@ class SearchController extends Controller {
     public function product_results(Request $request){
 
         $validated_data = $request->validate([
+            'data.store_type_id' => 'required',
+
             'data.query' => 'required',
             'data.type'  => 'required',
 
@@ -49,7 +51,7 @@ class SearchController extends Controller {
             'data.dietary' => '', // Halal, Vegetarian
             'data.child_category' => '',
             'data.brand' => '',
-
+            
             'data.text_search' => ''
         ]);
 

@@ -36,22 +36,23 @@ class SearchService {
 
         $cache_key = 'search_suggestions:' . str_replace(' ','_', $query) . '_store_type_id:' . $store_type_id;
 
-        $cached_results = Redis::get($cache_key);
+        // $cached_results = Redis::get($cache_key);
+        $cached_results = null;
 
         if($cached_results){
             $results = json_decode($cached_results);
         } else {
 
-            try {
-                $results = $this->suggestions_by_group($query, $results, $store_type_id);
-            } catch(Exception $e){
-                // Backup search in case elasticsearch fails from now
-                Log::critical('Elasticsearch Error: ' . $e);
+            // try {
+            //     $results = $this->suggestions_by_group($query, $results, $store_type_id);
+            // } catch(Exception $e){
+            //     // Backup search in case elasticsearch fails from now
+            //     Log::critical('Elasticsearch Error: ' . $e);
                 $results = $this->database_suggestions($query, $results, $store_type_id);         
-            }
+            // }
 
-            Redis::set($cache_key, json_encode($results));
-            Redis::expire($cache_key, 86400);
+            // Redis::set($cache_key, json_encode($results));
+            // Redis::expire($cache_key, 86400);
 
         }
 
@@ -128,6 +129,8 @@ class SearchService {
         $query = $data['query'];
         $type = strtolower($data['type']);
 
+        $store_type_id = $data['store_type_id'];
+
         $sort = $data['sort'] ?? '';
         $order = $data['order'] ?? '';
         $dietary = $data['dietary'] ?? '';
@@ -143,7 +146,7 @@ class SearchService {
 
             $search_type = preg_replace('/child_|parent_/i','',$type);
 
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), 30);
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), 30, $store_type_id);
 
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
@@ -154,7 +157,7 @@ class SearchService {
             $list_id = array_keys($list_id);
         }
 
-        $cache_key = "product_search_results_{$query}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}_page:$page";
+        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}_page:$page";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
@@ -189,7 +192,7 @@ class SearchService {
             if($text_search){
                 $base_query = $this->text_search_where($list_id, $type, $base_query);
             } else {
-                $base_query = $this->search_where($type, $query, $base_query);
+                $base_query = $this->search_where($type, $query, $store_type_id, $base_query);
             }   
 
             $base_query = $this->search_sort($data, $base_query);
@@ -237,13 +240,13 @@ class SearchService {
     }
 
 
-    private function search_where($type, $detail, Builder $base_query){
+    private function search_where($type, $detail, $store_type_id, Builder $base_query){
         if($type == 'products'){
-            $base_query = $base_query->where('products.name', 'like', "$detail%");
+            $base_query = $base_query->where([ ['products.store_type_id',  $store_type_id], ['products.name', 'like', "$detail%"] ]);
         } elseif($type == 'child_categories'){
-            $base_query = $base_query->where('child_categories.name',$detail);
+            $base_query = $base_query->where([ ['child_categories.store_type_id', $store_type_id], ['child_categories.name',$detail] ]);
         } elseif($type == 'parent_categories'){
-            $base_query = $base_query->where('parent_categories.name', $detail);
+            $base_query = $base_query->where([ ['parent_categories.store_type_id', $store_type_id], ['parent_categories.name', $detail] ]);
         }
 
         // $base_query->where('products.id', '>', 0);

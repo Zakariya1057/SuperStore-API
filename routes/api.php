@@ -88,7 +88,7 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
     });
 
     Route::prefix('list')->group(function () {
-        Route::get('/', 'API\ListController@index')->name('list.index');
+        Route::get('/{store_type_id}', 'API\ListController@index')->name('list.index');
         Route::post('/create', 'API\ListController@create')->name('list.create');
         Route::post('/delete', 'API\ListController@delete')->name('list.delete');
         Route::post('/update', 'API\ListController@update')->name('list.update');

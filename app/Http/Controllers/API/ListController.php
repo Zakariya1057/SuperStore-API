@@ -21,11 +21,12 @@ class ListController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function index(Request $request){
-
+    public function index($store_type_id, Request $request){
         $user = $request->user();
+
         $user_id = $user->id;
-        $store_type_id = $user->store_type_id;
+        
+        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
 
         $this->logger_service->log('list.index.'.$store_type_id, $request);
 
