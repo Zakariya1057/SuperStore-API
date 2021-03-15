@@ -39,6 +39,7 @@ class ListSharedService {
             'products.name as name',
             'grocery_list_items.total_price as total_price',
             'products.price as price',
+            'products.currency as currency',
             'grocery_list_items.quantity as quantity',
             'category_aisles.name as aisle_name',
             'products.weight as weight',

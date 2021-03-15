@@ -18,6 +18,7 @@ class CreateStoreTypesTable extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
+            $table->string('currency');
             $table->string('large_logo')->nullable();
             $table->string('small_logo')->nullable();
             

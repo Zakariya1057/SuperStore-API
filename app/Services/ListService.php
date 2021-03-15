@@ -6,6 +6,7 @@ use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\Product;
+use App\Models\StoreType;
 use Exception;
 
 class ListService extends ListSharedService {
@@ -17,12 +18,15 @@ class ListService extends ListSharedService {
         $store_type_id = $data['store_type_id'];
         $identifier = $data['identifier'];
 
+        $currency = StoreType::where('id', $store_type_id)->get()->first()->currency;
+
         if( !GroceryList::where('identifier',$identifier)->exists() ){
 
             $list = GroceryList::create([
                 'name' => $list_name,
                 'user_id' => $user_id,
                 'status' => 'Not Started',
+                'currency' => $currency,
                 'store_type_id' => $store_type_id,
                 'identifier' => $identifier
             ]);

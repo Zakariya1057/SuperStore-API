@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\CurrencyCast;
 use Illuminate\Database\Eloquent\Model;
 use App\Casts\HTMLDecode;
 use App\Casts\Image;
@@ -18,6 +19,8 @@ class Product extends Model
         'dimensions' => 'json',
 
         'price' => 'double',
+        'currency' => CurrencyCast::class,
+        
         'old_price' => 'double',
         'avg_rating' => 'double',
         'brand' => HTMLDecode::class,

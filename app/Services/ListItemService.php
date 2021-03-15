@@ -43,6 +43,7 @@ class ListItemService extends ListSharedService {
             if($product_details){
                 $list_item->name = $product_details->name;
                 $list_item->price = $product_details->price;
+                $list_item->currency = $product_details->currency;
             }
 
         } else {
