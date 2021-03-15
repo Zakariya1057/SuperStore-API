@@ -44,17 +44,26 @@ class HomeController extends Controller {
     public function show(Request $request){
         $user = $request->user();
         
+        $validated_data = $request->validate([
+            'data.store_type_id' => 'required',
+            'data.latitude' => '',
+            'data.longitude' => '',
+        ]);
+
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+        $store_type_id = $data['store_type_id'];
+
         $this->logger_service->log('home.show', $request);
         
         if(!is_null($user)){
-            $data['monitoring'] = $this->monitoring_service->monitoring_products($user->id);
-            $data['lists'] = $this->list_service->lists_progress($user->id);
-            $data['groceries'] = $this->list_service->recent_items($user->id);
+            $data['monitoring'] = $this->monitoring_service->monitoring_products($user->id, $store_type_id);
+            $data['lists'] = $this->list_service->lists_progress($user->id, $store_type_id);
+            $data['groceries'] = $this->list_service->recent_items($user->id, $store_type_id);
         } else {
             $data['monitoring'] = $data['lists'] = $data['groceries'] = [];
         }
 
-        $cache_key = 'home_page';
+        $cache_key = 'home_page_'.$store_type_id;
 
         $retrieved_data = Redis::get($cache_key);
         if($retrieved_data){
@@ -65,10 +74,10 @@ class HomeController extends Controller {
             $data['promotions'] = $retrieved_data['promotions'];
         } else {
 
-            $data['featured'] = $this->product_service->featured();
-            $data['stores'] = $this->store_service->stores_by_type(1,false);
-            $data['categories'] = $this->category_service->featured();
-            $data['promotions'] = $this->promotion_service->featured(1);
+            $data['featured'] = $this->product_service->featured($store_type_id, $store_type_id);
+            $data['stores'] = $this->store_service->stores_by_type($store_type_id,false);
+            $data['categories'] = $this->category_service->featured($store_type_id, $store_type_id);
+            $data['promotions'] = $this->promotion_service->featured($store_type_id, $store_type_id);
     
             Redis::set($cache_key, json_encode($data));
             Redis::expire($cache_key, 604800);

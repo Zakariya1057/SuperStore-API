@@ -6,10 +6,10 @@ use App\Models\MonitoredProduct;
 use App\Models\Product;
 
 class MonitoringService {
-    public function monitoring_products($user_id){
+    public function monitoring_products($user_id, $store_type_id){
         $product = new Product();
 
-        $products =  MonitoredProduct::where([ ['user_id', $user_id] ])
+        $products =  MonitoredProduct::where([ ['products.store_type_id', $store_type_id], ['user_id', $user_id] ])
         ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
         ->join('products','products.id','monitored_products.product_id')
         ->join('category_products','category_products.product_id','products.id')

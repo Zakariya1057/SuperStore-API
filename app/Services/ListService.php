@@ -95,7 +95,7 @@ class ListService extends ListSharedService {
 
 
     // Additional Functionality
-    public function recent_items($user_id){
+    public function recent_items($user_id, $store_type_id){
         
         $product = new Product();
 
@@ -106,11 +106,12 @@ class ListService extends ListSharedService {
         ->orderBy('grocery_lists.updated_at', 'DESC')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
+        ->where('products.store_type_id', $store_type_id)
         ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
     }
 
-    public function lists_progress($user_id){
-        return GroceryList::where('user_id', $user_id)
+    public function lists_progress($user_id, $store_type_id){
+        return GroceryList::where([ ['user_id', $user_id],['store_type_id', $store_type_id] ])
         ->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')
         ->limit(4)->get();
     }

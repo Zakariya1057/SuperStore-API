@@ -64,12 +64,13 @@ class CategoryService {
 
     }
 
-    public function featured(){
+    public function featured($store_type_id){
 
         $product = new Product();
         $casts = $product->casts;
 
-        $categories = FeaturedItem::select('parent_categories.*')->whereRaw('type = "categories"')
+        $categories = FeaturedItem::select('parent_categories.*')
+        ->where([ ['parent_categories.store_type_id', $store_type_id],['type', 'categories'] ])
         ->join('parent_categories','parent_categories.id','featured_id')
         ->withCasts(['name' => HTMLDecode::class])->limit(10)->get();
 

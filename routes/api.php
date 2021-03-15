@@ -25,6 +25,7 @@ Route::any('/', function () {
 
 Route::prefix('user')->group(function () {
     Route::post('/register', 'API\UserController@register')->name('user.register');
+    Route::post('/location', 'API\UserController@location')->name('user.location')->middleware('auth:sanctum');
     Route::post('/login', 'API\UserController@login')->name('user.login');
     Route::post('/update', 'API\UserController@update')->name('user.update')->middleware('auth:sanctum');
 
@@ -44,7 +45,7 @@ Route::prefix('image')->group(function () {
 
 
 Route::middleware(OptionalAuthentication::class)->group(function () { # Optional Authentication
-    Route::get('/home', 'API\HomeController@show')->name('home.show');
+    Route::post('/home', 'API\HomeController@show')->name('home.show');
 
     Route::prefix('store')->group(function () {
         Route::get('/{store_id}', 'API\StoreController@show')->name('store.show');
@@ -88,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
     });
 
     Route::prefix('list')->group(function () {
-        Route::get('/{store_type_id}', 'API\ListController@index')->name('list.index');
+        Route::get('stores/{store_type_id}', 'API\ListController@index')->name('list.index');
         Route::post('/create', 'API\ListController@create')->name('list.create');
         Route::post('/delete', 'API\ListController@delete')->name('list.delete');
         Route::post('/update', 'API\ListController@update')->name('list.update');

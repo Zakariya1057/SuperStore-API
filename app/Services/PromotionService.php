@@ -7,10 +7,10 @@ use App\Models\Promotion;
 
 class PromotionService {
 
-    public function featured($store_id){
+    public function featured($store_type_id){
         $promotion = new Promotion();
         return FeaturedItem::select('promotions.id as promotion_id', 'name as promotion')
-        ->whereRaw('type = "promotions"')
+        ->where([ ['featured_items.store_type_id', $store_type_id], ['type', 'promotions'] ])
         ->join('promotions','promotions.id','featured_id')
         ->withCasts($promotion->casts)->limit(10)
         ->get()->pluck('promotion')

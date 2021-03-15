@@ -19,7 +19,7 @@ class CreateFeaturedItemsTable extends Migration
 
             $table->unsignedBigInteger('featured_id');
             $table->string('type');
-            $table->unsignedBigInteger('store_type_id')->nullable();
+            $table->unsignedBigInteger('store_type_id');
 
             $table->integer('week');
             $table->integer('year');

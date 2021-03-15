@@ -74,10 +74,11 @@ class ProductService {
         return $product;
     }
 
-    public function featured(){
+    public function featured($store_type_id){
+
         $product = new Product();
         return FeaturedItem::select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
-        ->whereRaw('type = "products"')
+        ->where([ ['products.store_type_id', $store_type_id],['type', 'products'] ])
         ->join('products', 'products.id','=','featured_id')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
