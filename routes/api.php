@@ -62,7 +62,7 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         Route::post('/suggestions', 'API\SearchController@suggestions')->name('search.suggestions');
 
         Route::prefix('results')->group(function () {
-            Route::get('stores/{store_type_id}', 'API\SearchController@store_results')->name('search.store_results');
+            Route::post('stores', 'API\SearchController@store_results')->name('search.store_results');
             Route::post('product', 'API\SearchController@product_results')->name('search.product_results');
             Route::post('promotion', 'API\SearchController@promotion_results')->name('search.promotion_results');
         });

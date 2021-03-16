@@ -7,10 +7,11 @@ use App\Models\Store;
 use App\Models\StoreLocation;
 use App\Models\StoreType;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class StoreService {
 
-    public function stores_by_type($store_type_id,$opening_hours=true){
+    public function stores_by_type($store_type_id, $opening_hours=true, $latitude = null, $longitude=null){
 
         $hour = new OpeningHour();
         $store_type = new StoreType();
@@ -56,6 +57,16 @@ class StoreService {
                 $join->on('opening_hours.store_id', '=', 'stores.id')->where('day_of_week', '=', $day_of_week);
             });
         } 
+
+        if(!is_null($latitude) && !is_null($longitude)){
+            // 52.53218700 -1.78090000
+
+            $select[] = DB::raw('( 6367 * acos( cos( radians('.$latitude.') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( latitude ) ) ) ) AS distance');
+
+            $query_builder = $query_builder
+            ->having('distance', '<', 40)
+            ->orderBy('distance');
+        }
 
         $stores = $query_builder->select($select)->withCasts($casts)->get();
 

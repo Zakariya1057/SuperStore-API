@@ -55,6 +55,13 @@ class HomeController extends Controller {
 
         $this->logger_service->log('home.show', $request);
         
+
+        $latitude = $data['latitude'] ?? null;
+        $longitude = $data['longitude'] ?? null;
+
+        $data['stores'] = $this->store_service->stores_by_type($store_type_id,false, $latitude, $longitude);
+
+
         if(!is_null($user)){
             $data['monitoring'] = $this->monitoring_service->monitoring_products($user->id, $store_type_id);
             $data['lists'] = $this->list_service->lists_progress($user->id, $store_type_id);
@@ -69,13 +76,13 @@ class HomeController extends Controller {
         if($retrieved_data){
             $retrieved_data = (array)json_decode( $retrieved_data );
             $data['featured'] = $retrieved_data['featured'];
-            $data['stores'] = $retrieved_data['stores'];
+            // $data['stores'] = $retrieved_data['stores'];
             $data['categories'] = $retrieved_data['categories'];
             $data['promotions'] = $retrieved_data['promotions'];
         } else {
 
             $data['featured'] = $this->product_service->featured($store_type_id, $store_type_id);
-            $data['stores'] = $this->store_service->stores_by_type($store_type_id,false);
+            // $data['stores'] = $this->store_service->stores_by_type($store_type_id,false);
             $data['categories'] = $this->category_service->featured($store_type_id, $store_type_id);
             $data['promotions'] = $this->promotion_service->featured($store_type_id, $store_type_id);
     

@@ -214,24 +214,8 @@ class SearchService {
     }
 
     // Stores
-    public function store_results($store_type_id){
-        
-        $cache_key = "stores_search_results_{$store_type_id}";
-
-        $cached_results = Redis::get($cache_key);
-
-        if($cached_results){
-            return json_decode($cached_results);
-        } else {
-            $results = $this->store_service->stores_by_type($store_type_id);
-
-            if($results && count($results) > 0) {
-                Redis::set($cache_key, json_encode($results));
-                Redis::expire($cache_key, 86400);
-            }
-
-            return $results;
-        }
+    public function store_results($store_type_id, $latitude, $longitude){
+        return $this->store_service->stores_by_type($store_type_id, true, $latitude, $longitude);
     }
 
     // Promotion

@@ -51,7 +51,7 @@ class SearchController extends Controller {
             'data.dietary' => '', // Halal, Vegetarian
             'data.child_category' => '',
             'data.brand' => '',
-            
+
             'data.text_search' => ''
         ]);
 
@@ -69,16 +69,24 @@ class SearchController extends Controller {
 
     }
 
-    public function store_results($store_type_id, Request $request){
-
-        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
-
+    public function store_results(Request $request){
         $this->logger_service->log('search.store_results',$request);
 
-        $results = $this->search_service->store_results($store_type_id);
+        $validated_data = $request->validate([
+            'data.store_type_id' => 'required',
+            'data.latitude' => '',
+            'data.longitude' => '',
+        ]);
+
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+
+        $store_type_id = $data['store_type_id'];
+        $latitude = $data['latitude'] ?? null;
+        $longitude = $data['longitude'] ?? null;
+        
+        $results = $this->search_service->store_results($store_type_id, $latitude, $longitude);
 
         return response()->json(['data' => $results]);
-
     }
 
     public function promotion_results(Request $request){
