@@ -29,10 +29,12 @@ class CreateProductsTable extends Migration
 
             $table->string('currency')->default('Pounds');
 
-            $table->decimal('price', 6,2);
-            $table->decimal('old_price', 6,2)->nullable();
+            $table->decimal('price', 9,2);
+            $table->decimal('old_price', 9,2)->nullable();
 
             $table->boolean('is_on_sale')->nullable();
+            $table->timestamp('sale_ends_at')->nullable();
+            
             $table->unsignedBigInteger('promotion_id')->nullable();
             $table->string('site_product_id')->nullable();
 
@@ -43,7 +45,6 @@ class CreateProductsTable extends Migration
 
             $table->string('brand')->nullable();
             $table->string('weight')->nullable();
-            $table->string('manufacturer')->nullable();
             $table->text('storage')->nullable();
 
             $table->string('dietary_info', 500)->nullable();
