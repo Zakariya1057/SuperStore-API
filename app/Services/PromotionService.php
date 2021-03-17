@@ -9,7 +9,7 @@ class PromotionService {
 
     public function featured($store_type_id){
         $promotion = new Promotion();
-        return FeaturedItem::select('promotions.id as promotion_id', 'name as promotion')
+        return FeaturedItem::select('promotions.id as promotion_id', 'name as promotion', 'promotions.store_type_id')
         ->where([ ['featured_items.store_type_id', $store_type_id], ['type', 'promotions'] ])
         ->join('promotions','promotions.id','featured_id')
         ->withCasts($promotion->casts)->limit(10)
@@ -17,13 +17,13 @@ class PromotionService {
         ->toArray() ?? [];
     }
 
-    public function details(Promotion $promotion){
+    public function details($promotion_id, $promotion_name, $store_type_id){
 
-        if(is_null($promotion)){
+        if(is_null($promotion_name)){
             return;
         }
 
-        $name = html_entity_decode($promotion->name, ENT_QUOTES);
+        $name = html_entity_decode($promotion_name, ENT_QUOTES);
         preg_match('/(\d+).+£(\d+\.*\d*)$/',$name,$price_promotion_matches);
 
         $quantity = $price = $for_quantity = null;
@@ -43,7 +43,14 @@ class PromotionService {
             return null;
         }
 
-        return ['id' => $promotion->id, 'name' => $name, 'quantity' => $quantity, 'price' => $price, 'for_quantity' => $for_quantity];
+        return [
+            'id' => $promotion_id, 
+            'name' => $name, 
+            'quantity' => $quantity, 
+            'price' => $price, 
+            'for_quantity' => $for_quantity,
+            'store_type_id' => $store_type_id
+        ];
     }
 }
 

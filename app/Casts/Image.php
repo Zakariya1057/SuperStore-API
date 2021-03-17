@@ -18,8 +18,14 @@ class Image implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-        $hostname = env("APP_URL");
-        return "$hostname/api/image/$value";
+        $image = null;
+
+        if(!is_null($value) && $value != ''){
+            $hostname = env("APP_URL");
+            $image = "$hostname/api/image/$value";
+        }
+
+        return $image;
     }
 
     /**

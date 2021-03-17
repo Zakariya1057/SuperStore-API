@@ -47,7 +47,8 @@ class ListSharedService {
             'products.large_image as large_image',
             'grocery_list_items.ticked_off as ticked_off',
             'promotions.id as promotion_id',
-            'promotions.name as promotion'
+            'promotions.name as promotion',
+            'promotions.store_type_id'
         ])
         ->join('parent_categories', 'parent_categories.id','=','grocery_list_items.parent_category_id')
         ->join('products', 'products.id','=','grocery_list_items.product_id')
@@ -100,7 +101,7 @@ class ListSharedService {
     public function item_price($product_id,$quantity=1){
 
         $product = Product::where('products.id',$product_id)
-        ->select('products.price', 'promotions.id as promotion_id','promotions.name as promotion')
+        ->select('products.price', 'promotions.id as promotion_id','promotions.name as promotion', 'promotions.store_type_id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
         ->withCasts(['promotion' => PromotionCalculator::class])
         ->get()->first();
@@ -158,7 +159,8 @@ class ListSharedService {
             'grocery_list_items.total_price',
             'grocery_list_items.ticked_off',
             'promotions.id as promotion_id',
-            'promotions.name as promotion'
+            'promotions.name as promotion',
+            'promotions.store_type_id'
         )
         ->withCasts($casts)
         ->get();
