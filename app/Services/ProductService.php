@@ -27,7 +27,7 @@ class ProductService {
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
             'promotions.id as promotion_id',
-            'promotions.name as promotion'
+            'promotions.name as promotion',
         )
         ->join('category_products','category_products.product_id','products.id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
@@ -51,13 +51,11 @@ class ProductService {
         $product->features = is_null($product->features) ? null : $this->sanitize_service->decodeAllFields($product->features);
         $product->dimensions = is_null($product->dimensions) ? null : $this->sanitize_service->decodeAllFields($product->dimensions);
 
-        $recommended = Recommended::where([ ['recommended.product_id',$product->id] ])
+        $product->recommended = Recommended::where([ ['recommended.product_id',$product->id] ])
         ->join('products','products.id','recommended_product_id')
         ->withCasts(
             $product->casts
         )->get();
-
-        $product->recommended = $recommended;
 
         $favourite = $monitoring = false;
 
@@ -75,8 +73,8 @@ class ProductService {
     }
 
     public function featured($store_type_id){
-
         $product = new Product();
+
         return FeaturedItem::select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
         ->where([ ['products.store_type_id', $store_type_id],['type', 'products'] ])
         ->join('products', 'products.id','=','featured_id')
@@ -84,6 +82,20 @@ class ProductService {
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->orderBy('featured_items.updated_at', 'DESC')
         ->limit(10)->groupBy('category_products.product_id')->withCasts($product->casts)->get() ?? [];
+    }
+
+    public function on_sale($store_type_id){
+        $product = new Product();
+        
+        return Product::where('products.store_type_id', $store_type_id)
+        ->where(function($query) {
+            $query->where('is_on_sale', 1)->orwhereNotNull('promotion_id');
+        })
+        ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+        ->join('category_products','category_products.product_id','products.id')
+        ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
+        // ->orderBy('featured_items.updated_at', 'DESC')
+        ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get() ?? [];
     }
 
 }

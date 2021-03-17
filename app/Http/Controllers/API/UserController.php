@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Services\LocationService;
 use App\Services\LoggerService;
 use App\Services\SanitizeService;
 use App\Services\UserService;
@@ -14,12 +15,13 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller {
 
-    private $sanitize_service, $user_service, $logger_service;
+    private $sanitize_service, $user_service, $logger_service, $location_service;
 
-    function __construct(SanitizeService $sanitize_service, UserService $user_service, LoggerService $logger_service){
+    function __construct(SanitizeService $sanitize_service, UserService $user_service, LoggerService $logger_service, LocationService $location_service){
         $this->sanitize_service = $sanitize_service;
         $this->user_service = $user_service;
         $this->logger_service = $logger_service;
+        $this->location_service = $location_service;
     }
 
     public function register(Request $request){
@@ -123,10 +125,7 @@ class UserController extends Controller {
 
         $user_id = $request->user()->id;
 
-        User::where('id', $user_id)->update([
-            'latitude' => $latitude,
-            'longitude' => $longitude
-        ]);
+        $this->location_service->update_location($user_id, $latitude, $longitude);
 
         return response()->json(['data' => ['status' => 'success']]);
     }

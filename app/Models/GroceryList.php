@@ -19,7 +19,7 @@ class GroceryList extends Model
 
         'store_type_id' => 'integer',
         
-        'created_at' => 'datetime:d F Y',
-        'updated_at' => 'datetime:d F Y',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
 }

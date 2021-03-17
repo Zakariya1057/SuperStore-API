@@ -14,7 +14,7 @@ class GroceryListItem extends Model
         'total_price' => 'double',
         'ticked_off' => 'Bool',
         
-        'created_at' => 'datetime:d F Y',
-        'updated_at' => 'datetime:d F Y',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
 }

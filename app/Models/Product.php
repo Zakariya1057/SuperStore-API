@@ -20,9 +20,14 @@ class Product extends Model
 
         'price' => 'double',
         'currency' => CurrencyCast::class,
-        
+
+        'is_on_sale' => 'boolean',
+
         'old_price' => 'double',
         'avg_rating' => 'double',
+
+        'sale_ends_at' => 'datetime:Y-m-d H:i:s',
+
         'brand' => HTMLDecode::class,
 
         'allergen_info' => HTMLDecode::class,

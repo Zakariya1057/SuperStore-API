@@ -11,8 +11,8 @@ class Review extends Model
     protected $casts = [
         'text' => HTMLDecode::class,
         'title' => HTMLDecode::class,  
-        'updated_at' => 'datetime:d F Y',
-        'created_at' => 'datetime:d F Y',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+        'created_at' => 'datetime:Y-m-d H:i:s',
     ];
 
     public function user() {
