@@ -253,6 +253,9 @@ class SearchService {
     //////////////////    Filter Results   //////////////////
 
     private function search_sort($data, Builder $base_query){
+
+        $order_by_list = [];
+
         if(key_exists('sort', $data) && key_exists('order', $data) && !is_null($data['order'])){
             $sort = strtolower($data['sort']);
             $order = strtoupper($data['order']);
@@ -267,14 +270,18 @@ class SearchService {
             ];
 
             if(key_exists($sort,$sort_options)){
-                $base_query = $base_query->orderByRaw($sort_options[$sort] . ' '. $order);
+                $order_by_list[] = $sort_options[$sort] . ' '. $order;
             } else {
                 throw new Exception('Unknown sort by option.', 422);
             }
 
         } else {
-            $base_query = $base_query->orderByRaw('total_reviews_count / avg_rating desc');
+            $order_by_list[] = 'total_reviews_count / avg_rating desc';
         }
+        
+        $order_by_list[] = 'products.id asc';
+        
+        $base_query = $base_query->orderByRaw(join(',', $order_by_list));
 
         return $base_query;
     }
