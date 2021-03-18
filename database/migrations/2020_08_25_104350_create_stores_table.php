@@ -31,7 +31,7 @@ class CreateStoresTable extends Migration
 
             $table->timestamp('last_checked')->useCurrent();
 
-            $table->unsignedBigInteger('site_store_id')->unique();
+            $table->string('site_store_id')->unique();
             $table->unsignedBigInteger('store_type_id');
 
             $table->index('name');

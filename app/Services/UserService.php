@@ -92,6 +92,7 @@ class UserService extends UserAuthService {
             GroceryList::create([
                 'name' => 'Shopping List',
                 'user_id' => $user->id,
+                'store_type_id' => $store_type_id,
                 'identifier' => $uuid->toString()
             ]);
         } catch(Exception $e){

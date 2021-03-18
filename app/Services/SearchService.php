@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ChildCategory;
 use App\Models\ParentCategory;
 use App\Models\Product;
+use App\Models\Promotion;
 use App\Models\StoreType;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
@@ -44,9 +45,9 @@ class SearchService {
         } else {
 
             // try {
-            //     $results = $this->suggestions_by_group($query, $results, $store_type_id);
+                // $results = $this->suggestions_by_group($query, $results, $store_type_id);
             // } catch(Exception $e){
-            //     // Backup search in case elasticsearch fails from now
+            //     Backup search in case elasticsearch fails from now
             //     Log::critical('Elasticsearch Error: ' . $e);
                 $results = $this->database_suggestions($query, $results, $store_type_id);         
             // }
@@ -101,6 +102,7 @@ class SearchService {
         $stores = StoreType::select('id','name')->where([ ['id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
         $child_categories = ChildCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
         $parent_categories = ParentCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
+        $promotions = Promotion::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
 
         if((count($child_categories) + count($parent_categories)) <= 3 ){
             $product_limit = 10;
@@ -114,6 +116,7 @@ class SearchService {
         $results['parent_categories'] = $parent_categories ?? [];
         $results['child_categories'] = $child_categories ?? [];
         $results['products'] = $products ?? []; 
+        $results['promotions'] = $promotions ?? []; 
         
         return $results;
     }
@@ -213,16 +216,9 @@ class SearchService {
         return $results;
     }
 
-    // Stores
     public function store_results($store_type_id, $latitude, $longitude){
         return $this->store_service->stores_by_type($store_type_id, true, $latitude, $longitude);
     }
-
-    // Promotion
-    public function promotion_results($query){
-    
-    }
-
 
     private function search_where($type, $detail, $store_type_id, Builder $base_query){
         if($type == 'products'){
@@ -231,9 +227,9 @@ class SearchService {
             $base_query = $base_query->where([ ['child_categories.store_type_id', $store_type_id], ['child_categories.name',$detail] ]);
         } elseif($type == 'parent_categories'){
             $base_query = $base_query->where([ ['parent_categories.store_type_id', $store_type_id], ['parent_categories.name', $detail] ]);
+        } elseif($type == 'promotions'){
+            $base_query = $base_query->where([ ['promotions.store_type_id', $store_type_id], ['promotions.name', $detail] ]);
         }
-
-        // $base_query->where('products.id', '>', 0);
 
         return $base_query;
     }
@@ -245,6 +241,8 @@ class SearchService {
             $base_query = $base_query->where('child_categories.id',$item_id);
         } elseif($type == 'parent_categories'){
             $base_query = $base_query->where('parent_categories.id', $item_id);
+        } elseif($type == 'promotions'){
+            $base_query = $base_query->where('promotions.id', $item_id);
         }
 
         return $base_query;
