@@ -32,7 +32,9 @@ class SearchService {
             'stores' => [],
             'parent_categories' => [],
             'child_categories' => [],
-            'products' => []
+            'products' => [],
+            'promotions' => [],
+            'store_sales' => []
         ];
 
         $cache_key = 'search_suggestions:' . str_replace(' ','_', $query) . '_store_type_id:' . $store_type_id;
@@ -45,12 +47,22 @@ class SearchService {
         } else {
 
             // try {
-                // $results = $this->suggestions_by_group($query, $results, $store_type_id);
+                // $this->suggestions_by_group($query, $results, $store_type_id);
             // } catch(Exception $e){
             //     Backup search in case elasticsearch fails from now
             //     Log::critical('Elasticsearch Error: ' . $e);
-                $results = $this->database_suggestions($query, $results, $store_type_id);         
+                $this->database_suggestions($query, $results, $store_type_id);         
             // }
+
+
+            if(count($results['stores']) > 0){
+                $store = (object)$results['stores'][0];
+
+                $results['store_sales'][] = [
+                    'id' => $store->id,
+                    'name' => $store->name . ' Sales'
+                ];
+            }
 
             // Redis::set($cache_key, json_encode($results));
             // Redis::expire($cache_key, 86400);
@@ -60,11 +72,12 @@ class SearchService {
         return $results;
     }
 
-    private function suggestions_by_group($query, $results, $store_type_id){
+    private function suggestions_by_group($query, &$results, $store_type_id){
         $types = [
             'stores' => 2, 
             'categories' => 3, 
-            'products' => 8
+            'products' => 8,
+            'promotions' => 1
         ];
 
         $total_items = 0;
@@ -94,11 +107,9 @@ class SearchService {
             }
 
         }
-
-        return $results;
     }
 
-    private function database_suggestions($query, $results, $store_type_id){
+    private function database_suggestions($query, &$results, $store_type_id){
         $stores = StoreType::select('id','name')->where([ ['id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
         $child_categories = ChildCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
         $parent_categories = ParentCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
@@ -117,8 +128,6 @@ class SearchService {
         $results['child_categories'] = $child_categories ?? [];
         $results['products'] = $products ?? []; 
         $results['promotions'] = $promotions ?? []; 
-        
-        return $results;
     }
 
     ///////////////////////////////////////////     Suggestions     ///////////////////////////////////////////
@@ -229,6 +238,12 @@ class SearchService {
             $base_query = $base_query->where([ ['parent_categories.store_type_id', $store_type_id], ['parent_categories.name', $detail] ]);
         } elseif($type == 'promotions'){
             $base_query = $base_query->where([ ['promotions.store_type_id', $store_type_id], ['promotions.name', $detail] ]);
+        } elseif($type == 'store_sales'){
+            $base_query = $base_query
+            ->where('products.store_type_id', $store_type_id)
+            ->where(function($query) {
+                $query->where('products.is_on_sale', 1)->orwhereNotNull('products.promotion_id');
+            });
         }
 
         return $base_query;
@@ -418,7 +433,7 @@ class SearchService {
                     'sort' => $sort
             ]
         ];
-        
+
         return $client->search($params);
         
     }
