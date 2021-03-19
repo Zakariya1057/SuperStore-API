@@ -84,7 +84,7 @@ class ListService extends ListSharedService {
                         $ticked_off = (bool)$list_item->ticked_off;
                         $total_price = $this->item_price($product_id, $quantity);
 
-                        GroceryListItem::create(
+                        GroceryListItem::insertOrIgnore(
                             [
                                 'list_id' => $list_id, 
                                 'product_id' =>  $product_id,

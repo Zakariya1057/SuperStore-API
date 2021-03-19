@@ -150,7 +150,14 @@ class ListController extends Controller {
         // Loop through all their ids and delete
 
         if(count($list_ids) > 0){
-            GroceryList::where('user_id', $user_id)->whereIn('id', $list_ids)->delete();
+            foreach($list_ids as $list_id){
+                $list = GroceryList::where('user_id', $user_id)->where('id', $list_id)->first();
+
+                if(!is_null($list)){
+                    GroceryListItem::where('list_id', $list_id)->delete();
+                    GroceryList::where('user_id', $user_id)->where('id', $list_id)->delete();
+                }
+            }
         }
        
         return response()->json(['data' => ['status' => 'success']]);
