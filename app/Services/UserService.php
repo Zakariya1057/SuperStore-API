@@ -87,17 +87,19 @@ class UserService extends UserAuthService {
         $user = User::create($user_data);
 
         // Create new shopping list for new user
-        try {
-            $uuid = Uuid::uuid4();
-            GroceryList::create([
-                'name' => 'Shopping List',
-                'user_id' => $user->id,
-                'store_type_id' => $store_type_id,
-                'identifier' => $uuid->toString()
-            ]);
-        } catch(Exception $e){
-            Log::error('Failed To Automatic Create List: ' . $e->getMessage());
-        }
+        
+        // try {
+        //     $uuid = Uuid::uuid4();
+        //     GroceryList::create([
+        //         'name' => 'Shopping List',
+        //         'user_id' => $user->id,
+        //         'store_type_id' => $store_type_id,
+        //         'currency' => $store_type_id == 1 ? 'Pounds' : 'Canadian Dollars',
+        //         'identifier' => $uuid->toString()
+        //     ]);
+        // } catch(Exception $e){
+        //     Log::error('Failed To Automatic Create List: ' . $e->getMessage());
+        // }
 
         return $user;
 
