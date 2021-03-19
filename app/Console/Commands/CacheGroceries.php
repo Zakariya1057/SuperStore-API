@@ -54,7 +54,7 @@ class CacheGroceries extends Command
 
             $store_type_id = $store_type->id;
 
-            $grand_parent_categories = GrandParentCategory::get();
+            $grand_parent_categories = GrandParentCategory::where('store_type_id', $store_type_id)->get();
 
             $parent_categories_details = [];
     
