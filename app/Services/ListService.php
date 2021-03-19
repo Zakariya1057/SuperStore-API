@@ -12,8 +12,6 @@ use Exception;
 class ListService extends ListSharedService {
 
     public function create($data, $user_id){
-        $items = $data['items'] ?? [];
-
         $list_name = $data['name'];
         $store_type_id = $data['store_type_id'];
         $identifier = $data['identifier'];
@@ -31,7 +29,6 @@ class ListService extends ListSharedService {
                 'identifier' => $identifier
             ]);
 
-            $this->update_list_items($list->id, $items, 'overwrite');
             event(new GroceryListChangedEvent($list));
 
             return GroceryList::whereId($list->id)->get()->first();
@@ -40,11 +37,8 @@ class ListService extends ListSharedService {
 
     public function update($data, $user_id){
 
-        $items = $data['items'] ?? [];
-
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
-        $mode = $data['mode'] ?? '';
         $list_id = $data['list_id'];
 
         $list = GroceryList::where([['id', $list_id],['user_id', $user_id]])->get()->first();
@@ -53,23 +47,63 @@ class ListService extends ListSharedService {
             throw new Exception('No list found.', 404);
         } else {
 
-            if($mode == 'delete'){
-                GroceryListItem::where('list_id', $list_id)->delete();
-                GroceryList::where('id', $list_id)->delete();
-            } else {
-                GroceryList::where([['id', $list_id ],['user_id', $user_id]])
-                ->update([
-                    'name' => $name,
-                    'store_type_id' => $store_type_id
-                ]);
-    
-                $this->update_list_items($list_id, $items, $mode);
-                event(new GroceryListChangedEvent($list));
-            }
+            GroceryList::where([['id', $list_id ],['user_id', $user_id]])
+            ->update([
+                'name' => $name,
+                'store_type_id' => $store_type_id
+            ]);
 
+            event(new GroceryListChangedEvent($list));
         }
 
     }
+
+
+    public function sync_edited_lists($lists, $user_id){
+        foreach($lists as $list){
+            $list = (object)$list;
+
+            $list_id = $list->id;
+            $categories = $list->categories;
+
+            $list = GroceryList::where([ ['user_id', $user_id], ['id', $list_id] ])->first();
+
+            if(!is_null($list)){
+                GroceryListItem::where('list_id', $list_id)->delete();
+
+                foreach($categories as $category){
+                    $category = (object)$category;
+
+                    $category_id = $category->id;
+
+                    foreach($category->items as $list_item){
+                        $list_item = (object)$list_item;
+
+                        $product_id = $list_item->product_id;
+                        $quantity = $list_item->quantity;
+                        $ticked_off = (bool)$list_item->ticked_off;
+                        $total_price = $this->item_price($product_id, $quantity);
+
+                        GroceryListItem::create(
+                            [
+                                'list_id' => $list_id, 
+                                'product_id' =>  $product_id,
+                                'parent_category_id' => $category_id, 
+                                'quantity' => $quantity,
+                                'ticked_off' =>  $ticked_off,
+                                'total_price' => $total_price
+                            ]
+                        );
+                    }
+                }
+
+                event(new GroceryListChangedEvent($list));
+                
+            }
+        }
+    }
+
+
 
     public function reset($list_id, $user_id){
         $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ]);

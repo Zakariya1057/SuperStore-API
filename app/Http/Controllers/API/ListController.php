@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Http\Controllers\Controller;
+use App\Models\GroceryListItem;
 use App\Services\ListService;
 use App\Services\LoggerService;
 use App\Services\SanitizeService;
@@ -127,6 +128,50 @@ class ListController extends Controller {
 
         $this->list_service->reset($list_id, $user_id);
 
+        return response()->json(['data' => ['status' => 'success']]);
+        
+    }
+
+
+    // Offline Sync
+
+    public function offline_delete(Request $request){
+        $user_id = $request->user()->id;
+
+        $validated_data = $request->validate([
+            'data.list_ids' => 'required'
+        ]);
+
+        $this->logger_service->log('list.offline.delete', $request);
+
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+
+        $list_ids = $data['list_ids'];
+        // Loop through all their ids and delete
+
+        if(count($list_ids) > 0){
+            GroceryList::where('user_id', $user_id)->whereIn('id', $list_ids)->delete();
+        }
+       
+        return response()->json(['data' => ['status' => 'success']]);
+    }
+
+
+    public function offline_edited(Request $request){
+        $user_id = $request->user()->id;
+
+        $validated_data = $request->validate([
+            'data.lists' => 'required'
+        ]);
+
+        $this->logger_service->log('list.offline.delete', $request);
+
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+
+        $lists = $data['lists'];
+
+        $this->list_service->sync_edited_lists($lists, $user_id);
+       
         return response()->json(['data' => ['status' => 'success']]);
         
     }

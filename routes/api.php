@@ -97,6 +97,10 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
         
         Route::get('/{id}', 'API\ListController@show')->name('list.show');
         
+        Route::prefix('offline')->group(function () {
+            Route::post('/deleted', 'API\ListController@offline_delete')->name('list.offline.delete');
+            Route::post('/edited', 'API\ListController@offline_edited')->name('list.offline.edited');
+        });
     
         Route::prefix('{id}/item')->group(function () {
             Route::post('/create', 'API\ListItemController@create')->name('list_item.create');
