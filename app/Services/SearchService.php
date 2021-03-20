@@ -201,6 +201,9 @@ class SearchService {
                 'promotions.price as promotion_price',
                 'promotions.for_quantity as promotion_for_quantity',
     
+                'promotions.minimum as promotion_minimum',
+                'promotions.maximum as promotion_maximum',
+                
                 'promotions.expires as promotion_expires',
                 'promotions.starts_at as promotion_starts_at',
                 'promotions.ends_at as promotion_ends_at',

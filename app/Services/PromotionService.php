@@ -28,6 +28,9 @@ class PromotionService {
             'quantity',
             'price',
             'for_quantity',
+
+            'minimum',
+            'maximum',
     
             'store_type_id',
             

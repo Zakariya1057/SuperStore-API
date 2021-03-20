@@ -17,12 +17,13 @@ class Promotion extends Model
         'price',
         'for_quantity',
 
+        'minumum',
+        'maximum',
+
         'store_type_id',
-
         'products',
-
         'site_promotion_id',
-        
+
         'expires',
         'starts_at',
         'ends_at',

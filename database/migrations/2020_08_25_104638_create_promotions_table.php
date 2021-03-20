@@ -23,9 +23,12 @@ class CreatePromotionsTable extends Migration
             $table->string('url')->nullable();
 
             $table->string('name');
-            $table->integer('quantity');
+            $table->integer('quantity')->nullable();
             $table->decimal('price', 9,2)->nullable();
             $table->integer('for_quantity')->nullable();
+
+            $table->integer('minimum')->nullable();
+            $table->integer('maximum')->nullable();
 
             $table->boolean('expires')->nullable();
 

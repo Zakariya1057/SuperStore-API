@@ -56,6 +56,9 @@ class ListSharedService {
             'promotions.price as promotion_price',
             'promotions.for_quantity as promotion_for_quantity',
 
+            'promotions.minimum as promotion_minimum',
+            'promotions.maximum as promotion_maximum',
+
             'promotions.expires as promotion_expires',
             'promotions.starts_at as promotion_starts_at',
             'promotions.ends_at as promotion_ends_at',
@@ -124,19 +127,33 @@ class ListSharedService {
         }
 
         if(!is_null($promotion)){
-            $remainder = ($quantity % $promotion->quantity);
-            $goes_into_fully = floor($quantity / $promotion->quantity);
 
-            if($quantity < $promotion->quantity){
-                $total = $quantity * $price;   
-            } else {
+            if(!is_null($promotion->minimum)){
+                $minimum = $promotion->minimum;
+                $promotion_price = $promotion->price;
 
-                if( !is_null($promotion->for_quantity)){
-                    $total = ( $goes_into_fully * ( $promotion->for_quantity * $price)) + ($remainder * $price);
+                if($quantity >= $minimum){
+                    $total = $quantity * $promotion_price;
                 } else {
-                    $total = ($goes_into_fully * $promotion->price) + ($remainder * $price);
+                    $total = $quantity * $price;
+                }
+
+            } else {
+                $remainder = ($quantity % $promotion->quantity);
+                $goes_into_fully = floor($quantity / $promotion->quantity);
+
+                if($quantity < $promotion->quantity){
+                    $total = $quantity * $price;   
+                } else {
+
+                    if( !is_null($promotion->for_quantity)){
+                        $total = ( $goes_into_fully * ( $promotion->for_quantity * $price)) + ($remainder * $price);
+                    } else {
+                        $total = ($goes_into_fully * $promotion->price) + ($remainder * $price);
+                    }
                 }
             }
+
 
         } else {
             $total = $quantity * $price;
@@ -209,38 +226,42 @@ class ListSharedService {
                 $total_quantity += $product->product_quantity;
             }
 
-            $quantity = $promotion_details->quantity;
+            if(!is_null($promotion_details->quantity)){
 
-            $new_total = 0;
+                $quantity = $promotion_details->quantity;
 
-            if($total_quantity >= $quantity){
+                $new_total = 0;
 
-                $highest_price = 0;
-                $previous_total_price = 0;
+                if($total_quantity >= $quantity){
 
-                // Get the most expensive item
-                foreach($products as $product){
-                    $previous_total_price = $previous_total_price + $product->total_price;
-
-                    if($product->product_price > $highest_price){
-                        $highest_price = $product->product_price;
+                    $highest_price = 0;
+                    $previous_total_price = 0;
+    
+                    // Get the most expensive item
+                    foreach($products as $product){
+                        $previous_total_price = $previous_total_price + $product->total_price;
+    
+                        if($product->product_price > $highest_price){
+                            $highest_price = $product->product_price;
+                        }
                     }
-                }
-                
-                $remainder = ($total_quantity % $promotion_details->quantity);
-                $goes_into_fully = floor($total_quantity / $promotion_details->quantity);
-
-                if( !is_null($promotion_details->for_quantity)){
-                    $new_total = ( $goes_into_fully * ( $promotion_details->for_quantity * $highest_price)) + ($remainder * $highest_price);
-                } else {
-                    $new_total = ($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);
-                }
-
-                $new_total_price = ($total_price - $previous_total_price) + $new_total;
-
-                if($new_total < $previous_total_price){
-                    $data['old_total_price'] = $total_price;
-                    $data['total_price'] = $new_total_price;
+                    
+                    $remainder = ($total_quantity % $promotion_details->quantity);
+                    $goes_into_fully = floor($total_quantity / $promotion_details->quantity);
+    
+                    if( !is_null($promotion_details->for_quantity)){
+                        $new_total = ( $goes_into_fully * ( $promotion_details->for_quantity * $highest_price)) + ($remainder * $highest_price);
+                    } else {
+                        $new_total = ($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);
+                    }
+    
+                    $new_total_price = ($total_price - $previous_total_price) + $new_total;
+    
+                    if($new_total < $previous_total_price){
+                        $data['old_total_price'] = $total_price;
+                        $data['total_price'] = $new_total_price;
+                    }
+    
                 }
 
             }
