@@ -17,7 +17,7 @@ class Promotion extends Model
         'price',
         'for_quantity',
 
-        'minumum',
+        'minimum',
         'maximum',
 
         'store_type_id',
