@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use ErrorException;
+use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\MassAssignmentException;
@@ -57,14 +58,9 @@ class Handler extends ExceptionHandler
      *
      * @throws \Throwable
      */
-    
-     // public function render($request, Throwable $exception)
-    // {
-    //     return parent::render($request, $exception);
-    // }
 
     public function render($request, $exception){
-        return parent::render($request, $exception);
+        // return parent::render($request, $exception);
         if($exception instanceof QueryException || $exception instanceof ErrorException || $exception instanceOf MassAssignmentException || $exception instanceOf BindingResolutionException){
             return parent::render($request, $exception);
         } elseif($exception instanceof AuthenticationException) {
@@ -75,7 +71,7 @@ class Handler extends ExceptionHandler
                 $messages[] = str_replace('data.','',$error[0]);
             }
             return response()->json([ 'data' => ['error' => join(' ',$messages)]], 422);
-        } elseif (!($exception instanceof NotFoundHttpException) && $request->isJson()) {
+        } elseif ($exception instanceof Exception || !($exception instanceof NotFoundHttpException) && $request->isJson()) {
             return response()->json([ 'data' => ['error' => $exception->getMessage()] ], $exception->getCode());
         }  else {
             return parent::render($request, $exception);
