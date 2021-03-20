@@ -21,7 +21,7 @@ class CreateGroceryListItemsTable extends Migration
             $table->integer('quantity')->default(1);
             $table->unsignedBigInteger('list_id');
             $table->unsignedBigInteger('parent_category_id');
-            $table->decimal('total_price', 6,2)->default(0);
+            $table->decimal('total_price', 9,2)->default(0);
 
             $table->boolean('ticked_off')->default(0);
 

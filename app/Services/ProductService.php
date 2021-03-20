@@ -26,11 +26,8 @@ class ProductService {
             'products.*',
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
-            'promotions.id as promotion_id',
-            'promotions.name as promotion',
         )
         ->join('category_products','category_products.product_id','products.id')
-        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->withCasts($casts)
         ->get()
@@ -39,6 +36,8 @@ class ProductService {
         if(!$product){
             return null;
         }
+
+        $product->promotion;
 
         $product->images;
 

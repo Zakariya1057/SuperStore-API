@@ -6,7 +6,7 @@ use App\Casts\CurrencyCast;
 use Illuminate\Database\Eloquent\Model;
 use App\Casts\HTMLDecode;
 use App\Casts\Image;
-use App\Casts\PromotionCalculator;
+// use App\Casts\PromotionCalculator;
 
 class Product extends Model
 {
@@ -39,7 +39,7 @@ class Product extends Model
         'parent_category_name' => HTMLDecode::class,
         'child_category_name' => HTMLDecode::class,
 
-        'promotion' => PromotionCalculator::class
+        // 'promotion' => PromotionCalculator::class
     ];
 
     public function images(){

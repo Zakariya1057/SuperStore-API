@@ -5,14 +5,18 @@ namespace App\Services;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\Product;
-use App\Casts\PromotionCalculator;
-use App\Models\CategoryProduct;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ListSharedService {
 
+    private $promotion_service;
+
+    function __construct()
+    {
+        $this->promotion_service = new PromotionService();
+    }
     ////////////////////////////////////////////    SELECT List    //////////////////////////////////////////// 
 
     public function show_list($list_id, $user_id){
@@ -26,9 +30,7 @@ class ListSharedService {
         }
 
         $product = new Product();
-
-        $casts = $product->casts ?? [];
-        $casts['promotion'] = PromotionCalculator::class;
+        $casts = $product->casts;
 
         $items = GroceryListItem::where([ ['list_id', $list->id] ])
         ->select([
@@ -46,9 +48,17 @@ class ListSharedService {
             'products.small_image as small_image',
             'products.large_image as large_image',
             'grocery_list_items.ticked_off as ticked_off',
+
             'promotions.id as promotion_id',
-            'promotions.name as promotion',
-            'promotions.store_type_id'
+            'promotions.store_type_id as promotion_store_type_id',
+            'promotions.name as promotion_name',
+            'promotions.quantity as promotion_quantity',
+            'promotions.price as promotion_price',
+            'promotions.for_quantity as promotion_for_quantity',
+
+            'promotions.expires as promotion_expires',
+            'promotions.starts_at as promotion_starts_at',
+            'promotions.ends_at as promotion_ends_at',
         ])
         ->join('parent_categories', 'parent_categories.id','=','grocery_list_items.parent_category_id')
         ->join('products', 'products.id','=','grocery_list_items.product_id')
@@ -72,6 +82,8 @@ class ListSharedService {
         $categories = [];
 
         foreach($items as $item){
+
+            $this->promotion_service->set_product_promotion($item);
 
             $category_id = $item->category_id;
             $category_name = html_entity_decode($item->category_name, ENT_QUOTES);
@@ -100,12 +112,10 @@ class ListSharedService {
 
     public function item_price($product_id,$quantity=1){
 
-        $product = Product::where('products.id',$product_id)
-        ->select('products.price', 'promotions.id as promotion_id','promotions.name as promotion', 'promotions.store_type_id')
-        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
-        ->withCasts(['promotion' => PromotionCalculator::class])
-        ->get()->first();
+        $product = Product::where('products.id',$product_id)->get()->first();
     
+        $promotion = $product->promotion;
+
         $price = $product->price;
         $total = 0;
 
@@ -113,19 +123,18 @@ class ListSharedService {
             return $total;
         }
 
-        if(!is_null($product->promotion)){
-            $promotion_details = (object)$product->promotion;
-            $remainder = ($quantity % $promotion_details->quantity);
-            $goes_into_fully = floor($quantity / $promotion_details->quantity);
+        if(!is_null($promotion)){
+            $remainder = ($quantity % $promotion->quantity);
+            $goes_into_fully = floor($quantity / $promotion->quantity);
 
-            if($quantity < $promotion_details->quantity){
+            if($quantity < $promotion->quantity){
                 $total = $quantity * $price;   
             } else {
 
-                if( !is_null($promotion_details->for_quantity)){
-                    $total = ( $goes_into_fully * ( $promotion_details->for_quantity * $price)) + ($remainder * $price);
+                if( !is_null($promotion->for_quantity)){
+                    $total = ( $goes_into_fully * ( $promotion->for_quantity * $price)) + ($remainder * $price);
                 } else {
-                    $total = ($goes_into_fully * $promotion_details->price) + ($remainder * $price);
+                    $total = ($goes_into_fully * $promotion->price) + ($remainder * $price);
                 }
             }
 
@@ -150,7 +159,6 @@ class ListSharedService {
 
         $items =  GroceryListItem::
         join('products','products.id','grocery_list_items.product_id')
-        ->leftJoin('promotions','promotions.id','products.promotion_id')
         ->where('list_id',$list->id)
         ->select(
             'products.id as product_id',
@@ -158,9 +166,6 @@ class ListSharedService {
             'products.price as product_price',
             'grocery_list_items.total_price',
             'grocery_list_items.ticked_off',
-            'promotions.id as promotion_id',
-            'promotions.name as promotion',
-            'promotions.store_type_id'
         )
         ->withCasts($casts)
         ->get();
@@ -171,7 +176,6 @@ class ListSharedService {
         $total_price = $list_data['total_price'];
         $ticked_off_items = $list_data['ticked_off_items'];
 
-        
         $update = [];
 
         $price_data = $this->parse_promotion_data($promotions, $total_price);
@@ -255,8 +259,9 @@ class ListSharedService {
 
         foreach($items as $item){
 
-            if(!is_null($item->promotion)){
-                $promotion = (object)$item->promotion;
+            $promotion = $item->promotion;
+
+            if(!is_null($promotion)){
 
                 if(key_exists($promotion->id,$promotions)){
                     $promotions[$promotion->id]['products'][] = $item;

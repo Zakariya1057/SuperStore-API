@@ -18,9 +18,14 @@ class CreatePromotionsTable extends Migration
     {
         Schema::create('promotions', function (Blueprint $table) {
             $table->id();
+
+            $table->string('site_promotion_id')->nullable();
+            $table->string('url')->nullable();
+
             $table->string('name');
-            $table->string('site_promotion_id');
-            $table->string('url');
+            $table->integer('quantity');
+            $table->decimal('price', 9,2)->nullable();
+            $table->integer('for_quantity')->nullable();
 
             $table->boolean('expires')->nullable();
 

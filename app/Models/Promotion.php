@@ -8,9 +8,30 @@ use App\Casts\PromotionCalculator;
 
 class Promotion extends Model
 {
+    protected $visible = [
+        'id',
+        'url',
+        'name',
+
+        'quantity',
+        'price',
+        'for_quantity',
+
+        'store_type_id',
+
+        'products',
+
+        'site_promotion_id',
+        
+        'expires',
+        'starts_at',
+        'ends_at',
+    ];
+
+
     public $casts = [
         'name' => HTMLDecode::class,
-        'promotion' => PromotionCalculator::class
+        'price' => 'double'
     ];
 
     public function products() {
@@ -22,9 +43,6 @@ class Promotion extends Model
             'products.*',            
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
-            'promotions.id as promotion_id',
-            'promotions.name as promotion',
-            'promotions.store_type_id'
         )->groupBy('products.id')->withCasts($this->casts);
     }
 }

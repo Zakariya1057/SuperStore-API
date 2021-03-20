@@ -17,11 +17,13 @@ use Illuminate\Support\Facades\Redis;
 
 class SearchService {
 
-    private $client, $store_service;
+    private $client, $store_service, $promotion_service;
 
     public function __construct(StoreService $store_service){
         $this->client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
+       
         $this->store_service = $store_service;
+        $this->promotion_service = new PromotionService();
     }
 
     ///////////////////////////////////////////     Suggestions     ///////////////////////////////////////////
@@ -192,7 +194,16 @@ class SearchService {
                 'parent_categories.name as parent_category_name',
                 'child_categories.id as child_category_id',
                 'child_categories.name as child_category_name',
-                'promotions.name as promotion'
+
+                'promotions.store_type_id as promotion_store_type_id',
+                'promotions.name as promotion_name',
+                'promotions.quantity as promotion_quantity',
+                'promotions.price as promotion_price',
+                'promotions.for_quantity as promotion_for_quantity',
+    
+                'promotions.expires as promotion_expires',
+                'promotions.starts_at as promotion_starts_at',
+                'promotions.ends_at as promotion_ends_at',
             )
             ->join('category_products','category_products.parent_category_id','parent_categories.id')
             ->join('products','products.id','category_products.product_id')
@@ -214,6 +225,10 @@ class SearchService {
 
             $pagination_data = $this->paginate_results($base_query);
 
+            foreach($pagination_data['products'] as $product){
+                $this->promotion_service->set_product_promotion($product);
+            }
+            
             $results['products'] = $pagination_data['products'];
             $results['paginate'] = $pagination_data['paginate'];
 

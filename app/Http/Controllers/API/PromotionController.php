@@ -23,12 +23,10 @@ class PromotionController extends Controller {
 
         $this->logger_service->log('promotion.index',$request);
 
-        $promotion = Promotion::where('id', $promotion_id)->get()->first();
+        $promotion = Promotion::where('id', $promotion_id)->first();
 
-        $promotion_details = $promotion_service->details( $promotion->id, $promotion->name, $promotion->store_type_id );
+        $promotion->products;
 
-        $promotion_details['products'] = $promotion->products;
-
-        return response()->json(['data' => $promotion_details]);
+        return response()->json(['data' => $promotion]);
     }
 }

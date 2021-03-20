@@ -17,40 +17,38 @@ class PromotionService {
         ->toArray() ?? [];
     }
 
-    public function details($promotion_id, $promotion_name, $store_type_id){
+    public function set_product_promotion($item){
+        $promotion = new Promotion();
 
-        if(is_null($promotion_name)){
-            return;
-        }
-
-        $name = html_entity_decode($promotion_name, ENT_QUOTES);
-        preg_match('/(\d+).+£(\d+\.*\d*)$/',$name,$price_promotion_matches);
-
-        $quantity = $price = $for_quantity = null;
-
-        if($price_promotion_matches){
-            $quantity = (int)$price_promotion_matches[1];
-            $price = (float)$price_promotion_matches[2];
-        }
-
-        preg_match('/(\d+).+\s(\d+)$/',$name,$quantity_promotion_matches);
-        if($quantity_promotion_matches){
-            $quantity = (int)$quantity_promotion_matches[1];
-            $for_quantity = (int)$quantity_promotion_matches[2];
-        }
-
-        if(!$quantity_promotion_matches && !$price_promotion_matches){
-            return null;
-        }
-
-        return [
-            'id' => $promotion_id, 
-            'name' => $name, 
-            'quantity' => $quantity, 
-            'price' => $price, 
-            'for_quantity' => $for_quantity,
-            'store_type_id' => $store_type_id
+        $promotions_fields = [
+            'id',
+            'url',
+            'name',
+    
+            'quantity',
+            'price',
+            'for_quantity',
+    
+            'store_type_id',
+            
+            'expires',
+            'starts_at',
+            'ends_at',
         ];
+
+        foreach($promotions_fields as $field){
+            $item_field = 'promotion_' . $field;
+
+            $promotion->{$field} = $item->{$item_field};
+            unset($item->{$item_field});
+        }
+
+        if(is_null($promotion->name)){
+            return null;
+        } else {
+            $item->promotion = $promotion;
+        }
+
     }
 }
 
