@@ -70,7 +70,7 @@ class ListSharedService {
             $join->on('category_aisles.category_id','=','grocery_list_items.parent_category_id')
                  ->where('category_aisles.store_id',$list->store_id);
         })
-        ->orderBy('grocery_list_items.parent_category_id','ASC')
+        ->orderBy('parent_categories.parent_category_id','DESC')
         ->withCasts(
             $casts
         )
