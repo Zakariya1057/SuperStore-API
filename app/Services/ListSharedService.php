@@ -43,7 +43,6 @@ class ListSharedService {
             'products.price as price',
             'products.currency as currency',
             'grocery_list_items.quantity as quantity',
-            'category_aisles.name as aisle_name',
             'products.weight as weight',
             'products.small_image as small_image',
             'products.large_image as large_image',
@@ -66,11 +65,7 @@ class ListSharedService {
         ->join('parent_categories', 'parent_categories.id','=','grocery_list_items.parent_category_id')
         ->join('products', 'products.id','=','grocery_list_items.product_id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
-        ->leftJoin('category_aisles', function ($join) use($list) {
-            $join->on('category_aisles.category_id','=','grocery_list_items.parent_category_id')
-                 ->where('category_aisles.store_id',$list->store_id);
-        })
-        ->orderBy('parent_categories.parent_category_id','DESC')
+        ->orderBy('grocery_list_items.id','ASC')
         ->withCasts(
             $casts
         )
@@ -90,10 +85,8 @@ class ListSharedService {
 
             $category_id = $item->category_id;
             $category_name = html_entity_decode($item->category_name, ENT_QUOTES);
-            $aisle_name = $item->aisle_name;
             
             unset($item->category_name);
-            unset($item->aisle_name);
             unset($item->category_id);
             
             if(key_exists($category_name, $categories)){
@@ -102,7 +95,7 @@ class ListSharedService {
                 $categories[$category_name] = [ 
                     'id' => $category_id,
                     'name' =>  $category_name,
-                    'aisle_name' => $aisle_name,
+                    'aisle_name' => '',
                     'items' => [$item]
                 ];
             }
