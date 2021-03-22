@@ -56,7 +56,7 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         Route::get('products/{parent_cateogy_id}', 'API\CategoryController@products')->name('grocery.products');
     });
 
-    Route::get('promotion/{promotion_id}', 'API\PromotionController@index')->name('promotion.index');
+    Route::get('promotion/{promotion_id}', 'API\PromotionController@show')->name('promotion.show');
     
     Route::prefix('search')->group(function () {
         Route::post('/suggestions', 'API\SearchController@suggestions')->name('search.suggestions');

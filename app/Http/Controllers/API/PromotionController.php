@@ -18,7 +18,7 @@ class PromotionController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function index($promotion_id, PromotionService $promotion_service, Request $request){
+    public function show($promotion_id, Request $request){
         $promotion_id = $this->sanitize_service->sanitizeField($promotion_id);
 
         $this->logger_service->log('promotion.index',$request);
