@@ -17,7 +17,7 @@ class CreateGrandParentCategoriesTable extends Migration
     {
         Schema::create('grand_parent_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
 
             $table->string('site_category_id');
             $table->unsignedBigInteger('store_type_id');
@@ -26,7 +26,8 @@ class CreateGrandParentCategoriesTable extends Migration
             
             $table->foreign('store_type_id')->references('id')->on('store_types');
 
-            $table->index('name');
+            $table->unique(['name', 'store_type_id']);
+
             $table->index('site_category_id');
             
             $table->timestamp('created_at')->useCurrent();

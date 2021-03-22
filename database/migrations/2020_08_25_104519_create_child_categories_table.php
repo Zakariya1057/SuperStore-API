@@ -16,7 +16,7 @@ class CreateChildCategoriesTable extends Migration
     {
         Schema::create('child_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
 
             $table->unsignedBigInteger('parent_category_id');
 
@@ -28,7 +28,8 @@ class CreateChildCategoriesTable extends Migration
             $table->foreign('store_type_id')->references('id')->on('store_types');
             $table->foreign('parent_category_id')->references('id')->on('parent_categories');
 
-            $table->index('name');
+            $table->unique(['name', 'store_type_id', 'parent_category_id'],'child_categories_unique');
+            
             $table->index('site_category_id');
             
             $table->timestamp('created_at')->useCurrent();
