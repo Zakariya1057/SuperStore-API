@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\FeaturedItem;
 use App\Models\Promotion;
+use Carbon\Carbon;
 
 class PromotionService {
 
@@ -71,10 +72,15 @@ class PromotionService {
             unset($item->{$item_field});
         }
 
-        if(is_null($promotion->name)){
-            return null;
-        } else {
+        if(!is_null($promotion->name)){
             $item->promotion = $promotion;
+
+            // If promotion expired, don't return it
+            if(!is_null($promotion->ends_at)){
+                if(Carbon::now() > $promotion->ends_at){
+                    $item->promotion = null;
+                }
+            }
         }
 
     }

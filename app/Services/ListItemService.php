@@ -79,10 +79,10 @@ class ListItemService extends ListSharedService {
                 ]);
 
             }
+            
+            event(new GroceryListChangedEvent($list));
 
         }
-
-        event(new GroceryListChangedEvent($list));
 
     }
 

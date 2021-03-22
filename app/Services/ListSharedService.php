@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\Product;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -121,32 +122,45 @@ class ListSharedService {
 
         if(!is_null($promotion)){
 
-            if(!is_null($promotion->minimum)){
-                $minimum = $promotion->minimum;
-                $promotion_price = $promotion->price;
+            $promotion_expired = false;
 
-                if($quantity >= $minimum){
-                    $total = $quantity * $promotion_price;
-                } else {
-                    $total = $quantity * $price;
-                }
-
-            } else {
-                $remainder = ($quantity % $promotion->quantity);
-                $goes_into_fully = floor($quantity / $promotion->quantity);
-
-                if($quantity < $promotion->quantity){
-                    $total = $quantity * $price;   
-                } else {
-
-                    if( !is_null($promotion->for_quantity)){
-                        $total = ( $goes_into_fully * ( $promotion->for_quantity * $price)) + ($remainder * $price);
-                    } else {
-                        $total = ($goes_into_fully * $promotion->price) + ($remainder * $price);
-                    }
+            if(!is_null($promotion->ends_at)){
+                if(Carbon::now() > $promotion->ends_at){
+                    $promotion_expired = true;
                 }
             }
 
+            if(!$promotion_expired){
+
+                if(!is_null($promotion->minimum)){
+                    $minimum = $promotion->minimum;
+                    $promotion_price = $promotion->price;
+    
+                    if($quantity >= $minimum){
+                        $total = $quantity * $promotion_price;
+                    } else {
+                        $total = $quantity * $price;
+                    }
+    
+                } else {
+                    $remainder = ($quantity % $promotion->quantity);
+                    $goes_into_fully = floor($quantity / $promotion->quantity);
+    
+                    if($quantity < $promotion->quantity){
+                        $total = $quantity * $price;   
+                    } else {
+    
+                        if( !is_null($promotion->for_quantity)){
+                            $total = ( $goes_into_fully * ( $promotion->for_quantity * $price)) + ($remainder * $price);
+                        } else {
+                            $total = ($goes_into_fully * $promotion->price) + ($remainder * $price);
+                        }
+                    }
+                }
+
+            } else {
+                $total = $quantity * $price;
+            }
 
         } else {
             $total = $quantity * $price;
@@ -277,13 +291,23 @@ class ListSharedService {
 
             if(!is_null($promotion)){
 
-                if(key_exists($promotion->id,$promotions)){
-                    $promotions[$promotion->id]['products'][] = $item;
-                } else {
-                    $promotions[$promotion->id] = [
-                        'details' => $promotion,
-                        'products' => [$item],
-                    ];
+                $promotion_expired = false;
+
+                if(!is_null($promotion->ends_at)){
+                    if(Carbon::now() > $promotion->ends_at){
+                        $promotion_expired = true;
+                    }
+                }
+                
+                if(!$promotion_expired){
+                    if(key_exists($promotion->id,$promotions)){
+                        $promotions[$promotion->id]['products'][] = $item;
+                    } else {
+                        $promotions[$promotion->id] = [
+                            'details' => $promotion,
+                            'products' => [$item],
+                        ];
+                    }
                 }
             }
 
