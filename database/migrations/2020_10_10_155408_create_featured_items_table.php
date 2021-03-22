@@ -29,7 +29,7 @@ class CreateFeaturedItemsTable extends Migration
             $table->index('type');
 
             $table->foreign('store_type_id')->references('id')->on('store_types');
-            $table->unique(['featured_id', 'type']);
+            $table->unique(['store_type_id', 'featured_id', 'type']);
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
