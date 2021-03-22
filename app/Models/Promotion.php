@@ -32,7 +32,12 @@ class Promotion extends Model
 
     public $casts = [
         'name' => HTMLDecode::class,
-        'price' => 'double'
+        'price' => 'double',
+        
+        'expires' => 'Bool',
+
+        'starts_at' => 'datetime:Y-m-d H:i:s',
+        'ends_at' => 'datetime:Y-m-d H:i:s',
     ];
 
     public function products() {
