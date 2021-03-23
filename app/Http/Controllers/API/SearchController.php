@@ -88,34 +88,6 @@ class SearchController extends Controller {
 
         return response()->json(['data' => $results]);
     }
-
-    public function promotion_results(Request $request){
-
-        // $validated_data = $request->validate([
-        //     'data.type' => 'required',
-        //     'data.detail' => 'required',
-
-        //     'data.sort' => '', // Rating, Price, Sugar, etc.
-        //     'data.order' => '', // asc/desc
-
-        //     'data.dietary' => '', // Halal, Vegetarian
-        //     'data.child_category' => '',
-        //     'data.brand' => '',
-
-        //     'data.text_search' => ''
-        // ]);
-
-        // $data = $validated_data['data'];
-
-        // $data = $this->sanitize_service->sanitizeAllFields($data);
-
-        // $this->logger_service->log('search.results',$request);
-
-        // $results = $this->search_service->results($data);
-
-        // return response()->json(['data' => $results]);
-
-    }
     
     
 }

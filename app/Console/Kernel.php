@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\CacheHome',
         'App\Console\Commands\CacheGroceries',
         'App\Console\Commands\PromotionExpired',
+        'App\Console\Commands\SaleExpired',
     ];
 
     /**

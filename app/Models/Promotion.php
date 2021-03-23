@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Casts\HTMLDecode;
-use App\Casts\PromotionCalculator;
 
 class Promotion extends Model
 {

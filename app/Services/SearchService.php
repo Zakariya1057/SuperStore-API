@@ -154,21 +154,23 @@ class SearchService {
 
         $text_search = $data['text_search'] ?? false;
 
+        $item_ids = [];
+
         if($text_search){
             // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
-            $list_id = [];
-
             $search_type = preg_replace('/child_|parent_/i','',$type);
 
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), 30, $store_type_id);
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 30);
 
+            return $response;
+            
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
                 $name = trim($source['name']);
-                $list_id[ $source['id'] ] = $name;
+                $item_ids[ $source['id'] ] = $name;
             }
 
-            $list_id = array_keys($list_id);
+            $item_ids = array_keys($item_ids);
         }
 
         $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}_page:$page";
@@ -180,6 +182,7 @@ class SearchService {
         );
         
         $cached_results = Redis::get($cache_key);
+
         if($cached_results){
             $results = json_decode($cached_results);
         } else {
@@ -216,7 +219,7 @@ class SearchService {
             ->withCasts($casts);
             
             if($text_search){
-                $base_query = $this->text_search_where($list_id, $type, $base_query);
+                $base_query = $this->text_search_where($item_ids, $type, $base_query);
             } else {
                 $base_query = $this->search_where($type, $query, $store_type_id, $base_query);
             }   
@@ -267,15 +270,20 @@ class SearchService {
         return $base_query;
     }
 
-    private function text_search_where($item_id, $type, Builder $base_query){
-        if($type == 'products'){
-            $base_query = $base_query->whereIn('products.id', $item_id);
-        } elseif($type == 'child_categories'){
-            $base_query = $base_query->where('child_categories.id',$item_id);
-        } elseif($type == 'parent_categories'){
-            $base_query = $base_query->where('parent_categories.id', $item_id);
-        } elseif($type == 'promotions'){
-            $base_query = $base_query->where('promotions.id', $item_id);
+    private function text_search_where($item_ids, $type, Builder $base_query){
+
+        if(count($item_ids) > 0){
+
+            if($type == 'products'){
+                $base_query = $base_query->whereIn('products.id', $item_ids);
+            } elseif($type == 'child_categories'){
+                $base_query = $base_query->where('child_categories.id',$item_ids);
+            } elseif($type == 'parent_categories'){
+                $base_query = $base_query->where('parent_categories.id', $item_ids);
+            } elseif($type == 'promotions'){
+                $base_query = $base_query->where('promotions.id', $item_ids);
+            }
+
         }
 
         return $base_query;

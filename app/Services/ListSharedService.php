@@ -114,6 +114,14 @@ class ListSharedService {
         $promotion = $product->promotion;
 
         $price = $product->price;
+
+        // Check if sale expired, use old price instead of new
+        if(!is_null($product->sale_ends_at)){
+            if(Carbon::now() > $product->sale_ends_at){
+                $price = $product->old_price;
+            }
+        }
+
         $total = 0;
 
         if($quantity == 0){
@@ -188,7 +196,7 @@ class ListSharedService {
             'products.id as product_id',
             'grocery_list_items.quantity as product_quantity',
             'products.price as product_price',
-            'grocery_list_items.total_price',
+            // 'grocery_list_items.total_price',
             'grocery_list_items.ticked_off',
         )
         ->withCasts($casts)
@@ -286,6 +294,7 @@ class ListSharedService {
         $ticked_off_items = 0;
 
         foreach($items as $item){
+            $item->total_price = $this->item_price($item->product_id, $item->product_quantity);
 
             $promotion = $item->promotion;
 
