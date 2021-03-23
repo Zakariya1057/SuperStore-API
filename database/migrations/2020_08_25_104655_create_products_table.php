@@ -46,6 +46,7 @@ class CreateProductsTable extends Migration
 
             $table->string('brand')->nullable();
             $table->string('weight')->nullable();
+            $table->string('recipe')->nullable();
             $table->text('storage')->nullable();
 
             $table->string('dietary_info', 500)->nullable();

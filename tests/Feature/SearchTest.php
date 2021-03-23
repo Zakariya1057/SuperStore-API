@@ -14,14 +14,19 @@ class SearchTest extends TestCase
      * @return void
      */
     public function testSearchSuggestionsResponse(){
-        $response = $this->get('/api/search/suggestions/pasta');
+        $response = $this->postJson('/api/search/suggestions', ['data' => [
+            'query' => 'Bread', 
+            'store_type_id' => 2
+        ]]);
 
         $response->assertStatus(200)->assertJsonStructure(['data' => [
             'stores',
-            'parent_categories',
+            'store_sales',
             'child_categories',
+            'parent_categories',
             'products',
-            'categories',
+            'promotions',
+            'brands'
         ]]);
     }
 
@@ -30,20 +35,62 @@ class SearchTest extends TestCase
      *
      * @return void
      */
-    public function testSearchResultsResponse(){
-        $response = $this->post('api/search/results', [
-            "data" => [
-                "type" => "products",
-                "detail" => "ASDA Pineapple Lolly"
+    public function testSearchProductResultsResponse(){
+        $response = $this->post('/api/search/results/product?page=1', [
+            'data' => [
+                'store_type_id' => 2, 
+                'type' => 'child_categories', 
+                'dietary' => '', 
+                'brand' => '', 
+                'text_search' => false, 
+                'sort' => '', 
+                'order' => '', 
+                'query' => 'Alcoholic Drinks', 
+                'child_category' => ''
             ]
         ]);
 
         $response->assertStatus(200)->assertJsonStructure(['data' => [
-            'stores',
             'products',
             'filter',
-            'products',
-            'paginate',
+            'paginate'
+        ]]);
+    }
+
+
+    /**
+     * A basic feature to test home json.
+     *
+     * @return void
+     */
+    public function testSearchStoresResultsResponse(){
+        $response = $this->post('/api/search/results/stores', [
+            'data' => [
+                "store_type_id" => 2,
+                "latitude" => 43.6532,
+                "longitude" => -79.3832
+            ]
+        ]);
+
+        $response->assertStatus(200)->assertJsonStructure(['data' => [
+            '*' => [
+                'id',
+                'name',
+                'description',
+                'store_image',
+                'google_url',
+                'uber_url',
+                'url',
+                'last_checked',
+                'site_store_id',
+                'store_type_id',
+                'created_at',
+                'updated_at',
+                'large_logo',
+                'small_logo',
+                'location',
+                'opening_hours',
+            ]
         ]]);
     }
 }

@@ -25,7 +25,7 @@ class StoreTest extends TestCase
             'uber_url',
             'url',
             'last_checked',
-            'store_site_id',
+            'site_store_id',
             'store_type_id',
             'created_at',
             'updated_at',

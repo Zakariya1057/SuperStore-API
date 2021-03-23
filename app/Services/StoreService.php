@@ -64,7 +64,8 @@ class StoreService {
             $select[] = DB::raw('( 6367 * acos( cos( radians('.$latitude.') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( latitude ) ) ) ) AS distance');
 
             $query_builder = $query_builder
-            ->having('distance', '<', 50)
+            // ->having('distance', '<', 50)
+            ->having('distance', '>', 0)
             ->orderBy('distance');
         }
 

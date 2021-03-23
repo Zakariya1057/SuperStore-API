@@ -15,13 +15,14 @@ class CategoryTest extends TestCase
      */
     public function testCategoryResponse()
     {
-        $response = $this->get('/api/grocery/1');
+        $response = $this->get('/api/grocery/categories/1');
 
         $response->assertStatus(200)->assertJsonStructure(['data' => [
             '*' => [
                 'id',
                 'name',
-                'child_categories' => [
+                'store_type_id',
+                'parent_categories' => [
                     '*' => [
                         'id',
                         'name',
@@ -44,33 +45,47 @@ class CategoryTest extends TestCase
     {
         $response = $this->get('/api/grocery/products/1');
 
+        
         $response->assertStatus(200)->assertJsonStructure(['data' => [
             '*' => [
                 'id',
                 'name',
                 'parent_category_id',
+                'store_type_id',
                 'products' => [
                     '*' => [
                         'id',
                         'name',
-                        'large_image',
                         'small_image',
+                        'large_image',
+                        
+                        'store_type_id',
+                        
                         'description',
+                        'features',
+                        'dimensions',
+                        
                         'price',
                         'old_price',
                         'is_on_sale',
-                        'promotion_id',
-                        'weight' ,
-                        'brand',
+                        'sale_ends_at',
+                        
+                        'currency',
+                        
                         'storage',
-                        'dietary_info',
-                        'allergen_info',
+                        'weight',
+                        
                         'avg_rating',
                         'total_reviews_count',
-                        'store_type_id',
+                        
+                        'dietary_info',
+                        'allergen_info',
+                        
+                        'brand',
+                        
                         'parent_category_id',
                         'parent_category_name',
-                        'promotion_id',
+                        'child_category_name',
                     ]
                 ]
             ]

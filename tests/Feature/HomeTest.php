@@ -14,15 +14,23 @@ class HomeTest extends TestCase
      * @return void
      */
     public function testHomeResponse(){
-        $response = $this->get('/api/home');
+        $response = $this->postJson('/api/home', [
+            'data' => [
+                'latitude' => 43.6532,
+                'longitude' => -79.3832,
+                'store_type_id' => 2
+            ]
+        ]);
 
         $response->assertStatus(200)->assertJsonStructure(['data' => [
-            'groceries',
             'lists',
-            'featured',
             'stores',
-            'categories',
+            'featured',
+            'groceries',
+            'monitoring',
             'promotions',
+            'on_sale',
+            'categories'
         ]]);
     }
     

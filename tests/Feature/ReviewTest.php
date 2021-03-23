@@ -16,7 +16,7 @@ class ReviewTest extends TestCase
      */
     public function testReviewsResponse()
     {
-        $response = $this->get('/api/product/1/reviews');
+        $response = $this->get('/api/review/1');
 
         $response->assertStatus(200)->assertJsonStructure(['data' => [
             '*' => [
@@ -44,7 +44,7 @@ class ReviewTest extends TestCase
     {
         $user = factory(User::class)->make();
 
-        $response = $this->actingAs($user)->postJson('/api/product/1/review/delete');
+        $response = $this->actingAs($user)->postJson('/api/review/1/delete');
 
         $response->assertStatus(200)->assertJson(['data' => ['status' => 'success'] ]);
     }
@@ -58,7 +58,7 @@ class ReviewTest extends TestCase
     {
         $user = factory(User::class)->make();
 
-        $response = $this->actingAs($user)->postJson('/api/product/1/review/delete');
+        $response = $this->actingAs($user)->postJson('/api/review/1/delete');
 
         $response->assertStatus(200)->assertJson(['data' => ['status' => 'success'] ]);
     }

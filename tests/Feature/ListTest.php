@@ -16,7 +16,7 @@ class ListTest extends TestCase
      */
     public function testListUnauthorised()
     {
-        $response = $this->getJson('/api/list');
+        $response = $this->getJson('/api/list/stores/2');
         $response->assertUnauthorized()->assertSee('Unauthenticated');
     }
 
@@ -29,7 +29,7 @@ class ListTest extends TestCase
     {
         $user = factory(User::class)->make();
 
-        $response = $this->actingAs($user)->getJson('/api/list');
+        $response = $this->actingAs($user)->getJson('/api/list/stores/2');
 
         $response->assertStatus(200)->assertJsonStructure(['data' => [
             '*' => [
@@ -44,10 +44,65 @@ class ListTest extends TestCase
                 'total_items',
                 'old_total_price',
                 'categories',
+                'currency',
+                'store_type_id',
                 'updated_at',
                 'created_at',
             ]
 
+        ]]);
+    }
+
+
+        /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
+    public function testAuthListResponse()
+    {
+        $user = factory(User::class)->make();
+
+        $user->id = 16;
+
+        $response = $this->actingAs($user)->get('/api/list/18');
+
+        $response->assertStatus(200)->assertJsonStructure(['data' => [
+            'id',
+            'identifier',
+            'name',
+            'status',
+            'user_id',
+            'total_price',
+            'ticked_off_items',
+            'total_items',
+            'old_total_price',
+            'categories',
+            'currency',
+            'categories' => [
+                '*' => [
+                    'id',
+                    'name',
+                    'items' => [
+                        '*' => [
+                            'id',
+                            'name',
+                            'product_id',
+                            'total_price',
+                            'price',
+                            'currency',
+                            'quantity',
+                            'weight',
+                            'small_image',
+                            'large_image',
+                            'ticked_off'
+                        ]
+                    ]
+                ]
+            ],
+            'store_type_id',
+            'updated_at',
+            'created_at',
         ]]);
     }
 }

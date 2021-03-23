@@ -17,8 +17,8 @@ class UserTest extends TestCase
     {
         $response = $this->postJson('/api/user/login', [
             'data' => [
-                "email" => "zakaria2011@live.no",
-                "password" => "passwrod",
+                "email" => "email@email.com",
+                "password" => "password12345",
                 "notification_token" => ""
             ]
         ]);
@@ -36,8 +36,8 @@ class UserTest extends TestCase
         // Change to apple testing account. Later
         $response = $this->postJson('/api/user/login', [
             'data' => [
-                "email" => "zakaria2011@live.no",
-                "password" => "password1234",
+                "email" => "email@email.com",
+                "password" => "password123451",
                 "notification_token" => ""
             ]
         ]);
@@ -61,7 +61,7 @@ class UserTest extends TestCase
         // Change to apple testing account. Later
         $response = $this->postJson('/api/user/reset/send-code', [
             'data' => [
-                "email" => "zakaria2011@live.no",
+                "email" => "email@email.com",
             ]
         ]);
 

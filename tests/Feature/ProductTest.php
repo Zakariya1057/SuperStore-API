@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -19,28 +20,100 @@ class ProductTest extends TestCase
         $response->assertStatus(200)->assertJsonStructure(['data' => [
             'id',
             'name',
-            'large_image',
             'small_image',
+            'large_image',
+            'images',
+            
+            'store_type_id',
+            
             'description',
+            'features',
+            'dimensions',
+            
             'price',
             'old_price',
             'is_on_sale',
-            'promotion_id',
-            'weight' ,
-            'brand',
+            'sale_ends_at',
+            
+            'currency',
+            
             'storage',
-            'dietary_info',
-            'allergen_info',
+            'weight',
+            
             'avg_rating',
             'total_reviews_count',
-            'store_type_id',
-            'parent_category_id',
-            'parent_category_name',
-            'promotion',
+            
+            'dietary_info',
+            'allergen_info',
+            
+            'brand',
             'favourite',
             'monitoring',
-            'ingredients',
+            
             'reviews',
+            'ingredients',
+            
+            'recommended',
+            
+            'parent_category_id',
+            'parent_category_name',
+            
+            'promotion',
         ]]);
+    }
+
+
+    public function testFavouriteProducts(){
+        $user = factory(User::class)->make();
+        
+        $response = $this->actingAs($user)->get('/api/favourites');
+
+        $response->assertStatus(200)->assertJsonStructure(['data' => [
+            '*' => [
+                'id',
+                'name',
+                'small_image',
+                'large_image',
+                'images',
+                
+                'store_type_id',
+                
+                'description',
+                'features',
+                'dimensions',
+                
+                'price',
+                'old_price',
+                'is_on_sale',
+                'sale_ends_at',
+                
+                'currency',
+                
+                'storage',
+                'weight',
+                
+                'avg_rating',
+                'total_reviews_count',
+                
+                'dietary_info',
+                'allergen_info',
+                
+                'brand',
+                'favourite',
+                'monitoring',
+                
+                'reviews',
+                'ingredients',
+                
+                'recommended',
+                
+                'parent_category_id',
+                'parent_category_name',
+                
+                'promotion',
+            ]
+
+        ]]);
+
     }
 }
