@@ -48,6 +48,8 @@ class PromotionExpired extends Command
 
         $promotions = Promotion::whereDate('ends_at', '<', Carbon::now())->get();
 
+        $this->info(count($promotions) . ' Expired Promotions Found');
+
         foreach($promotions as $promotion){
             $id = $promotion->id;
             $name = $promotion->name;

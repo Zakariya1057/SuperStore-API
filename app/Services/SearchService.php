@@ -36,7 +36,8 @@ class SearchService {
             'child_categories' => [],
             'products' => [],
             'promotions' => [],
-            'store_sales' => []
+            'store_sales' => [],
+            'brands' => [],
         ];
 
         $cache_key = 'search_suggestions:' . str_replace(' ','_', $query) . '_store_type_id:' . $store_type_id;
@@ -116,6 +117,7 @@ class SearchService {
         $child_categories = ChildCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
         $parent_categories = ParentCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
         $promotions = Promotion::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
+        $brands = Product::select(['id','brand as name'])->where([ ['store_type_id', $store_type_id], ['brand', 'like', "%$query%"] ])->groupBy('brand')->orderByRaw('total_reviews_count / avg_rating desc')->limit(2)->get()->toArray();
 
         if((count($child_categories) + count($parent_categories)) <= 3 ){
             $product_limit = 10;
@@ -130,6 +132,7 @@ class SearchService {
         $results['child_categories'] = $child_categories ?? [];
         $results['products'] = $products ?? []; 
         $results['promotions'] = $promotions ?? []; 
+        $results['brands'] = $brands ?? []; 
     }
 
     ///////////////////////////////////////////     Suggestions     ///////////////////////////////////////////
@@ -259,6 +262,8 @@ class SearchService {
             $base_query = $base_query->where([ ['parent_categories.store_type_id', $store_type_id], ['parent_categories.name', $detail] ]);
         } elseif($type == 'promotions'){
             $base_query = $base_query->where([ ['promotions.store_type_id', $store_type_id], ['promotions.name', $detail] ]);
+        } elseif($type == 'brands'){
+            $base_query = $base_query->where([ ['products.store_type_id', $store_type_id], ['brand', $detail] ]);
         } elseif($type == 'store_sales'){
             $base_query = $base_query
             ->where('products.store_type_id', $store_type_id)
@@ -391,6 +396,7 @@ class SearchService {
         if($index == 'products'){
             $fields_match = ['name','description','brand','dietary_info'];
             $fields_should = ['name', 'weight','brand'];
+
             $sort = [
                     
                 [
@@ -413,6 +419,9 @@ class SearchService {
                 '_score',
                 
             ];
+        } elseif($index == 'brands'){
+            $fields_match = ['brand'];
+            $fields_should = ['brand'];
         } else {
             $fields_match = ['name'];
             $fields_should = ['name', 'weight'];
