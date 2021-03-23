@@ -150,7 +150,7 @@ class ListSharedService {
                         $total = $quantity * $price;
                     }
     
-                } else {
+                } else if (!is_null($promotion->quantity)){
                     $remainder = ($quantity % $promotion->quantity);
                     $goes_into_fully = floor($quantity / $promotion->quantity);
     
@@ -164,6 +164,8 @@ class ListSharedService {
                             $total = ($goes_into_fully * $promotion->price) + ($remainder * $price);
                         }
                     }
+                } else {
+                    $total = $quantity * $price;
                 }
 
             } else {
@@ -279,6 +281,9 @@ class ListSharedService {
     
                 }
 
+            } else {
+                $data['old_total_price'] = $total_price;
+                $data['total_price'] = $new_total_price; 
             }
 
         }

@@ -52,7 +52,7 @@ class CreateProductsTable extends Migration
             $table->string('dietary_info', 500)->nullable();
             $table->string('allergen_info', 500)->nullable();
 
-            $table->decimal('avg_rating', 4,2)->nullable();
+            $table->decimal('avg_rating', 5,2)->nullable();
             $table->integer('total_reviews_count')->nullable();
             
             $table->unsignedBigInteger('store_type_id');
