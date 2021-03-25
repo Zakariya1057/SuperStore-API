@@ -12,7 +12,7 @@ use App\Models\FeaturedItem;
 class CategoryService {
     
     public function grocery_categories($store_type_id){
-        $grand_parent_categories = GrandParentCategory::where('store_type_id', $store_type_id)->get();
+        $grand_parent_categories = GrandParentCategory::where('grand_parent_categories.store_type_id', $store_type_id)->get();
 
         foreach($grand_parent_categories as $category){
             $category->parent_categories;

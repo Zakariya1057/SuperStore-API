@@ -59,7 +59,7 @@ class ListTest extends TestCase
         $response = $this->actingAs($user)->postJson('/api/list/create/', [
             'data' => [
                 'name' => 'Names',
-                'store_type_id' => 2, 
+                'store_type_id' => 1, 
                 'identifier' => '00F7301B-4607-43B0-94E6-362EB496A282'
             ]
         ]);
@@ -77,9 +77,9 @@ class ListTest extends TestCase
     {
         $user = factory(User::class)->make();
 
-        $user->id = 16;
+        $user->id = 1;
 
-        $response = $this->actingAs($user)->get('/api/list/18');
+        $response = $this->actingAs($user)->get('/api/list/1');
 
         $response->assertStatus(200)->assertJsonStructure(['data' => [
             'id',
