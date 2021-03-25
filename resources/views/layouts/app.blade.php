@@ -35,7 +35,7 @@
 
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link btn-light btn text-dark font-weight-bold px-3" href="#">Download</a>
+                        <a class="nav-link btn-light btn text-dark font-weight-bold px-3" href="https://apps.apple.com/za/app/superstore-groceries-offers/id1537442192">Download</a>
                     </li>
                 </ul>
 

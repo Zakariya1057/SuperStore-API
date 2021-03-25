@@ -37,7 +37,6 @@ class CreateProductsTable extends Migration
             
             $table->unsignedBigInteger('promotion_id')->nullable();
             $table->string('site_product_id')->nullable();
-            $table->json('upcs')->nullable();
 
             $table->boolean('available')->default(1);
 

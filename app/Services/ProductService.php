@@ -93,7 +93,8 @@ class ProductService {
         ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
-        // ->orderBy('featured_items.updated_at', 'DESC')
+        ->whereNotNull('products.small_image')
+        ->orderBy('products.price', 'DESC')
         ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get() ?? [];
     }
 
