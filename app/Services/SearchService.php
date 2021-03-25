@@ -165,8 +165,6 @@ class SearchService {
 
             $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 30);
 
-            return $response;
-            
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
                 $name = trim($source['name']);
@@ -289,6 +287,8 @@ class SearchService {
                 $base_query = $base_query->where('promotions.id', $item_ids);
             }
 
+        } else {
+            $base_query = $base_query->where('products.id', 0);
         }
 
         return $base_query;
