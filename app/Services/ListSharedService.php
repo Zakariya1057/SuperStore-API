@@ -8,7 +8,6 @@ use App\Models\Product;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ListSharedService {
 
@@ -193,13 +192,27 @@ class ListSharedService {
 
         $items =  GroceryListItem::
         join('products','products.id','grocery_list_items.product_id')
+        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
         ->where('list_id',$list->id)
         ->select(
             'products.id as product_id',
             'grocery_list_items.quantity as product_quantity',
             'products.price as product_price',
-            // 'grocery_list_items.total_price',
             'grocery_list_items.ticked_off',
+
+            'promotions.id as promotion_id',
+            'promotions.store_type_id as promotion_store_type_id',
+            'promotions.name as promotion_name',
+            'promotions.quantity as promotion_quantity',
+            'promotions.price as promotion_price',
+            'promotions.for_quantity as promotion_for_quantity',
+
+            'promotions.minimum as promotion_minimum',
+            'promotions.maximum as promotion_maximum',
+
+            'promotions.expires as promotion_expires',
+            'promotions.starts_at as promotion_starts_at',
+            'promotions.ends_at as promotion_ends_at',
         )
         ->withCasts($casts)
         ->get();
@@ -242,7 +255,7 @@ class ListSharedService {
             foreach($products as $product){
                 $total_quantity += $product->product_quantity;
             }
-
+            
             if(!is_null($promotion_details->quantity)){
 
                 $quantity = $promotion_details->quantity;
@@ -273,17 +286,17 @@ class ListSharedService {
                     }
     
                     $new_total_price = ($total_price - $previous_total_price) + $new_total;
-    
+
                     if($new_total < $previous_total_price){
                         $data['old_total_price'] = $total_price;
                         $data['total_price'] = $new_total_price;
                     }
-    
+                    
                 }
 
             } else {
-                $data['old_total_price'] = $total_price;
-                $data['total_price'] = $new_total_price; 
+                $data['old_total_price'] = null;
+                $data['total_price'] = $total_price;
             }
 
         }
@@ -301,8 +314,10 @@ class ListSharedService {
         foreach($items as $item){
             $item->total_price = $this->item_price($item->product_id, $item->product_quantity);
 
-            $promotion = $item->promotion;
+            $this->promotion_service->set_product_promotion($item);
 
+            $promotion = $item->promotion;
+            
             if(!is_null($promotion)){
 
                 $promotion_expired = false;
