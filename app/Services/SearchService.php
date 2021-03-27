@@ -42,20 +42,19 @@ class SearchService {
 
         $cache_key = 'search_suggestions:' . str_replace(' ','_', $query) . '_store_type_id:' . $store_type_id;
 
-        // $cached_results = Redis::get($cache_key);
-        $cached_results = null;
+        $cached_results = Redis::get($cache_key);
 
         if($cached_results){
             $results = json_decode($cached_results);
         } else {
 
-            // try {
-                // $this->suggestions_by_group($query, $results, $store_type_id);
-            // } catch(Exception $e){
-            //     Backup search in case elasticsearch fails from now
-            //     Log::critical('Elasticsearch Error: ' . $e);
+            try {
+                $this->suggestions_by_group($query, $results, $store_type_id);
+            } catch(Exception $e){
+                // Backup search in case elasticsearch fails from now
+                Log::critical('Elasticsearch Error: ' . $e);
                 $this->database_suggestions($query, $results, $store_type_id);         
-            // }
+            }
 
 
             if(count($results['stores']) > 0){
@@ -67,8 +66,8 @@ class SearchService {
                 ];
             }
 
-            // Redis::set($cache_key, json_encode($results));
-            // Redis::expire($cache_key, 86400);
+            Redis::set($cache_key, json_encode($results));
+            Redis::expire($cache_key, 86400);
 
         }
 
