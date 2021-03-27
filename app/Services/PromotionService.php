@@ -72,7 +72,9 @@ class PromotionService {
             unset($item->{$item_field});
         }
 
-        if(!is_null($promotion->name)){
+        if(is_null($item->promotion_id)){
+            $item->promotion = null;
+        } else {
             $item->promotion = $promotion;
 
             // If promotion expired, don't return it
