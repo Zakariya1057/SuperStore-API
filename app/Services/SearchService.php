@@ -436,6 +436,8 @@ class SearchService {
             $fields_should = ['brand'];
 
             $index = 'products';
+        } else if($index == 'promotions'){
+            $fields_match = ['name'];
         } else {
             $fields_match = ['name'];
             $fields_should = ['name', 'weight'];
