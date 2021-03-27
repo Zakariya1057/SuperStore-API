@@ -23,7 +23,7 @@ class UserTest extends TestCase
             ]
         ]);
 
-        $response->assertStatus(401)->assertJson(['data' => ['error' => 'Incorrect password.'] ]);
+        $response->assertStatus(403)->assertJson(['data' => ['error' => 'Incorrect password.'] ]);
     }
 
     /**
