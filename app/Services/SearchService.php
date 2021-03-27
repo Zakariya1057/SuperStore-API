@@ -77,6 +77,7 @@ class SearchService {
     private function suggestions_by_group($query, &$results, $store_type_id){
         $types = [
             'stores' => 2, 
+            'brands' => 2,
             'categories' => 3, 
             'products' => 8,
             'promotions' => 1
@@ -97,6 +98,10 @@ class SearchService {
 
                 if($type == 'categories'){
                     $item_type = $source['type'];
+                }
+
+                if($type == 'brands'){
+                    $name = trim($source['brand']);
                 }
                 
                 $total_items++;
@@ -224,7 +229,13 @@ class SearchService {
                 $base_query = $this->search_where($type, $query, $store_type_id, $base_query);
             }   
 
-            $base_query = $this->search_sort($data, $base_query);
+            if(!$text_search && $sort == '' && $order == ''){
+                $base_query = $this->search_sort($data, $base_query, $text_search);
+            } else {
+                $product_ids = join(',', $item_ids);
+                $base_query = $base_query->orderByRaw("FIELD(products.id, $product_ids)");
+            }
+
             $base_query = $this->search_dietary($data, $base_query);
             $base_query = $this->search_brand($data, $base_query);
             $base_query = $this->search_category($data, $base_query);
@@ -392,6 +403,8 @@ class SearchService {
         $index = strtolower($index);
         $query = strtolower($query);
         
+        $sort = [];
+
         if($index == 'products'){
             $fields_match = ['name','description','brand','dietary_info'];
             $fields_should = ['name', 'weight','brand'];
@@ -421,10 +434,11 @@ class SearchService {
         } elseif($index == 'brands'){
             $fields_match = ['brand'];
             $fields_should = ['brand'];
+
+            $index = 'products';
         } else {
             $fields_match = ['name'];
             $fields_should = ['name', 'weight'];
-            $sort = [];
         }
 
         $params = [
@@ -467,6 +481,8 @@ class SearchService {
                     'sort' => $sort
             ]
         ];
+
+        // dd(json_encode($params));
 
         return $client->search($params);
         
