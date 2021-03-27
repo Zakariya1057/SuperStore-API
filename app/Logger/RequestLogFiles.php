@@ -19,7 +19,7 @@ class RequestLogFiles
 
         foreach ($logger->getHandlers() as $handler) {
             $handler->setFormatter(new LineFormatter(
-                "\n" . '[%datetime%] %level_name%: %message% %context% %extra%'
+                "\n" . '[%datetime%] %message% %context% %extra%'
             ));
 
             if ($handler instanceof RotatingFileHandler) {
