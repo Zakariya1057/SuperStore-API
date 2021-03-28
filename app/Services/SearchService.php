@@ -167,7 +167,7 @@ class SearchService {
             // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
             $search_type = preg_replace('/child_|parent_/i','',$type);
 
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 30);
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50);
 
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
@@ -229,7 +229,7 @@ class SearchService {
                 $base_query = $this->search_where($type, $query, $store_type_id, $base_query);
             }   
 
-            if(!$text_search && $sort == '' && $order == ''){
+            if(!$text_search || ($text_search && $sort != '' && $order != '')){
                 $base_query = $this->search_sort($data, $base_query, $text_search);
             } else {
                 $product_ids = join(',', $item_ids);
@@ -404,6 +404,7 @@ class SearchService {
         $query = strtolower($query);
         
         $sort = [];
+        $operator = 'and';
 
         if($index == 'products'){
             $fields_match = ['name','description','brand','dietary_info'];
@@ -431,6 +432,9 @@ class SearchService {
                 '_score',
                 
             ];
+
+            $operator = 'or';
+
         } elseif($index == 'brands'){
             $fields_match = ['brand'];
             $fields_should = ['brand'];
@@ -438,7 +442,8 @@ class SearchService {
             $index = 'products';
         } else if($index == 'promotions'){
             $fields_match = ['name'];
-            $fields_should = ['name'];
+            $fields_should = [];
+            $operator = 'and';
         } else {
             $fields_match = ['name'];
             $fields_should = ['name', 'weight'];
@@ -465,7 +470,7 @@ class SearchService {
                                     'multi_match' => [
                                         'query' => $query,
                                         'fields' => $fields_match,
-                                        'operator' => 'or',
+                                        'operator' => $operator,
                                         'fuzziness' => 'auto'
                                     ],
                                 ],
@@ -485,7 +490,9 @@ class SearchService {
             ]
         ];
 
-        // dd(json_encode($params));
+        // if($index == 'promotions'){
+        //     dd(json_encode($params));
+        // }
 
         return $client->search($params);
         
