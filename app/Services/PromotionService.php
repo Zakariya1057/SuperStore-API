@@ -72,7 +72,7 @@ class PromotionService {
             unset($item->{$item_field});
         }
 
-        if(is_null($item->promotion_id)){
+        if(is_null($promotion->id)){
             $item->promotion = null;
         } else {
             $item->promotion = $promotion;
