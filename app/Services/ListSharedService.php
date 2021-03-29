@@ -351,12 +351,12 @@ class ListSharedService {
     }
 
     private function get_list_status(int $total_items, int $ticked_off_items): string { 
-        if($ticked_off_items == $total_items){
-            return 'Completed';
-        } elseif($ticked_off_items > 0){
-            return 'In Progress';
-        } else {
+        if($total_items == 0 || $ticked_off_items == 0){
             return 'Not Started';
+        } else if ($ticked_off_items == $total_items){
+            return 'Completed';
+        } else {
+            return 'In Progress';
         }
     }
 
