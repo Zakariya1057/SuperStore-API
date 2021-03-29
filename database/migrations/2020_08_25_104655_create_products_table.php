@@ -26,6 +26,9 @@ class CreateProductsTable extends Migration
 
             $table->json('features')->nullable();
             $table->json('dimensions')->nullable();
+            $table->text('storage')->nullable();
+
+            $table->string('country_of_origin')->nullable();
 
             $table->string('currency')->default('Pounds');
 
@@ -46,10 +49,12 @@ class CreateProductsTable extends Migration
             $table->string('brand')->nullable();
             $table->string('weight')->nullable();
             $table->string('recipe')->nullable();
-            $table->text('storage')->nullable();
 
             $table->string('dietary_info', 500)->nullable();
             $table->string('allergen_info', 500)->nullable();
+
+            $table->text('return_policy')->nullable();
+            $table->text('warning')->nullable();
 
             $table->decimal('avg_rating', 5,2)->nullable();
             $table->integer('total_reviews_count')->nullable();
