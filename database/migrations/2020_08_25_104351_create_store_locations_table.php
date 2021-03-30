@@ -29,8 +29,8 @@ class CreateStoreLocationsTable extends Migration
 
             $table->string('postcode');
 
-            $table->decimal('latitude',11,8);
-            $table->decimal('longitude',11,8);
+            $table->decimal('latitude',11,8)->nullable();
+            $table->decimal('longitude',11,8)->nullable();
 
             $table->unique('store_id');
             $table->foreign('store_id')->references('id')->on('stores');

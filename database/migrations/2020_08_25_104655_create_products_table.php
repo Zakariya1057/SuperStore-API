@@ -53,14 +53,14 @@ class CreateProductsTable extends Migration
             $table->string('dietary_info', 500)->nullable();
             $table->string('allergen_info', 500)->nullable();
 
-            $table->text('return_policy')->nullable();
-            $table->text('warning')->nullable();
-
             $table->decimal('avg_rating', 5,2)->nullable();
             $table->integer('total_reviews_count')->nullable();
             
             $table->unsignedBigInteger('store_type_id');
             $table->text('url')->nullable();
+
+            $table->text('return_policy')->nullable();
+            $table->text('warning')->nullable();
 
             $table->timestamp('last_checked')->useCurrent();
             
