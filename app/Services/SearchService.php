@@ -17,12 +17,14 @@ use Illuminate\Support\Facades\Redis;
 
 class SearchService {
 
-    private $client, $store_service, $promotion_service;
+    private $client, $store_service, $promotion_service, $paginate_service;
 
-    public function __construct(StoreService $store_service){
+    public function __construct(StoreService $store_service, PaginateService $paginate_service){
         $this->client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
        
         $this->store_service = $store_service;
+        $this->paginate_service = $paginate_service;
+
         $this->promotion_service = new PromotionService();
     }
 
@@ -240,7 +242,7 @@ class SearchService {
             $base_query = $this->search_brand($data, $base_query);
             $base_query = $this->search_category($data, $base_query);
 
-            $pagination_data = $this->paginate_results($base_query);
+            $pagination_data = $this->paginate_service->paginate_results($base_query);
 
             foreach($pagination_data['products'] as $product){
                 $this->promotion_service->set_product_promotion($product);
@@ -373,26 +375,7 @@ class SearchService {
 
     //////////////////    Filter Results   //////////////////
 
-    private function paginate_results(Builder $base_query, $limit = 100){
-        $results = [];
 
-        $paginator = $base_query->paginate($limit);
-
-        $results['products'] = $paginator->items();
-
-        $results['paginate'] = [
-            'from' => 0,
-            'current' => $paginator->currentPage(),
-            'to' => $paginator->lastPage(),
-            'per_page' => $paginator->perPage(),
-            'next_page_url' => $paginator->url( $paginator->currentPage() + 1),
-            'current_page_url' => $paginator->url( $paginator->currentPage() ),
-            'prev_page_url' => $paginator->previousPageUrl(),
-            'more_available' => $paginator->hasMorePages(),
-        ];
-
-        return $results;
-    }
 
 
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////

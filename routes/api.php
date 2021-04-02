@@ -51,9 +51,10 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         Route::get('/{store_id}', 'API\StoreController@show')->name('store.show');
     });
     
-    Route::prefix('grocery')->group(function () {
-        Route::get('categories/{store_type_id}', 'API\CategoryController@categories')->name('grocery.categories');
-        Route::get('products/{parent_cateogy_id}', 'API\CategoryController@products')->name('grocery.products');
+    Route::prefix('groceries')->group(function () {
+        Route::get('grand_parent_categories/{store_type_id}', 'API\CategoryController@grand_parent_categories')->name('grocery.grand_parent_categories');
+        Route::get('child_categories/{parent_categories}', 'API\CategoryController@child_categories')->name('grocery.child_categories');
+        Route::get('category_products/{child_category_id}', 'API\CategoryController@category_products')->name('grocery.category_products');
     });
 
     Route::get('promotion/{promotion_id}', 'API\PromotionController@show')->name('promotion.show');
