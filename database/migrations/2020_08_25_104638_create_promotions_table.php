@@ -27,6 +27,8 @@ class CreatePromotionsTable extends Migration
             $table->decimal('price', 9,2)->nullable();
             $table->integer('for_quantity')->nullable();
 
+            $table->unsignedBigInteger('site_category_id')->nullable();
+
             $table->integer('minimum')->nullable();
             $table->integer('maximum')->nullable();
 
