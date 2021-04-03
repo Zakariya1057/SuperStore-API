@@ -169,7 +169,7 @@ class SearchService {
             // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
             $search_type = preg_replace('/child_|parent_/i','',$type);
 
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50);
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50, true);
 
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
@@ -292,7 +292,7 @@ class SearchService {
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
 
 
-    private function elastic_search(Client $client, $index, $query, $store_type_id, $limit=10): Array{
+    private function elastic_search(Client $client, $index, $query, $store_type_id, $limit=10, $text_search = false): Array{
 
         $index = strtolower($index);
         $query = strtolower($query);
@@ -301,33 +301,40 @@ class SearchService {
         $operator = 'and';
 
         if($index == 'products'){
-            $fields_match = ['name','description','brand','dietary_info'];
-            $fields_should = ['name', 'weight','brand'];
 
-            $sort = [
+            if($text_search){
+                $fields_match = ['name'];
+                $fields_should = ['name'];
+            } else {
+                $fields_match = ['name','description','brand','dietary_info'];
+                $fields_should = ['name', 'weight','brand'];
+    
+                $sort = [
+                        
+                    [
+                        '_script' => [
+                            'type' => 'number',
+                            'script' => [
+                                'lang' => 'painless',
+                                'source' => "
+                                if(doc['avg_rating'].value > 0 && doc['total_reviews_count'].value > 0){
+                                    _score + ( (doc['total_reviews_count'].value * 0.0001) / doc['avg_rating'].value) 
+                                } else {
+                                    0
+                                }
+                                "
+                            ],
+                            'order' => 'desc'
+                        ]
+                    ],
+    
+                    '_score',
                     
-                [
-                    '_script' => [
-                        'type' => 'number',
-                        'script' => [
-                            'lang' => 'painless',
-                            'source' => "
-                            if(doc['avg_rating'].value > 0 && doc['total_reviews_count'].value > 0){
-                                _score + ( (doc['total_reviews_count'].value * 0.0001) / doc['avg_rating'].value) 
-                            } else {
-                                0
-                            }
-                            "
-                        ],
-                        'order' => 'desc'
-                    ]
-                ],
+                ];
+    
+                $operator = 'or';
+            }
 
-                '_score',
-                
-            ];
-
-            $operator = 'or';
 
         } elseif($index == 'brands'){
             $fields_match = ['brand'];
@@ -384,7 +391,7 @@ class SearchService {
             ]
         ];
 
-        // if($index == 'promotions'){
+        // if($index == 'products'){
         //     dd(json_encode($params));
         // }
 

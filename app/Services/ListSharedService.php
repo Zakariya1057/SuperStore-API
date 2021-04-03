@@ -190,7 +190,7 @@ class ListSharedService {
         $product = new Product();
         $casts = $product->casts;
 
-        $items =  GroceryListItem::
+        $items = GroceryListItem::
         join('products','products.id','grocery_list_items.product_id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
         ->where('list_id',$list->id)
@@ -294,7 +294,17 @@ class ListSharedService {
                     
                 }
 
-            } else {
+            } else if(!is_null($promotion_details->minimum)){
+
+                $minimum_quantity = $promotion_details->minimum;
+
+                if($total_quantity >= $minimum_quantity){
+                    $data['old_total_price'] = $total_price;
+                    $data['total_price'] = $total_quantity * $promotion_details->price;
+                }
+            } 
+            
+            else {
                 $data['old_total_price'] = null;
                 $data['total_price'] = $total_price;
             }
