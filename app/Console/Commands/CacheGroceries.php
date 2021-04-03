@@ -50,34 +50,50 @@ class CacheGroceries extends Command
 
         foreach(StoreType::get() as $store_type){
 
-            $this->info('Starting Caching Categories For Store: ' . $store_type->name);
+            $this->info('---- Starting Caching Categories For Store: ' . $store_type->name);
 
             $store_type_id = $store_type->id;
 
-            $grand_parent_categories = GrandParentCategory::where('store_type_id', $store_type_id)->get();
+            $grand_parent_categories = $this->category_service->grand_parent_categories($store_type_id);
 
-            $parent_categories_details = [];
-    
-            // Top cache, store all grand parent categories and their child categories
+            Cache::put('grand_parent_category_'.$store_type_id, $grand_parent_categories);
+
             foreach($grand_parent_categories as $grand_parent_category){
-                $parent_categories = $grand_parent_category->parent_categories;
-                $parent_categories_details[$grand_parent_category->name] = $parent_categories;
-            }
+                $grand_parent_category_id = $grand_parent_category->id;
+                $grand_parent_category_name = $grand_parent_category->name;
+                
+                $this->info("--- Start Caching Categories For Grand Parent Category: [$grand_parent_category_id] $grand_parent_category_name");
+
+                foreach($grand_parent_category->parent_categories as $parent_category){
+                    $parent_category_id = $parent_category->id;
+                    $parent_category_name = $parent_category->name;
+                    
+                    $this->info("\n-- Start Caching Child Categories For Parent Category: [$parent_category_id] $parent_category_name");
+
+                    $child_categories = $this->category_service->child_categories($parent_category_id);
     
-            Cache::put('categories_'.$store_type_id, $grand_parent_categories);
-    
-            // Cache all parent categories, with their products
-            foreach($parent_categories_details as $grand_parent_category_name => $child_categories){
-                $this->info('Caching Categories For: '.$grand_parent_category_name);
-    
-                foreach($child_categories as $child_category){
-                    $this->info('Caching Product Categories For: '.$child_category->name);
-                    $product_categories = $this->category_service->grocery_products($child_category->id);
-                    Cache::put('category_products_'.$child_category->id, $product_categories);
+                    Cache::put('child_category_'. $parent_category_id, $child_categories);
+
+                    foreach($child_categories as $category){
+                        $child_category_id = $category->id;
+                        $child_category_name = $category->name;
+
+                        $this->info("Caching Category Products For: [$child_category_id] $child_category_name");
+
+                        $category_products = $this->category_service->category_products($child_category_id);
+
+                        Cache::put('category_products_' . $child_category_id, $category_products);
+                        
+                    }
+
+                    $this->info("-- Complete Caching Child Categories For Parent Category: [$parent_category_id] $parent_category_name");
                 }
+
+                $this->info("-- Complete Caching Categories For Grand Parent Category: [$parent_category_id] $parent_category_name");
+
             }
 
-            $this->info('Complete Caching Categories For Store: ' . $store_type->name);
+            $this->info('---- Complete Caching Categories For Store: ' . $store_type->name);
         }
 
         $this->info('Daily Grocery Cache Complete');
