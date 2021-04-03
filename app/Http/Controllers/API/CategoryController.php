@@ -47,12 +47,29 @@ class CategoryController extends Controller {
 
     public function category_products($child_category_id, Request $request){
 
+        $validated_data = $request->validate([
+            'data.sort' => '',
+            'data.order' => '',
+            'data.dietary' => '',
+            'data.brand' => '',
+        ]);
+
+        $data = $validated_data['data'];
+        $data = $this->sanitize_service->sanitizeAllFields($data);
+
+        $page = $this->sanitize_service->sanitizeField((int)$request->page ?? 1);
+
         $child_category_id = $this->sanitize_service->sanitizeField($child_category_id);
 
         $this->logger_service->log('category.products', $request);
 
-        $categories = Cache::remember('category_products_'.$child_category_id, now()->addWeek(1), function () use ($child_category_id){
-            return $this->category_service->category_products($child_category_id);
+        $sort = $data['sort'] ?? '';
+        $order = $data['order'] ?? '';
+        $dietary = $data['dietary'] ?? '';
+        $brand = $data['brand'] ?? '';
+
+        $categories = Cache::remember("category_products_{$child_category_id}_page_{$page}_sort_{$sort}_order_{$order}_brand_{$brand}_dietary_{$dietary}" , now()->addWeek(1), function () use ($child_category_id, $data){
+            return $this->category_service->category_products($child_category_id, $data);
         });
 
         return response()->json(['data' => $categories]);
