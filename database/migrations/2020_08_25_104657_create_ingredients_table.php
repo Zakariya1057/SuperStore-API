@@ -16,12 +16,13 @@ class CreateIngredientsTable extends Migration
     {
         Schema::create('ingredients', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
+            $table->text('name')->nullable();
             $table->unsignedBigInteger('product_id');
 
             $table->foreign('product_id')->references('id')->on('products');
 
-            $table->unique(['name','product_id']);
+            $table->index('product_id');
+
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
