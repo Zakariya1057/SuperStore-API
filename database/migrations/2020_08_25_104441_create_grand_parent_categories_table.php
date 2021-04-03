@@ -22,6 +22,8 @@ class CreateGrandParentCategoriesTable extends Migration
             $table->string('site_category_id');
             $table->unsignedBigInteger('store_type_id');
 
+            $table->boolean('enabled')->default(1);
+
             $table->unsignedBigInteger('store_id')->nullable();
             
             $table->foreign('store_type_id')->references('id')->on('store_types');
