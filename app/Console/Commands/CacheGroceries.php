@@ -50,7 +50,7 @@ class CacheGroceries extends Command
 
         foreach(StoreType::get() as $store_type){
 
-            $this->info('---- Starting Caching Categories For Store: ' . $store_type->name);
+            $this->info("\n---- Starting Caching Categories For Store: " . $store_type->name);
 
             $store_type_id = $store_type->id;
 

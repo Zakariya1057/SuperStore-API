@@ -240,8 +240,7 @@ class ListSharedService {
 
     private function parse_promotion_data($promotions, $total_price): array {
 
-        $new_total_price = 0;
-        $data = ['total_price' => $total_price, 'old_total_price' => null];
+        $new_promotion_total_price = 0;
 
         // For All Products Within Promotion Group
         foreach($promotions as $promotion){
@@ -251,9 +250,11 @@ class ListSharedService {
             $products = $promotion->products;
 
             $total_quantity = 0;
+            $total_items_price = 0;
 
             foreach($products as $product){
                 $total_quantity += $product->product_quantity;
+                $total_items_price += $product->total_price;
             }
             
             if(!is_null($promotion_details->quantity)){
@@ -284,14 +285,11 @@ class ListSharedService {
                     } else {
                         $new_total = ($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);
                     }
-    
-                    $new_total_price = ($total_price - $previous_total_price) + $new_total;
-
-                    if($new_total < $previous_total_price){
-                        $data['old_total_price'] = $total_price;
-                        $data['total_price'] = $new_total_price;
-                    }
                     
+                    $new_promotion_total_price += $new_total;
+
+                } else {
+                    $new_promotion_total_price += $total_items_price;
                 }
 
             } else if(!is_null($promotion_details->minimum)){
@@ -299,19 +297,19 @@ class ListSharedService {
                 $minimum_quantity = $promotion_details->minimum;
 
                 if($total_quantity >= $minimum_quantity){
-                    $data['old_total_price'] = $total_price;
-                    $data['total_price'] = $total_quantity * $promotion_details->price;
+                    $new_promotion_total_price += $total_quantity * $promotion_details->price;
+                } else {
+                    $new_promotion_total_price += $total_items_price;
                 }
             } 
-            
-            else {
-                $data['old_total_price'] = null;
-                $data['total_price'] = $total_price;
-            }
 
         }
 
-        return $data;
+        if($new_promotion_total_price < $total_price){
+            return ['total_price' => $new_promotion_total_price, 'old_total_price' => $total_price];
+        } else {
+            return ['total_price' => $total_price, 'old_total_price' => NULL];
+        }
 
     }
 
