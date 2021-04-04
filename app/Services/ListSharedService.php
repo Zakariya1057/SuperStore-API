@@ -221,11 +221,12 @@ class ListSharedService {
 
         $promotions = $list_data['promotions'];
         $total_price = $list_data['total_price'];
+        $total_price_without_promotion_items =  $list_data['total_price_without_promotion_items'];
         $ticked_off_items = $list_data['ticked_off_items'];
 
         $update = [];
 
-        $price_data = $this->parse_promotion_data($promotions, $total_price);
+        $price_data = $this->parse_promotion_data($promotions, $total_price, $total_price_without_promotion_items);
 
         $update['old_total_price'] = $price_data['old_total_price'];
         $update['total_price'] = $price_data['total_price'];
@@ -238,7 +239,7 @@ class ListSharedService {
         
     }
 
-    private function parse_promotion_data($promotions, $total_price): array {
+    private function parse_promotion_data($promotions, $total_price, $total_price_without_promotion_items): array {
 
         $new_promotion_total_price = 0;
 
@@ -285,7 +286,7 @@ class ListSharedService {
                     } else {
                         $new_total = ($goes_into_fully * $promotion_details->price) + ($remainder * $highest_price);
                     }
-                    
+
                     $new_promotion_total_price += $new_total;
 
                 } else {
@@ -306,7 +307,7 @@ class ListSharedService {
         }
 
         if($new_promotion_total_price < $total_price){
-            return ['total_price' => $new_promotion_total_price, 'old_total_price' => $total_price];
+            return ['total_price' => $total_price_without_promotion_items + $new_promotion_total_price, 'old_total_price' => $total_price];
         } else {
             return ['total_price' => $total_price, 'old_total_price' => NULL];
         }
@@ -317,6 +318,7 @@ class ListSharedService {
 
         $promotions = [];
         $total_price = 0;
+        $total_price_without_promotion_items = 0;
         $ticked_off_items = 0;
 
         foreach($items as $item){
@@ -346,6 +348,8 @@ class ListSharedService {
                         ];
                     }
                 }
+            } else {
+                $total_price_without_promotion_items += $item->total_price;
             }
 
             $total_price += $item->total_price;
@@ -355,7 +359,12 @@ class ListSharedService {
             }
         }
 
-        return ['promotions' => $promotions, 'total_price' => $total_price, 'ticked_off_items' => $ticked_off_items];
+        return [
+            'promotions' => $promotions, 
+            'total_price' => $total_price, 
+            'total_price_without_promotion_items' => $total_price_without_promotion_items, 
+            'ticked_off_items' => $ticked_off_items
+        ];
     }
 
     private function get_list_status(int $total_items, int $ticked_off_items): string { 
