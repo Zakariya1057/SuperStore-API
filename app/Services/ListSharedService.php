@@ -116,7 +116,7 @@ class ListSharedService {
 
         // Check if sale expired, use old price instead of new
         if(!is_null($product->sale_ends_at)){
-            if(Carbon::now() > $product->sale_ends_at){
+            if(Carbon::now()->diffInDays($product->sale_ends_at) < 0){
                 $price = $product->old_price;
             }
         }
