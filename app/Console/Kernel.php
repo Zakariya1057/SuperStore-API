@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('promotion:expired')->daily()->at('00:00')->runInBackground();
         $schedule->command('sale:expired')->daily()->at('00:00')->runInBackground();
 
-        $schedule->command('backup:database')->daily()->at('05:00')->runInBackground();
+        $schedule->command('backup:database')->weekly()->at('05:00')->runInBackground();
         $schedule->command('cache:home')->mondays()->at('06:00')->runInBackground();
         $schedule->command('cache:groceries')->weekly()->sundays()->at('03:00')->runInBackground();
     }
