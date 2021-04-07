@@ -105,7 +105,10 @@ class CategoryService {
         $categories = FeaturedItem::select('parent_categories.*')
         ->where([ ['parent_categories.store_type_id', $store_type_id],['type', 'categories'] ])
         ->join('parent_categories','parent_categories.id','featured_id')
-        ->withCasts(['name' => HTMLDecode::class])->limit(10)->get();
+        ->withCasts(['name' => HTMLDecode::class])
+        ->groupBy('featured_id')
+        ->orderBy('featured_items.created_at', 'ASC')
+        ->limit(10)->get();
 
         $results = [];
 
