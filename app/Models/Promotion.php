@@ -11,6 +11,7 @@ class Promotion extends Model
         'id',
         'url',
         'name',
+        'title',
 
         'quantity',
         'price',
