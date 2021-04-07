@@ -71,15 +71,11 @@ class CacheHome extends Command
 
             $this->info("Caching Featured Promotions");
             $promotions = $this->promotion_service->featured($store_type_id);
-
-            $this->info("Caching On Sale Products");
-            $on_sale = $this->product_service->on_sale($store_type_id);
     
             $data = [
                 'stores' => $stores,
                 'featured' => $featured_items,
                 'promotions' => $promotions,
-                'on_sale' => $on_sale,
                 'categories' => $categories,
             ];
     

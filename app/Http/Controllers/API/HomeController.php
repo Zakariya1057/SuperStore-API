@@ -89,17 +89,16 @@ class HomeController extends Controller {
         $cache_key = 'home_page_'.$store_type_id;
 
         $retrieved_data = Redis::get($cache_key);
+        
         if($retrieved_data){
             $retrieved_data = (array)json_decode( $retrieved_data );
             $data['featured'] = $retrieved_data['featured'];
             $data['categories'] = $retrieved_data['categories'];
             $data['promotions'] = $retrieved_data['promotions'];
-            $data['on_sale'] = $retrieved_data['on_sale'];
         } else {
             $data['featured'] = $this->product_service->featured($store_type_id);
             $data['categories'] = $this->category_service->featured($store_type_id);
             $data['promotions'] = $this->promotion_service->featured($store_type_id);
-            $data['on_sale'] = $this->product_service->on_sale($store_type_id);
     
             Redis::set($cache_key, json_encode($data));
             Redis::expire($cache_key, 604800);
