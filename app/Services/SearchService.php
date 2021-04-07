@@ -82,7 +82,7 @@ class SearchService {
             'brands' => 2,
             'categories' => 3, 
             'products' => 8,
-            'promotions' => 1
+            'promotions' => 2
         ];
 
         $total_items = 0;
