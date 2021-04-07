@@ -15,6 +15,7 @@ class PromotionService {
 
         $featured_promotions = FeaturedItem::select(
             'promotions.id as promotion_id',
+            'promotions.title as promotion_title',
             'promotions.name as promotion_name',
             'promotions.quantity as promotion_quantity',
             'promotions.price as promotion_price',
@@ -31,13 +32,16 @@ class PromotionService {
         )
         ->where([ ['featured_items.store_type_id', $store_type_id], ['type', 'promotions'], ['promotions.store_type_id', $store_type_id] ])
         ->join('promotions','promotions.id','featured_id')
+        ->groupBy('featured_id')
         ->withCasts($promotion->casts)->limit(10)
         ->get();
 
 
         foreach($featured_promotions as $promotion){
             $this->set_product_promotion($promotion);
-            $promotions[] = $promotion->promotion;
+            if(!is_null($promotion->promotion)){
+                $promotions[] = $promotion->promotion;
+            }
         }
 
         return $promotions;
@@ -49,6 +53,8 @@ class PromotionService {
         $promotions_fields = [
             'id',
             'url',
+
+            'title',
             'name',
     
             'quantity',
@@ -68,7 +74,7 @@ class PromotionService {
         foreach($promotions_fields as $field){
             $item_field = 'promotion_' . $field;
 
-            $promotion->{$field} = $item->{$item_field};
+            $promotion->{$field} = $item->{$item_field} ?? null;
             unset($item->{$item_field});
         }
 
@@ -79,7 +85,8 @@ class PromotionService {
 
             // If promotion expired, don't return it
             if(!is_null($promotion->ends_at)){
-                if(Carbon::now() > $promotion->ends_at){
+                // Convert two dates
+                if(Carbon::now()->diffInDays($promotion->ends_at) < 0){
                     $item->promotion = null;
                 }
             }

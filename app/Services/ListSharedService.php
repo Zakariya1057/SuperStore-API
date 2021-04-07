@@ -132,7 +132,7 @@ class ListSharedService {
             $promotion_expired = false;
 
             if(!is_null($promotion->ends_at)){
-                if(Carbon::now() > $promotion->ends_at){
+                if(Carbon::now()->diffInDays($promotion->ends_at) < 0){
                     $promotion_expired = true;
                 }
             }
@@ -302,7 +302,9 @@ class ListSharedService {
                 } else {
                     $new_promotion_total_price += $total_items_price;
                 }
-            } 
+            }  else {
+                $new_promotion_total_price += $total_items_price;
+            }
 
         }
 
@@ -333,7 +335,7 @@ class ListSharedService {
                 $promotion_expired = false;
 
                 if(!is_null($promotion->ends_at)){
-                    if(Carbon::now() > $promotion->ends_at){
+                    if(Carbon::now()->diffInDays($promotion->ends_at) < 0){
                         $promotion_expired = true;
                     }
                 }

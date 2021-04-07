@@ -22,7 +22,9 @@ class CreatePromotionsTable extends Migration
             $table->string('site_promotion_id')->nullable();
             $table->string('url')->nullable();
 
+            $table->string('title')->nullable();
             $table->string('name');
+
             $table->integer('quantity')->nullable();
             $table->decimal('price', 9,2)->nullable();
             $table->integer('for_quantity')->nullable();
