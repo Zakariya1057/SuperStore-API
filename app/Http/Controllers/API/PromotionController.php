@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Services\LoggerService;
 use App\Services\PromotionService;
 use App\Services\SanitizeService;
+use Exception;
 use Illuminate\Http\Request;
 
 class PromotionController extends Controller {
@@ -25,8 +26,12 @@ class PromotionController extends Controller {
 
         $promotion = Promotion::where('id', $promotion_id)->first();
 
-        $promotion->products;
-
+        if(!is_null($promotion)){
+            $promotion->products;
+        } else {
+            throw new Exception('Promotion not found.', 404);
+        }
+        
         return response()->json(['data' => $promotion]);
     }
 }
