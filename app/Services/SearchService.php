@@ -327,7 +327,7 @@ class SearchService {
             'post_tags' => '', 
             'fields' => [
               'name' => [
-                  'fragment_size' => substr_count($query,' ') + 1,
+                  'fragment_size' => 1,
                   'number_of_fragments' => 1,
                   'order' => 'score'
                 ]
