@@ -108,7 +108,7 @@ class SearchService {
                     $correct_term = ucwords(strtolower($item['highlight']['name'][0]));
                     if(!is_numeric($correct_term)){
 
-                        preg_match("/^\s*[-,.+@';:=()]/", $correct_term, $matches);
+                        preg_match("/^\s*[-,.+@';:=()&*%]/", $correct_term, $matches);
                         if(!$matches){
                             // If suggestion begins with weird characters then ignore
                             $highlighted_terms[$correct_term] = $source['id'];
@@ -201,7 +201,7 @@ class SearchService {
         if($type == 'products'){
             $text_search = true;
         }
-        
+
         if($text_search){
             // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
             $search_type = preg_replace('/child_|parent_/i','',$type);
