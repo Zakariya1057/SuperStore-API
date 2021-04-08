@@ -82,7 +82,7 @@ class SearchService {
             'stores' => 2, 
             'brands' => 2,
             'categories' => 3, 
-            'products' => 3,
+            'products' => 5,
             'promotions' => 2
         ];
 
@@ -104,9 +104,11 @@ class SearchService {
                 $source = $item['_source'];
                 $name = trim($source['name']);
 
-                if(key_exists('highlight', $item)){
+                if($type != 'promotions' && key_exists('highlight', $item)){
                     $correct_term = $item['highlight']['name'][0];
-                    $highlighted_terms[$correct_term] = $source['id'];
+                    if(is_nan($correct_term)){
+                        $highlighted_terms[$correct_term] = $source['id'];
+                    }
                 }
                 
                 if($type == 'categories'){
@@ -134,7 +136,7 @@ class SearchService {
             if(!key_exists(strtolower($term), $unique_terms)){
                 $results['corrections'][] = [
                     'id' => $id,
-                    'name' => $term
+                    'name' => "$term"
                 ];
             }
         }
