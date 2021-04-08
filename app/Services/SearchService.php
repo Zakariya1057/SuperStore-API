@@ -40,6 +40,8 @@ class SearchService {
             'promotions' => [],
             'store_sales' => [],
             'brands' => [],
+
+            'corrections' => []
         ];
 
         $cache_key = 'search_suggestions:' . str_replace(' ','_', $query) . '_store_type_id:' . $store_type_id;
@@ -57,7 +59,6 @@ class SearchService {
                 Log::critical('Elasticsearch Error: ' . $e);
                 $this->database_suggestions($query, $results, $store_type_id);         
             }
-
 
             if(count($results['stores']) > 0){
                 $store = (object)$results['stores'][0];
@@ -81,9 +82,14 @@ class SearchService {
             'stores' => 2, 
             'brands' => 2,
             'categories' => 3, 
-            'products' => 4,
+            'products' => 3,
             'promotions' => 2
         ];
+
+        // Suggested Correct Word. Vread -> Bread
+        $highlighted_terms = [];
+
+        $unique_terms = [];
 
         $total_items = 0;
 
@@ -98,6 +104,11 @@ class SearchService {
                 $source = $item['_source'];
                 $name = trim($source['name']);
 
+                if(key_exists('highlight', $item)){
+                    $correct_term = $item['highlight']['name'][0];
+                    $highlighted_terms[$correct_term] = $source['id'];
+                }
+                
                 if($type == 'categories'){
                     $item_type = $source['type'];
                 }
@@ -106,6 +117,8 @@ class SearchService {
                     $name = trim($source['brand']);
                 }
                 
+                $unique_terms[strtolower($name)] = 1;
+
                 $total_items++;
 
                 if(!key_exists($name, $unique_names)){
@@ -115,6 +128,15 @@ class SearchService {
 
             }
 
+        }
+
+        foreach( $highlighted_terms as $term => $id){
+            if(!key_exists(strtolower($term), $unique_terms)){
+                $results['corrections'][] = [
+                    'id' => $id,
+                    'name' => $term
+                ];
+            }
         }
     }
 
@@ -300,6 +322,18 @@ class SearchService {
         $sort = [];
         $operator = 'and';
 
+        $highlight = [
+            'pre_tags' => '',
+            'post_tags' => '', 
+            'fields' => [
+              'name' => [
+                  'fragment_size' => substr_count($query,' ') + 1,
+                  'number_of_fragments' => 1,
+                  'order' => 'score'
+                ]
+            ]
+        ];
+
         if($index == 'products'){
 
             if($text_search){
@@ -387,7 +421,9 @@ class SearchService {
                         ],
                     ],
 
-                    'sort' => $sort
+                    'sort' => $sort,
+
+                    'highlight' => $highlight
             ]
         ];
 
