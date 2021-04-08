@@ -328,8 +328,7 @@ class SearchService {
             'fields' => [
               'name' => [
                   'fragment_size' => 1,
-                  'number_of_fragments' => 1,
-                  'order' => 'score'
+                  'number_of_fragments' => 1
                 ]
             ]
         ];
