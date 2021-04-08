@@ -11,7 +11,6 @@ use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
@@ -36,11 +35,12 @@ class SearchService {
             'stores' => [],
             'parent_categories' => [],
             'child_categories' => [],
-            'products' => [],
+            'brands' => [],
             'promotions' => [],
             'store_sales' => [],
-            'brands' => [],
-
+            
+            'products' => [],
+            
             'corrections' => []
         ];
 
@@ -105,9 +105,14 @@ class SearchService {
                 $name = trim($source['name']);
 
                 if($type != 'promotions' && key_exists('highlight', $item)){
-                    $correct_term = $item['highlight']['name'][0];
+                    $correct_term = ucwords(strtolower($item['highlight']['name'][0]));
                     if(!is_numeric($correct_term)){
-                        $highlighted_terms[$correct_term] = $source['id'];
+
+                        preg_match("/^\s*[-,.+@';:=()]/", $correct_term, $matches);
+                        if(!$matches){
+                            // If suggestion begins with weird characters then ignore
+                            $highlighted_terms[$correct_term] = $source['id'];
+                        }
                     }
                 }
                 
@@ -119,6 +124,10 @@ class SearchService {
                     $name = trim($source['brand']);
                 }
                 
+                if($type == 'products' && key_exists(strtolower($name), $unique_terms)){
+                    continue;
+                }
+
                 $unique_terms[strtolower($name)] = 1;
 
                 $total_items++;
@@ -133,7 +142,7 @@ class SearchService {
         }
 
         foreach( $highlighted_terms as $term => $id){
-            if(!key_exists(strtolower($term), $unique_terms)){
+            if( (!key_exists(strtolower($term), $unique_terms) ) && count($results['corrections']) < 2){
                 $results['corrections'][] = [
                     'id' => $id,
                     'name' => $term
@@ -189,6 +198,10 @@ class SearchService {
 
         $item_ids = [];
 
+        if($type == 'products'){
+            $text_search = true;
+        }
+        
         if($text_search){
             // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
             $search_type = preg_replace('/child_|parent_/i','',$type);
@@ -329,8 +342,9 @@ class SearchService {
             'post_tags' => '', 
             'fields' => [
               'name' => [
-                  'fragment_size' => 1,
-                  'number_of_fragments' => 1
+                  'fragment_size' =>  strpos($query, ' ') === false ? 1 : strlen($query),
+                  'number_of_fragments' => 1,
+                  'order' => 'score'
                 ]
             ]
         ];
@@ -341,7 +355,7 @@ class SearchService {
                 $fields_match = ['name'];
                 $fields_should = ['name'];
             } else {
-                $fields_match = ['name','description','brand','dietary_info'];
+                $fields_match = ['name','brand','dietary_info'];
                 $fields_should = ['name', 'weight','brand'];
     
                 $sort = [
