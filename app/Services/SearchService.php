@@ -106,7 +106,7 @@ class SearchService {
 
                 if($type != 'promotions' && key_exists('highlight', $item)){
                     $correct_term = $item['highlight']['name'][0];
-                    if(is_nan($correct_term)){
+                    if(!is_numeric($correct_term)){
                         $highlighted_terms[$correct_term] = $source['id'];
                     }
                 }
@@ -136,7 +136,7 @@ class SearchService {
             if(!key_exists(strtolower($term), $unique_terms)){
                 $results['corrections'][] = [
                     'id' => $id,
-                    'name' => "$term"
+                    'name' => $term
                 ];
             }
         }
@@ -428,7 +428,7 @@ class SearchService {
             ]
         ];
 
-        // if($index == 'products'){
+        // if($index == 'products' && $limit > 2){
         //     dd(json_encode($params));
         // }
 
