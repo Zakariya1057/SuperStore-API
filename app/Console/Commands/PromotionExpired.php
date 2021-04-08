@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Promotion;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 
 class PromotionExpired extends Command
 {
@@ -47,8 +48,9 @@ class PromotionExpired extends Command
         $this->info('Fetching All Expired Promotions');
 
         $promotions = Promotion::whereDate('ends_at', '<', Carbon::now())->get();
+        $promotions_count = count($promotions);
 
-        $this->info(count($promotions) . ' Expired Promotions Found');
+        $this->info( $promotions_count . ' Expired Promotions Found');
 
         foreach($promotions as $promotion){
             $id = $promotion->id;
@@ -75,6 +77,10 @@ class PromotionExpired extends Command
             Product::where('promotion_id', $id)->update(['promotion_id' => null]);
             Promotion::where('id', $id)->delete();
 
+        }
+
+        if($promotions_count > 0){
+            Artisan::call('cache:home');
         }
 
     }

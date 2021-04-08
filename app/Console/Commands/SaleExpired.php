@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Promotion;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 
 class SaleExpired extends Command
 {
@@ -49,8 +50,9 @@ class SaleExpired extends Command
         $products = Product::whereDate('sale_ends_at', '<', Carbon::now())->get();
 
         $product_ids = [];
+        $products_count = count($products);
 
-        $this->info(count($products) . ' Products with expired sales');
+        $this->info($products_count . ' Products with expired sales');
 
         foreach($products as $product){
             $product_id = $product->id;
@@ -83,6 +85,10 @@ class SaleExpired extends Command
             event(new GroceryListChangedEvent($list));
         }
 
+        if($products_count > 0){
+            Artisan::call('cache:home');
+        }
+        
     }
 
 }
