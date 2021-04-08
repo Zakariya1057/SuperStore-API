@@ -81,14 +81,14 @@ class SearchService {
             'stores' => 2, 
             'brands' => 2,
             'categories' => 3, 
-            'products' => 8,
+            'products' => 4,
             'promotions' => 2
         ];
 
         $total_items = 0;
 
         foreach($types as $type => $limit){
-            $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $type == 'products' && $total_items <= 3 ? 12 : $limit);
+            $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $limit);
             $results[$type] = [];
 
             $item_type = $type;
