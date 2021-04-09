@@ -52,13 +52,13 @@ class SearchService {
             $results = json_decode($cached_results);
         } else {
 
-            try {
+            // try {
                 $this->suggestions_by_group($query, $results, $store_type_id);
-            } catch(Exception $e){
-                // Backup search in case elasticsearch fails from now
-                Log::critical('Elasticsearch Error: ' . $e);
-                $this->database_suggestions($query, $results, $store_type_id);         
-            }
+            // } catch(Exception $e){
+            //     // Backup search in case elasticsearch fails from now
+            //     Log::critical('Elasticsearch Error: ' . $e);
+            //     $this->database_suggestions($query, $results, $store_type_id);         
+            // }
 
             if(count($results['stores']) > 0){
                 $store = (object)$results['stores'][0];
@@ -82,8 +82,8 @@ class SearchService {
             'stores' => 2, 
             'brands' => 2,
             'categories' => 3, 
-            'products' => 5,
-            'promotions' => 2
+            'products' => 4,
+            'promotions' => 3
         ];
 
         // Suggested Correct Word. Vread -> Bread
@@ -106,12 +106,20 @@ class SearchService {
 
                 if($type != 'promotions' && key_exists('highlight', $item)){
                     $correct_term = ucwords(strtolower($item['highlight']['name'][0]));
-                    if(!is_numeric($correct_term)){
+                    $correct_term = preg_replace("/\s*[-,.+@';:=()&*%]$/", '', $correct_term);
 
+                    if(!is_numeric($correct_term)){
                         preg_match("/^\s*[-,.+@';:=()&*%]/", $correct_term, $matches);
+
                         if(!$matches){
                             // If suggestion begins with weird characters then ignore
-                            $highlighted_terms[$correct_term] = $source['id'];
+                            if(
+                                !key_exists(substr($correct_term, 0, -1), $highlighted_terms) 
+                                && !key_exists($correct_term .'s', $highlighted_terms)
+                                && !key_exists($correct_term .'es', $highlighted_terms)
+                                ){
+                                $highlighted_terms[$correct_term] = $source['id'];
+                            }
                         }
                     }
                 }
@@ -124,7 +132,7 @@ class SearchService {
                     $name = trim($source['brand']);
                 }
                 
-                if($type == 'products' && key_exists(strtolower($name), $unique_terms)){
+                if( ($type == 'products' || $type == 'categories') && key_exists(strtolower($name), $unique_terms)){
                     continue;
                 }
 
@@ -142,11 +150,13 @@ class SearchService {
         }
 
         foreach( $highlighted_terms as $term => $id){
-            if( (!key_exists(strtolower($term), $unique_terms) ) && count($results['corrections']) < 2){
-                $results['corrections'][] = [
-                    'id' => $id,
-                    'name' => $term
-                ];
+            if(strlen($term) > 2){
+                if( (!key_exists(strtolower($term), $unique_terms) ) && count($results['corrections']) < 2){
+                    $results['corrections'][] = [
+                        'id' => $id,
+                        'name' => $term
+                    ];
+                }
             }
         }
     }
@@ -187,6 +197,8 @@ class SearchService {
 
         $store_type_id = $data['store_type_id'];
 
+        $products_limit_elastic = 100;
+
         $sort = $data['sort'] ?? '';
         $order = $data['order'] ?? '';
         $dietary = $data['dietary'] ?? '';
@@ -199,14 +211,17 @@ class SearchService {
         $item_ids = [];
 
         if($type == 'products'){
-            $text_search = true;
+            if(!$text_search){
+                $text_search = true;
+                $data['text_search'] = true;
+            }
         }
 
         if($text_search){
             // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
             $search_type = preg_replace('/child_|parent_/i','',$type);
 
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50, true);
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, 0);
 
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
@@ -329,13 +344,15 @@ class SearchService {
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
 
 
-    private function elastic_search(Client $client, $index, $query, $store_type_id, $limit=10, $text_search = false): Array{
+    private function elastic_search(Client $client, $index, $query, $store_type_id, $limit=10, $text_search = false, $fuzziness = 'auto'): Array{
 
         $index = strtolower($index);
         $query = strtolower($query);
         
         $sort = [];
+
         $operator = 'and';
+        // $fuzziness = 'auto';
 
         $highlight = [
             'pre_tags' => '',
@@ -421,7 +438,7 @@ class SearchService {
                                         'query' => $query,
                                         'fields' => $fields_match,
                                         'operator' => $operator,
-                                        'fuzziness' => 'auto'
+                                        'fuzziness' => $fuzziness
                                     ],
                                 ],
 
