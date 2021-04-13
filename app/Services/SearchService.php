@@ -52,13 +52,13 @@ class SearchService {
             $results = json_decode($cached_results);
         } else {
 
-            // try {
+            try {
                 $this->suggestions_by_group($query, $results, $store_type_id);
-            // } catch(Exception $e){
-            //     // Backup search in case elasticsearch fails from now
-            //     Log::critical('Elasticsearch Error: ' . $e);
-            //     $this->database_suggestions($query, $results, $store_type_id);         
-            // }
+            } catch(Exception $e){
+                // Backup search in case elasticsearch fails from now
+                Log::critical('Elasticsearch Error: ' . $e);
+                $this->database_suggestions($query, $results, $store_type_id);         
+            }
 
             if(count($results['stores']) > 0){
                 $store = (object)$results['stores'][0];
