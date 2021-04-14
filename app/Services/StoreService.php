@@ -35,7 +35,8 @@ class StoreService {
 
         $query_builder = Store::where('store_type_id', $store_type_id)
         ->join('store_types', 'store_types.id', '=', 'stores.store_type_id')
-        ->join('store_locations','store_locations.store_id', '=','stores.id');
+        ->join('store_locations','store_locations.store_id', '=','stores.id')
+        ->limit(20);
 
         $location_fields = [
             'city',
@@ -66,7 +67,6 @@ class StoreService {
             $query_builder = $query_builder
             // ->having('distance', '<', 50)
             // ->having('distance', '>', 0)
-            ->limit(20)
             ->orderBy('distance');
         }
 
