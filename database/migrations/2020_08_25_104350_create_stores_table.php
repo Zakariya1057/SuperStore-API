@@ -34,6 +34,8 @@ class CreateStoresTable extends Migration
             $table->string('site_store_id')->unique();
             $table->unsignedBigInteger('store_type_id');
 
+            $table->boolean('enabled')->default(1);
+            
             $table->index('name');
             $table->index('site_store_id');
 

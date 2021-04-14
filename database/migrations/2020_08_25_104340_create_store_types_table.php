@@ -24,6 +24,8 @@ class CreateStoreTypesTable extends Migration
             
             $table->unsignedBigInteger('user_id');
 
+            $table->boolean('enabled')->default(1);
+            
             $table->index('name');
             $table->foreign('user_id')->references('id')->on('users');
             
