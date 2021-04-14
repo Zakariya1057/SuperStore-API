@@ -40,6 +40,8 @@ class CreatePromotionsTable extends Migration
             $table->timestamp('ends_at')->nullable();
             $table->unsignedBigInteger('store_type_id');
             
+            $table->boolean('enabled')->default(1);
+            
             $table->unique('site_promotion_id');
             $table->index('name');
             $table->index('store_type_id');
