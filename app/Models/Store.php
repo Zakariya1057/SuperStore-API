@@ -29,7 +29,8 @@ class Store extends Model
     ];
 
     protected $casts = [
-        'name' => HTMLDecode::class
+        'name' => HTMLDecode::class,
+        'enabled' => 'Bool'
     ];
 
     public function opening_hours() {

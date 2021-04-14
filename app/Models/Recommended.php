@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Recommended extends Model
 {
     public function product() {
-        return $this->belongsTo('App\Models\Product','recommended_product_id')->limit(5);
+        return $this->belongsTo('App\Models\Product','recommended_product_id')->where('products.enabled', 1)->limit(5);
     }
 }

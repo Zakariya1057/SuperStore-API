@@ -61,6 +61,8 @@ class ListSharedService {
             'promotions.expires as promotion_expires',
             'promotions.starts_at as promotion_starts_at',
             'promotions.ends_at as promotion_ends_at',
+
+            'promotions.enabled as promotion_enabled',
         ])
         ->join('parent_categories', 'parent_categories.id','=','grocery_list_items.parent_category_id')
         ->join('products', 'products.id','=','grocery_list_items.product_id')
@@ -127,7 +129,7 @@ class ListSharedService {
             return $total;
         }
 
-        if(!is_null($promotion)){
+        if(!is_null($promotion) && $promotion->enabled){
 
             $promotion_expired = false;
 
@@ -213,6 +215,8 @@ class ListSharedService {
             'promotions.expires as promotion_expires',
             'promotions.starts_at as promotion_starts_at',
             'promotions.ends_at as promotion_ends_at',
+
+            'promotions.enabled as promotion_enabled',
         )
         ->withCasts($casts)
         ->get();
@@ -330,7 +334,7 @@ class ListSharedService {
 
             $promotion = $item->promotion;
             
-            if(!is_null($promotion)){
+            if(!is_null($promotion) && $promotion->enabled){
 
                 $promotion_expired = false;
 

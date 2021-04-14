@@ -269,12 +269,15 @@ class SearchService {
                 'promotions.expires as promotion_expires',
                 'promotions.starts_at as promotion_starts_at',
                 'promotions.ends_at as promotion_ends_at',
+
+                'promotions.enabled as promotion_enabled',
             )
             ->join('category_products','category_products.parent_category_id','parent_categories.id')
             ->join('products','products.id','category_products.product_id')
             ->join('child_categories','child_categories.id','category_products.child_category_id')
             ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
             ->groupBy('products.id')
+            ->where([ [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
             ->withCasts($casts);
             
             if($text_search){

@@ -20,7 +20,7 @@ class CategoryService {
     }
     
     public function grand_parent_categories($store_type_id){
-        $grand_parent_categories = GrandParentCategory::where('grand_parent_categories.store_type_id', $store_type_id)->get();
+        $grand_parent_categories = GrandParentCategory::where([ ['enabled', 1], ['grand_parent_categories.store_type_id', $store_type_id]])->get();
 
         foreach($grand_parent_categories as $category){
             $category->parent_categories;
@@ -30,7 +30,7 @@ class CategoryService {
     }
 
     public function child_categories($parent_category_id){
-        return ChildCategory::where('child_categories.parent_category_id', $parent_category_id)->get();
+        return ChildCategory::where([ ['enabled', 1], ['child_categories.parent_category_id', $parent_category_id] ])->get();
     }
 
     public function category_products($child_category_id, $data = []){
@@ -58,13 +58,15 @@ class CategoryService {
             'promotions.expires as promotion_expires',
             'promotions.starts_at as promotion_starts_at',
             'promotions.ends_at as promotion_ends_at',
+            
+            'promotions.enabled as promotion_enabled',
         )
 
         ->join('category_products','category_products.child_category_id','child_categories.id')
         ->join('parent_categories','parent_categories.id','child_categories.parent_category_id')
         ->join('products', 'products.id', 'category_products.product_id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
-
+        ->where('products.enabled', 1)
         ->withCasts( $casts );
         
         $pagination_data = $this->refine_service->refine_results($base_query, $data);
@@ -103,7 +105,7 @@ class CategoryService {
         $casts = $product->casts;
 
         $categories = FeaturedItem::select('parent_categories.*')
-        ->where([ ['parent_categories.store_type_id', $store_type_id],['type', 'categories'] ])
+        ->where([ ['enabled', 1], ['parent_categories.store_type_id', $store_type_id],['type', 'categories'] ])
         ->join('parent_categories','parent_categories.id','featured_id')
         ->withCasts(['name' => HTMLDecode::class])
         ->groupBy('featured_id')
@@ -119,6 +121,8 @@ class CategoryService {
             ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
             ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
             ->limit(15)->groupBy('category_products.product_id')->withCasts($casts)->get();
+
+            $category->enabled = (bool)$category->enabled;
 
             $category->products = $products;
             $results[] = $category; 

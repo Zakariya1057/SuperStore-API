@@ -20,6 +20,7 @@ class FavouriteService {
         ->withCasts(
             $product->casts
         )->groupBy('products.id')
+        ->where('products.enabled', 1)
         ->orderBy('favourite_products.created_at','DESC')->get();
 
         foreach($products as $product){

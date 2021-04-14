@@ -27,6 +27,8 @@ class Promotion extends Model
         'expires',
         'starts_at',
         'ends_at',
+
+        'enabled'
     ];
 
 
@@ -35,6 +37,8 @@ class Promotion extends Model
         'price' => 'double',
         
         'expires' => 'Bool',
+
+        'enabled' => 'Bool',
 
         'starts_at' => 'datetime:Y-m-d H:i:s',
         'ends_at' => 'datetime:Y-m-d H:i:s',
@@ -49,6 +53,6 @@ class Promotion extends Model
             'products.*',            
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
-        )->groupBy('products.id')->withCasts($this->casts);
+        )->where('products.enabled', 1)->groupBy('products.id')->withCasts($this->casts);
     }
 }

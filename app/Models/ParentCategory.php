@@ -7,10 +7,10 @@ use App\Casts\HTMLDecode;
 
 class ParentCategory extends Model
 {
-    
     protected $casts = [
         'name' => HTMLDecode::class,
         'description' =>  HTMLDecode::class,
+        'enabled' => 'Bool'
     ];
 
     public function child_categories() {

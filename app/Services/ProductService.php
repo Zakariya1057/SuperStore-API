@@ -54,7 +54,7 @@ class ProductService {
         ->join('products','products.id','recommended_product_id')
         ->withCasts(
             $product->casts
-        )->get();
+        )->where('products.enabled', 1)->get();
 
         $favourite = $monitoring = false;
 
@@ -75,7 +75,7 @@ class ProductService {
         $product = new Product();
 
         return FeaturedItem::select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
-        ->where([ ['products.store_type_id', $store_type_id],['type', 'products'] ])
+        ->where([ ['products.enabled', 1], ['products.store_type_id', $store_type_id],['type', 'products'] ])
         ->join('products', 'products.id','=','featured_id')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
@@ -95,6 +95,7 @@ class ProductService {
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->whereNotNull('products.small_image')
         ->orderBy('products.price', 'DESC')
+        ->where('products.enabled', 1)
         ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get() ?? [];
     }
 

@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ChildCategory extends Model
 {
     protected $casts = [
-        'name' => HTMLDecode::class
+        'name' => HTMLDecode::class,
+        'enabled' => 'Bool'
     ];
 
     public function products() {

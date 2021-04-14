@@ -37,6 +37,8 @@ class Product extends Model
 
         'parent_category_name' => HTMLDecode::class,
         'child_category_name' => HTMLDecode::class,
+
+        'enabled' => 'Bool',
     ];
 
     public function images(){
@@ -52,7 +54,7 @@ class Product extends Model
     }
 
     public function promotion(){
-        return $this->belongsTo('App\Models\Promotion');
+        return $this->belongsTo('App\Models\Promotion')->where('promotions.enabled', 1);
     }
 
 }

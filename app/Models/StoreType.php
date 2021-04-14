@@ -11,5 +11,6 @@ class StoreType extends Model
     public $casts = [
         'large_logo' => Image::class,
         'small_logo' => Image::class,
+        'enabled' => 'Bool'
     ];
 }

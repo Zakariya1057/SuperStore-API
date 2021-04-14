@@ -29,6 +29,8 @@ class PromotionService {
             'promotions.expires as promotion_expires',
             'promotions.starts_at as promotion_starts_at',
             'promotions.ends_at as promotion_ends_at',
+
+            'promotions.enabled as promotion_enabled',
         )
         ->where([ ['featured_items.store_type_id', $store_type_id], ['type', 'promotions'], ['promotions.store_type_id', $store_type_id] ])
         ->join('promotions','promotions.id','featured_id')
@@ -69,6 +71,8 @@ class PromotionService {
             'expires',
             'starts_at',
             'ends_at',
+
+            'enabled'
         ];
 
         foreach($promotions_fields as $field){
@@ -78,7 +82,7 @@ class PromotionService {
             unset($item->{$item_field});
         }
 
-        if(is_null($promotion->id)){
+        if(is_null($promotion->id) || !$promotion->enabled){
             $item->promotion = null;
         } else {
             $item->promotion = $promotion;
