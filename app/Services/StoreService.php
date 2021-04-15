@@ -36,7 +36,8 @@ class StoreService {
         $query_builder = Store::where('store_type_id', $store_type_id)
         ->join('store_types', 'store_types.id', '=', 'stores.store_type_id')
         ->join('store_locations','store_locations.store_id', '=','stores.id')
-        ->where('stores.enabled', 1)
+        ->where([ ['stores.enabled', 1]])
+        ->whereNotNull('longitude')
         ->limit(20);
 
         $location_fields = [
