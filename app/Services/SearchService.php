@@ -206,9 +206,15 @@ class SearchService {
         $child_category = $data['child_category'] ?? '';
         $brand = $data['brand'] ?? '';
 
+        $fuzziness = 0;
+
         $text_search = $data['text_search'] ?? false;
 
         $item_ids = [];
+
+        if($text_search){
+            $fuzziness = 'auto';
+        }
 
         if($type == 'products'){
             if(!$text_search){
@@ -221,7 +227,7 @@ class SearchService {
             // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
             $search_type = preg_replace('/child_|parent_/i','',$type);
 
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, 0);
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, $fuzziness);
 
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
