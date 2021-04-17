@@ -20,7 +20,7 @@ class UserResetService extends UserAuthService {
         $user = User::where('email',$data['email'])->get()->first();
 
         if(is_null($user)){
-            Log::error('No user found with email: '. $data['email']);
+            throw new Exception('No user found with email: '. $data['email']);
         } else {
             $code = mt_rand(1000000,9999999);
             User::where('id', $user->id)->update(['remember_token' => $code, 'token_sent_at' => Carbon::now()]);
