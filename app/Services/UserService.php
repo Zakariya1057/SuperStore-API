@@ -21,7 +21,7 @@ class UserService extends UserAuthService {
         $user = User::where('email', $data['email'])->get()->first();
 
         if(!$user){
-            throw new Exception('Email address doesn\'t belongs to any user.', 404);
+            throw new Exception('Email address doesn\'t belongs to any user. Please create a new account.', 404);
         }
 
         if (Hash::check($data['password'], $user->password)) {
