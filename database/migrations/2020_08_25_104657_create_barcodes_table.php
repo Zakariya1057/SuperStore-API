@@ -28,6 +28,8 @@ class CreateBarcodesTable extends Migration
 
             $table->unique(['type', 'value', 'store_type_id', 'product_id'], 'unique_barcode');
 
+            $table->index('product_id');
+
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

@@ -73,6 +73,7 @@ class CreateProductsTable extends Migration
             $table->index('name');
             $table->index('dietary_info');
             $table->index('allergen_info');
+            $table->index('promotion_id');
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
