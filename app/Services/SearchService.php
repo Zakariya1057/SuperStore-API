@@ -94,7 +94,8 @@ class SearchService {
         $total_items = 0;
 
         foreach($types as $type => $limit){
-            $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $limit);
+            $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $type == 'products' ? 20 : $limit);
+
             $results[$type] = [];
 
             $item_type = $type;
@@ -113,11 +114,7 @@ class SearchService {
 
                         if(!$matches){
                             // If suggestion begins with weird characters then ignore
-                            if(
-                                !key_exists(substr($correct_term, 0, -1), $highlighted_terms) 
-                                && !key_exists($correct_term .'s', $highlighted_terms)
-                                && !key_exists($correct_term .'es', $highlighted_terms)
-                                ){
+                            if( !key_exists($correct_term .'s', $highlighted_terms) && !key_exists($correct_term .'es', $highlighted_terms) ){
                                 $highlighted_terms[$correct_term] = $source['id'];
                             }
                         }
@@ -147,11 +144,17 @@ class SearchService {
 
             }
 
+            if($type == 'products'){
+                $results['products'] = array_slice($results['products'], 0, $limit); 
+            }
         }
+
+        $keys = array_map('strlen', array_keys($highlighted_terms));
+        array_multisort($keys, SORT_DESC, $highlighted_terms);
 
         foreach( $highlighted_terms as $term => $id){
             if(strlen($term) > 2){
-                if( (!key_exists(strtolower($term), $unique_terms) ) && count($results['corrections']) < 2){
+                if( (!key_exists(strtolower($term), $unique_terms) ) && count($results['corrections']) < 3){
                     $results['corrections'][] = [
                         'id' => $id,
                         'name' => $term
@@ -159,6 +162,8 @@ class SearchService {
                 }
             }
         }
+
+        // dd($results['corrections']);
     }
 
     private function database_suggestions($query, &$results, $store_type_id){
@@ -213,7 +218,7 @@ class SearchService {
         $item_ids = [];
 
         if($text_search){
-            $fuzziness = 'auto';
+            $fuzziness = 1;
         }
 
         if($type == 'products'){
