@@ -325,9 +325,8 @@ class SearchService {
         } elseif($type == 'store_sales'){
             $base_query = $base_query
             ->where('products.store_type_id', $store_type_id)
-            ->where(function($query) {
-                $query->where('products.is_on_sale', 1)->orwhereNotNull('products.promotion_id');
-            });
+            ->orderBy('products.price', 'DESC')
+            ->whereNotNull('products.promotion_id');
         }
 
         return $base_query;
