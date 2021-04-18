@@ -386,8 +386,8 @@ class SearchService {
                 $fields_match = ['name'];
                 $fields_should = ['name'];
             } else {
-                $fields_match = ['name','brand','dietary_info'];
-                $fields_should = ['name', 'weight','brand'];
+                $fields_match = ['name','brand', 'dietary_info'];
+                $fields_should = ['name', 'weight','brand', 'description'];
     
                 $sort = [
                         
