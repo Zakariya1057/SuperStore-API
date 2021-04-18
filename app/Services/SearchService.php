@@ -288,7 +288,7 @@ class SearchService {
             ->join('child_categories','child_categories.id','category_products.child_category_id')
             ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
             ->groupBy('products.id')
-            ->where([ [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
+            ->where([ ['products.store_type_id', $store_type_id], [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
             ->withCasts($casts);
             
             if($text_search){
