@@ -30,6 +30,7 @@ class RefineService {
         $base_query = $this->search_dietary($data, $base_query);
         $base_query = $this->search_brand($data, $base_query);
         $base_query = $this->search_category($data, $base_query);
+        $base_query = $this->search_promotion($data, $base_query);
 
         $pagination_data = $this->paginate_service->paginate_results($base_query);
 
@@ -100,6 +101,15 @@ class RefineService {
         if(key_exists('child_category', $data) && !is_null($data['child_category'])){
             $category = $data['child_category'];
             $base_query = $base_query->where('child_categories.name',$category);
+        }
+
+        return $base_query;
+    }
+
+    private function search_promotion($data, Builder $base_query){
+        if(key_exists('promotion', $data) && !is_null($data['promotion'])){
+            $promotion = $data['promotion'];
+            $base_query = $base_query->where('promotions.name',$promotion);
         }
 
         return $base_query;

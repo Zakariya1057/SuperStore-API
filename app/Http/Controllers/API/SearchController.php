@@ -51,6 +51,7 @@ class SearchController extends Controller {
             'data.dietary' => '', // Halal, Vegetarian
             'data.child_category' => '',
             'data.brand' => '',
+            'data.promotion' => '',
 
             'data.text_search' => ''
         ]);

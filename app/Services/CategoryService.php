@@ -77,8 +77,6 @@ class CategoryService {
         $category = null;
 
         foreach($products as $index => $product){
-            $this->promotion_service->set_product_promotion($product);
-
             if($index == 0){
                 $category = [
                     'id' => $product->child_category_id,

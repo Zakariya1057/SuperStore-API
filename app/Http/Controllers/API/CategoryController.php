@@ -56,6 +56,7 @@ class CategoryController extends Controller {
             'data.order' => '',
             'data.dietary' => '',
             'data.brand' => '',
+            'data.promotion' => '',
         ]);
 
         $data = $validated_data['data'];
@@ -71,10 +72,11 @@ class CategoryController extends Controller {
         $order = $data['order'] ?? '';
         $dietary = $data['dietary'] ?? '';
         $brand = $data['brand'] ?? '';
+        $promotion = $data['promotion'] ?? '';
 
         // $categories = $this->category_service->category_products($child_category_id, $data);
         
-        $categories = Cache::remember("category_products_{$child_category_id}_page_{$page}_sort_{$sort}_order_{$order}_brand_{$brand}_dietary_{$dietary}" , now()->addWeek(1), function () use ($child_category_id, $data){
+        $categories = Cache::remember("category_products_{$child_category_id}_page_{$page}_sort_{$sort}_order_{$order}_brand_{$brand}_promotion_{$promotion}_dietary_{$dietary}" , now()->addWeek(1), function () use ($child_category_id, $data){
             return $this->category_service->category_products($child_category_id, $data);
         });
 
