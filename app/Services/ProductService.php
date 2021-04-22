@@ -24,11 +24,16 @@ class ProductService {
         $product = Product::where('products.id',$product_id)
         ->select(
             'products.*',
+
+            'child_categories.id as child_category_id',
+            'child_categories.name as child_category_name',
+
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
         )
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
+        ->join('child_categories','category_products.child_category_id','child_categories.id')
         ->withCasts($casts)
         ->get()
         ->first();
