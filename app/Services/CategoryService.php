@@ -67,6 +67,7 @@ class CategoryService {
         ->join('products', 'products.id', 'category_products.product_id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
         ->where('products.enabled', 1)
+        ->whereRaw('products.store_type_id = child_categories.store_type_id')
         ->withCasts( $casts );
         
         $pagination_data = $this->refine_service->refine_results($base_query, $data);
