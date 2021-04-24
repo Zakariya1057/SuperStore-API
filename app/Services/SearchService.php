@@ -52,20 +52,29 @@ class SearchService {
             $results = json_decode($cached_results);
         } else {
 
-            try {
+            // try {
                 $this->suggestions_by_group($query, $results, $store_type_id);
-            } catch(Exception $e){
-                // Backup search in case elasticsearch fails from now
-                Log::critical('Elasticsearch Error: ' . $e);
-                $this->database_suggestions($query, $results, $store_type_id);         
-            }
+            // } catch(Exception $e){
+            //     // Backup search in case elasticsearch fails from now
+            //     Log::critical('Elasticsearch Error: ' . $e);
+            //     $this->database_suggestions($query, $results, $store_type_id);         
+            // }
 
+            
+            preg_match('/sale|discount|offer|promotion/i', $query, $sale_matches);
+
+            // If the search term contains sale or discount then show this
             if(count($results['stores']) > 0){
                 $store = (object)$results['stores'][0];
 
                 $results['store_sales'][] = [
                     'id' => $store->id,
-                    'name' => $store->name . ' Sales'
+                    'name' => $store->name . ' Offers'
+                ];
+            } else if($sale_matches) {
+                $results['store_sales'][] = [
+                    'id' => (int)$store_type_id,
+                    'name' => 'Offers'
                 ];
             }
 
@@ -149,12 +158,11 @@ class SearchService {
             }
         }
 
-        $keys = array_map('strlen', array_keys($highlighted_terms));
-        array_multisort($keys, SORT_DESC, $highlighted_terms);
+        $this->sort_corrections($highlighted_terms, $query);
 
         foreach( $highlighted_terms as $term => $id){
             if(strlen($term) > 2){
-                if( (!key_exists(strtolower($term), $unique_terms) ) && count($results['corrections']) < 3){
+                if( ( !key_exists(strtolower($term), $unique_terms) ) &&  count($results['corrections']) < 3){
                     $results['corrections'][] = [
                         'id' => $id,
                         'name' => $term
@@ -162,8 +170,14 @@ class SearchService {
                 }
             }
         }
+    }
 
-        // dd($results['corrections']);
+    private function sort_corrections(&$highlighted_terms, $query){
+        $keys = array_map(function($term) use($query){
+            return similar_text($query, $term);
+        }, array_keys($highlighted_terms));
+
+        array_multisort($keys, SORT_DESC, $highlighted_terms);
     }
 
     private function database_suggestions($query, &$results, $store_type_id){
@@ -202,12 +216,13 @@ class SearchService {
 
         $store_type_id = $data['store_type_id'];
 
-        $products_limit_elastic = 100;
+        $products_limit_elastic = 300;
 
         $sort = $data['sort'] ?? '';
         $order = $data['order'] ?? '';
         $dietary = $data['dietary'] ?? '';
         $category = $data['category'] ?? '';
+        $promotion = $data['promotion'] ?? '';
         $child_category = $data['child_category'] ?? '';
         $brand = $data['brand'] ?? '';
 
@@ -243,7 +258,7 @@ class SearchService {
             $item_ids = array_keys($item_ids);
         }
 
-        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_text_search:{$text_search}_page:$page";
+        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_page:$page";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
@@ -365,7 +380,6 @@ class SearchService {
         $sort = [];
 
         $operator = 'and';
-        // $fuzziness = 'auto';
 
         $highlight = [
             'pre_tags' => '',
@@ -410,8 +424,6 @@ class SearchService {
                     '_score',
                     
                 ];
-    
-                $operator = 'or';
             }
 
 
