@@ -52,13 +52,13 @@ class SearchService {
             $results = json_decode($cached_results);
         } else {
 
-            // try {
+            try {
                 $this->suggestions_by_group($query, $results, $store_type_id);
-            // } catch(Exception $e){
-            //     // Backup search in case elasticsearch fails from now
-            //     Log::critical('Elasticsearch Error: ' . $e);
-            //     $this->database_suggestions($query, $results, $store_type_id);         
-            // }
+            } catch(Exception $e){
+                // Backup search in case elasticsearch fails from now
+                Log::critical('Elasticsearch Error: ' . $e);
+                $this->database_suggestions($query, $results, $store_type_id);         
+            }
 
             
             preg_match('/sale|discount|offer|promotion/i', $query, $sale_matches);
@@ -104,6 +104,12 @@ class SearchService {
 
         foreach($types as $type => $limit){
             $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $type == 'products' ? 20 : $limit);
+            
+            // If searched and no results found then might be a multi word problem. Use or instead again.
+            $total_results = $response['hits']['total']['value'];
+            if($total_results == 0){
+                $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $type == 'products' ? 20 : $limit, false, 'auto', 'or');
+            }
 
             $results[$type] = [];
 
@@ -249,6 +255,12 @@ class SearchService {
 
             $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, $fuzziness);
 
+            // If searched and no results found then might be a multi word problem. Use or instead again.
+            $total_results = $response['hits']['total']['value'];
+            if($total_results == 0){
+                $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, $fuzziness,'or');
+            }
+
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
                 $name = trim($source['name']);
@@ -372,14 +384,12 @@ class SearchService {
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
 
 
-    private function elastic_search(Client $client, $index, $query, $store_type_id, $limit=10, $text_search = false, $fuzziness = 'auto'): Array{
+    private function elastic_search(Client $client, $index, $query, $store_type_id, $limit=10, $text_search = false, $fuzziness = 'auto', $operator = 'and'): Array{
 
         $index = strtolower($index);
         $query = strtolower($query);
         
         $sort = [];
-
-        $operator = 'and';
 
         $highlight = [
             'pre_tags' => '',
@@ -487,7 +497,7 @@ class SearchService {
         // if($index == 'products' && $limit > 2){
         //     dd(json_encode($params));
         // }
-
+        
         return $client->search($params);
         
     }
