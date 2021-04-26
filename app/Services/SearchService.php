@@ -60,7 +60,6 @@ class SearchService {
                 $this->database_suggestions($query, $results, $store_type_id);         
             }
 
-            
             preg_match('/sale|discount|offer|promotion/i', $query, $sale_matches);
 
             // If the search term contains sale or discount then show this
@@ -89,10 +88,15 @@ class SearchService {
     private function suggestions_by_group($query, &$results, $store_type_id){
         $types = [
             'stores' => 2, 
-            'brands' => 2,
             'categories' => 3, 
             'products' => 4,
-            'promotions' => 3
+            'promotions' => 3,
+            'brands' => 2,
+        ];
+
+        $fetch_limits = [
+            'products' => 20,
+            'categories' => 5
         ];
 
         // Suggested Correct Word. Vread -> Bread
@@ -103,12 +107,15 @@ class SearchService {
         $total_items = 0;
 
         foreach($types as $type => $limit){
-            $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $type == 'products' ? 20 : $limit);
-            
+
+            $elsatic_limit = $fetch_limits[$type] ?? $limit;
+
+            $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $elsatic_limit);
+
             // If searched and no results found then might be a multi word problem. Use or instead again.
             $total_results = $response['hits']['total']['value'];
-            if($total_results == 0){
-                $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $type == 'products' ? 20 : $limit, false, 'auto', 'or');
+            if($total_results < 3){
+                $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $elsatic_limit, false, 'auto', 'or');
             }
 
             $results[$type] = [];
@@ -144,7 +151,7 @@ class SearchService {
                     $name = trim($source['brand']);
                 }
                 
-                if( ($type == 'products' || $type == 'categories') && key_exists(strtolower($name), $unique_terms)){
+                if( ($type == 'products' || $type == 'brands') && key_exists(strtolower($name), $unique_terms)){
                     continue;
                 }
 
@@ -159,9 +166,8 @@ class SearchService {
 
             }
 
-            if($type == 'products'){
-                $results['products'] = array_slice($results['products'], 0, $limit); 
-            }
+            $results[$item_type] = array_slice($results[$item_type], 0, $limit); 
+
         }
 
         $this->sort_corrections($highlighted_terms, $query);
@@ -257,8 +263,8 @@ class SearchService {
 
             // If searched and no results found then might be a multi word problem. Use or instead again.
             $total_results = $response['hits']['total']['value'];
-            if($total_results == 0){
-                $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, $fuzziness,'or');
+            if($total_results < 3){
+                $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50, true, $fuzziness,'or');
             }
 
             foreach($response['hits']['hits'] as $item){
@@ -407,7 +413,7 @@ class SearchService {
 
             if($text_search){
                 $fields_match = ['name'];
-                $fields_should = ['name'];
+                $fields_should = ['name', 'brand'];
             } else {
                 $fields_match = ['name','brand', 'dietary_info'];
                 $fields_should = ['name', 'weight','brand', 'description'];
@@ -494,7 +500,7 @@ class SearchService {
             ]
         ];
 
-        // if($index == 'products' && $limit > 2){
+        // if($index == 'categories'){
         //     dd(json_encode($params));
         // }
         
