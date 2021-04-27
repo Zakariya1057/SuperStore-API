@@ -166,7 +166,7 @@ class SearchService {
 
             }
 
-            $results[$item_type] = array_slice($results[$item_type], 0, $limit); 
+            $results[$type] = array_slice($results[$type], 0, $limit); 
 
         }
 
