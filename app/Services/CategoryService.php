@@ -109,7 +109,7 @@ class CategoryService {
         ->withCasts(['name' => HTMLDecode::class])
         ->groupBy('featured_id')
         ->orderBy('featured_items.created_at', 'ASC')
-        ->limit(10)->get();
+        ->limit(20)->get();
 
         $results = [];
 
