@@ -413,7 +413,7 @@ class SearchService {
 
             if($text_search){
                 $fields_match = ['name'];
-                $fields_should = ['name', 'brand'];
+                $fields_should = ['name', 'description', 'brand'];
             } else {
                 $fields_match = ['name','brand', 'dietary_info'];
                 $fields_should = ['name', 'weight','brand', 'description'];
