@@ -411,12 +411,19 @@ class SearchService {
 
         if($index == 'products'){
 
+            $fields_should = [
+                'child_category_names', 
+                'parent_category_names',
+
+                'description', 
+                'brand', 
+                'weight',
+            ];
+
             if($text_search){
                 $fields_match = ['name'];
-                $fields_should = ['name', 'description', 'brand'];
             } else {
                 $fields_match = ['name','brand', 'dietary_info'];
-                $fields_should = ['name', 'weight','brand', 'description'];
     
                 $sort = [
                         
