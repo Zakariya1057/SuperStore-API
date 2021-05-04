@@ -11,20 +11,28 @@ use App\Services\SanitizeService;
 
 class MonitoredController extends Controller {
     
-    private $sanitize_service, $monitoring_serve;
+    private $sanitize_service, $monitoring_service;
 
-    function __construct(SanitizeService $sanitize_service, MonitoringService $monitoring_serve, LoggerService $logger_service){
+    function __construct(SanitizeService $sanitize_service, MonitoringService $monitoring_service, LoggerService $logger_service){
         $this->sanitize_service = $sanitize_service;
-        $this->monitoring_serve = $monitoring_serve;
+        $this->monitoring_service = $monitoring_service;
         $this->logger_service = $logger_service;
     }
 
     public function index(Request $request){
         $user_id = $request->user()->id;
 
+        $validated_data = $request->validate([
+            'data.store_type_id' => 'required',
+        ]);
+
+        $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+
+        $store_type_id = $data['store_type_id'];
+
         $this->logger_service->log('monitor.index', $request);
 
-        $products = $this->monitoring_serve->monitoring_products($user_id);
+        $products = $this->monitoring_service->all($user_id, $store_type_id);
         return response()->json(['data' => $products ]);
     }
 
@@ -41,16 +49,7 @@ class MonitoredController extends Controller {
 
         $monitor = $data['monitor'];
 
-        if ($monitor) {
-            if( !MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product_id] ])->exists()) {
-                $favourite = new MonitoredProduct();
-                $favourite->product_id = $product_id;
-                $favourite->user_id = $user_id;
-                $favourite->save();
-            }
-        } else {
-            MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product_id] ])->delete();
-        }
+        $this->monitoring_service->update($user_id, $product_id, $monitor);
 
         return response()->json(['data' => ['status' => 'success']]);
 

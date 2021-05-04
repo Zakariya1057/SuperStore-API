@@ -75,6 +75,10 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
     
     Route::get('/favourites', 'API\FavouriteController@index')->name('favourite.index');
 
+    Route::prefix('monitor')->group(function () {
+        Route::post('products', 'API\MonitoredController@index')->name('monitor.index');
+    });
+
     Route::prefix('product/{product}')->group(function () {
         Route::get('/', 'API\ProductController@show')->withoutMiddleware('auth:sanctum')->middleware(OptionalAuthentication::class)->name('product.show');
     

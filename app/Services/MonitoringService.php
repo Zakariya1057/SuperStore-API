@@ -6,7 +6,7 @@ use App\Models\MonitoredProduct;
 use App\Models\Product;
 
 class MonitoringService {
-    public function monitoring_products($user_id, $store_type_id){
+    public function all($user_id, $store_type_id){
         $product = new Product();
 
         $products =  MonitoredProduct::where([ ['products.store_type_id', $store_type_id], ['user_id', $user_id] ])
@@ -16,8 +16,9 @@ class MonitoringService {
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->withCasts(
             $product->casts
-        )->limit(20)->groupBy('products.id')->orderBy('monitored_products.created_at','DESC')->get();
-
+        )->groupBy('products.id')
+        ->orderBy('monitored_products.created_at','DESC')
+        ->get();
 
         foreach($products as $product_item){
             $product_item->monitoring = true;
@@ -25,6 +26,19 @@ class MonitoringService {
 
         return $products;
 
+    }
+
+    public function update($user_id, $product_id, $monitor){
+        if ($monitor) {
+            if( !MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product_id] ])->exists()) {
+                $favourite = new MonitoredProduct();
+                $favourite->product_id = $product_id;
+                $favourite->user_id = $user_id;
+                $favourite->save();
+            }
+        } else {
+            MonitoredProduct::where([ ['user_id', $user_id], ['product_id', $product_id] ])->delete();
+        }
     }
 }
 ?>

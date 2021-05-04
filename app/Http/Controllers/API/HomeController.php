@@ -79,7 +79,7 @@ class HomeController extends Controller {
                 $this->location_service->update_location($user->id, $latitude, $longitude);
             }
             
-            $data['monitoring'] = $this->monitoring_service->monitoring_products($user->id, $store_type_id);
+            $data['monitoring'] = $this->monitoring_service->all($user->id, $store_type_id);
             $data['lists'] = $this->list_service->lists_progress($user->id, $store_type_id);
             $data['groceries'] = $this->list_service->recent_items($user->id, $store_type_id);
         } else {
