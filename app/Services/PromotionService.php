@@ -5,8 +5,35 @@ namespace App\Services;
 use App\Models\FeaturedItem;
 use App\Models\Promotion;
 use Carbon\Carbon;
+use Exception;
 
 class PromotionService {
+
+    private $sanitize_service;
+
+    function __construct(SanitizeService $sanitize_service){
+        $this->sanitize_service = $sanitize_service;
+    }
+
+    public function all($store_type_id){
+        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
+        return Promotion::where('store_type_id', $store_type_id)->limit(100)->get();
+    }
+
+    public function get($promotion_id){
+
+        $promotion_id = $this->sanitize_service->sanitizeField($promotion_id);
+
+        $promotion = Promotion::where('id', $promotion_id)->first();
+
+        if(!is_null($promotion)){
+            $promotion->products;
+        } else {
+            throw new Exception('Promotion not found.', 404);
+        }
+
+        return $promotion;
+    }
 
     public function featured($store_type_id){
         $promotion = new Promotion();

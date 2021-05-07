@@ -13,10 +13,11 @@ class ListSharedService {
 
     private $promotion_service;
 
-    function __construct()
+    function __construct(PromotionService $promotion_service)
     {
-        $this->promotion_service = new PromotionService();
+        $this->promotion_service = $promotion_service;
     }
+    
     ////////////////////////////////////////////    SELECT List    //////////////////////////////////////////// 
 
     public function show_list($list_id, $user_id){

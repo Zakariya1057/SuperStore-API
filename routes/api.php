@@ -57,7 +57,12 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         Route::post('category_products/{child_category_id}', 'API\CategoryController@category_products')->name('grocery.category_products');
     });
 
-    Route::get('promotion/{promotion_id}', 'API\PromotionController@show')->name('promotion.show');
+    Route::prefix('promotion')->group(function () {
+        Route::get('all/{store_type_id}', 'API\PromotionController@all')->name('promotion.all');
+        Route::get('{promotion_id}', 'API\PromotionController@show')->name('promotion.show');
+    });
+
+    // Route::get('promotion/{promotion_id}', 'API\PromotionController@show')->name('promotion.show');
     
     Route::prefix('search')->group(function () {
         Route::post('/suggestions', 'API\SearchController@suggestions')->name('search.suggestions');

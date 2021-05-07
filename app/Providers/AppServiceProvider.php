@@ -14,9 +14,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(PromotionService::class, function ($app) {
-            return new PromotionService();
-        });
     }
 
     /**
