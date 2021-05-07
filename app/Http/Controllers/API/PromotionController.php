@@ -17,7 +17,6 @@ class PromotionController extends Controller {
     }
 
     public function all($store_type_id){
-
         $promotions = $this->promotion_service->all($store_type_id);
         
         return response()->json(['data' => $promotions]);

@@ -34,6 +34,8 @@ class Promotion extends Model
 
     public $casts = [
         'name' => HTMLDecode::class,
+        'title' => HTMLDecode::class,
+
         'price' => 'double',
         
         'expires' => 'Bool',

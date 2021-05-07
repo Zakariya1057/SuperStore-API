@@ -6,6 +6,7 @@ use App\Models\FeaturedItem;
 use App\Models\Promotion;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Redis;
 
 class PromotionService {
 
@@ -17,7 +18,22 @@ class PromotionService {
 
     public function all($store_type_id){
         $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
-        return Promotion::where('store_type_id', $store_type_id)->limit(100)->get();
+
+
+        $cache_key = 'all_promotions_' . $store_type_id;
+        $promotions = Redis::get($cache_key);
+
+        if(is_null($promotions)){
+            $promotions = Promotion::where('store_type_id', $store_type_id)->orderBy('id', 'DESC')->limit(100)->get();
+            
+            Redis::set($cache_key, json_encode($promotions));
+
+            Redis::expire($cache_key, 604800);
+        } else {
+            $promotions = json_decode($promotions);
+        }
+
+        return $promotions;
     }
 
     public function get($promotion_id){
