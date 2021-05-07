@@ -69,6 +69,8 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         });
     });
 
+    Route::post('/feedback/create', 'API\FeedbackController@create')->name('feedback.create');
+    Route::post('/report/issue', 'API\ReportController@create')->name('report.create');
 });
 
 Route::middleware('auth:sanctum')->group(function () { # Authenticate Users

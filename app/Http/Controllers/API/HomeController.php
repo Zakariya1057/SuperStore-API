@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Services\CategoryService;
 use App\Services\ListService;
 use App\Services\LocationService;
@@ -14,7 +13,6 @@ use App\Services\PromotionService;
 use App\Services\SanitizeService;
 use App\Services\StoreService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class HomeController extends Controller {
@@ -67,7 +65,6 @@ class HomeController extends Controller {
 
         $this->logger_service->log('home.show', $request);
         
-
         $latitude = $data['latitude'] ?? null;
         $longitude = $data['longitude'] ?? null;
 
