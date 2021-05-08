@@ -43,7 +43,9 @@ class CreatePromotionsTable extends Migration
             $table->boolean('enabled')->default(1);
             
             $table->unique('site_promotion_id');
+            
             $table->index('name');
+            $table->index('title');
             $table->index('store_type_id');
 
             $table->foreign('store_type_id')->references('id')->on('store_types');

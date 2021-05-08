@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\FeaturedItem;
+use App\Models\Product;
 use App\Models\Promotion;
 use Carbon\Carbon;
 use Exception;
@@ -19,15 +20,76 @@ class PromotionService {
     public function all($store_type_id){
         $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
 
-
         $cache_key = 'all_promotions_' . $store_type_id;
+        // $promotions = Redis::get($cache_key);
+        $promotions = null;
+
+        if(is_null($promotions)){
+            $promotions = Promotion::where('store_type_id', $store_type_id)->limit(200)->groupBy('title')->pluck('title');
+
+            Redis::set($cache_key, json_encode($promotions));
+            Redis::expire($cache_key, 604800);
+        } else {
+            $promotions = json_decode($promotions);
+        }
+
+        return $promotions;
+    }
+
+    public function group($store_type_id, $title){
+        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
+        $title = $this->sanitize_service->sanitizeField($title);
+
+        $cache_key = "promotion_group_{$store_type_id}_$title";
         $promotions = Redis::get($cache_key);
 
         if(is_null($promotions)){
-            $promotions = Promotion::where('store_type_id', $store_type_id)->orderBy('id', 'DESC')->limit(100)->get();
-            
-            Redis::set($cache_key, json_encode($promotions));
+            $products = Product::where([ ['promotions.store_type_id', $store_type_id],['title', $title] ])
+            ->select(
+                'products.*',
+    
+                'promotions.store_type_id as promotion_store_type_id',
+                'promotions.name as promotion_name',
+                'promotions.title as promotion_title',
+                'promotions.quantity as promotion_quantity',
+                'promotions.price as promotion_price',
+                'promotions.for_quantity as promotion_for_quantity',
+        
+                'promotions.minimum as promotion_minimum',
+                'promotions.maximum as promotion_maximum',
+                
+                'promotions.expires as promotion_expires',
+                'promotions.starts_at as promotion_starts_at',
+                'promotions.ends_at as promotion_ends_at',
+        
+                'promotions.enabled as promotion_enabled',
+            )
+            ->join('promotions','promotions.id', 'promotion_id')->get();
+    
+            $promotions = [];
+    
+            foreach($products as $product){
+                $promotion_id = $product->promotion_id;
+    
+                $this->set_product_promotion($product);
+    
+                if(key_exists($promotion_id, $promotions)){
+                    $promotion_products = $promotions[$promotion_id]['products'];
+                    $promotion_products[] = $product;
+    
+                    $promotions[$promotion_id]['products'] = $promotion_products;
+                } else {
+                    $promotion = clone $product->promotion;
+                    $promotion->products = [$product];
+    
+                    $promotions[$promotion_id] = $promotion;
+                }
+               
+            }
+    
+            $promotions = array_values($promotions);
 
+            Redis::set($cache_key, json_encode($promotions));
             Redis::expire($cache_key, 604800);
         } else {
             $promotions = json_decode($promotions);

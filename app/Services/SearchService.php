@@ -18,13 +18,13 @@ class SearchService {
 
     private $client, $store_service, $refine_service;
 
-    public function __construct(StoreService $store_service, RefineService $refine_service){
+    public function __construct(StoreService $store_service, RefineService $refine_service, PromotionService $promotion_service){
         $this->client = ClientBuilder::create()->setRetries(3)->setHosts(['host' => env('ELASTICSEARCH_HOST')])->build();
        
         $this->store_service = $store_service;
         $this->refine_service = $refine_service;
 
-        $this->promotion_service = new PromotionService();
+        $this->promotion_service = $promotion_service;
     }
 
     ///////////////////////////////////////////     Suggestions     ///////////////////////////////////////////
@@ -296,6 +296,7 @@ class SearchService {
             $base_query = ParentCategory::
             select(
                 'products.*',
+
                 'parent_categories.id as parent_category_id',
                 'parent_categories.name as parent_category_name',
                 'child_categories.id as child_category_id',

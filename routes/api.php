@@ -58,11 +58,13 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
     });
 
     Route::prefix('promotion')->group(function () {
-        Route::get('all/{store_type_id}', 'API\PromotionController@all')->name('promotion.all');
+        Route::prefix('all/{store_type_id}')->group(function () {
+            Route::get('', 'API\PromotionController@all')->name('promotion.all');
+            Route::get('{title}', 'API\PromotionController@groups')->name('promotion.groups');
+        });
+        
         Route::get('{promotion_id}', 'API\PromotionController@show')->name('promotion.show');
     });
-
-    // Route::get('promotion/{promotion_id}', 'API\PromotionController@show')->name('promotion.show');
     
     Route::prefix('search')->group(function () {
         Route::post('/suggestions', 'API\SearchController@suggestions')->name('search.suggestions');

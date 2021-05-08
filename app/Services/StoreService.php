@@ -62,8 +62,6 @@ class StoreService {
         } 
 
         if(!is_null($latitude) && !is_null($longitude)){
-            // 52.53218700 -1.78090000
-
             $select[] = DB::raw('( 6367 * acos( cos( radians('.$latitude.') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( latitude ) ) ) ) AS distance');
 
             $query_builder = $query_builder

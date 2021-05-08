@@ -22,6 +22,12 @@ class PromotionController extends Controller {
         return response()->json(['data' => $promotions]);
     }
 
+    public function groups($store_type_id, $title){
+        $promotions = $this->promotion_service->group($store_type_id, $title);
+        
+        return response()->json(['data' => $promotions]);
+    }
+
     public function show($promotion_id, Request $request){
         $this->logger_service->log('promotion.index', $request);
 
