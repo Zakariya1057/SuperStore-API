@@ -38,6 +38,8 @@ class Product extends Model
         'parent_category_name' => HTMLDecode::class,
         'child_category_name' => HTMLDecode::class,
 
+        'product_group_name' => HTMLDecode::class,
+
         'enabled' => 'Bool',
     ];
 

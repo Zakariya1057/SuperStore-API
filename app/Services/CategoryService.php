@@ -43,8 +43,11 @@ class CategoryService {
         ->select(
             'products.*',
             'child_categories.store_type_id as store_type_id',
+            
             'child_categories.id as child_category_id','child_categories.name as child_category_name',
             'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name',
+
+            'product_groups.name as product_group_name',
 
             'promotions.store_type_id as promotion_store_type_id',
             'promotions.name as promotion_name',
@@ -65,6 +68,7 @@ class CategoryService {
         ->join('category_products','category_products.child_category_id','child_categories.id')
         ->join('parent_categories','parent_categories.id','child_categories.parent_category_id')
         ->join('products', 'products.id', 'category_products.product_id')
+        ->leftJoin('product_groups','product_groups.id','category_products.product_group_id')
         ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
         ->where('products.enabled', 1)
         ->whereRaw('products.store_type_id = child_categories.store_type_id')

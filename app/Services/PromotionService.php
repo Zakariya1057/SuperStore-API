@@ -25,7 +25,7 @@ class PromotionService {
         $promotions = null;
 
         if(is_null($promotions)){
-            $promotions = Promotion::where('store_type_id', $store_type_id)->limit(200)->groupBy('title')->pluck('title');
+            $promotions = Promotion::where('store_type_id', $store_type_id)->whereNotNull('title')->limit(200)->groupBy('title')->pluck('title');
 
             Redis::set($cache_key, json_encode($promotions));
             Redis::expire($cache_key, 604800);

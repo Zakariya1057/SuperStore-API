@@ -33,8 +33,11 @@ class SearchService {
         
         $results = [
             'stores' => [],
-            'parent_categories' => [],
+
+            'product_groups' => [],
             'child_categories' => [],
+            'parent_categories' => [],
+
             'brands' => [],
             'promotions' => [],
             'store_sales' => [],
@@ -89,7 +92,7 @@ class SearchService {
         $types = [
             'stores' => 2, 
             'categories' => 3, 
-            'products' => 4,
+            'products' => 3,
             'promotions' => 3,
             'brands' => 2,
         ];
@@ -235,7 +238,7 @@ class SearchService {
         $dietary = $data['dietary'] ?? '';
         $category = $data['category'] ?? '';
         $promotion = $data['promotion'] ?? '';
-        $child_category = $data['child_category'] ?? '';
+        $product_group = $data['product_group'] ?? '';
         $brand = $data['brand'] ?? '';
 
         $fuzziness = 0;
@@ -267,6 +270,8 @@ class SearchService {
                 $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50, true, $fuzziness,'or');
             }
 
+            // dd($response['hits']['hits']);
+
             foreach($response['hits']['hits'] as $item){
                 $source = $item['_source'];
                 $name = trim($source['name']);
@@ -276,7 +281,7 @@ class SearchService {
             $item_ids = array_keys($item_ids);
         }
 
-        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_child_category:{$child_category}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_page:$page";
+        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_product_group:{$product_group}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_page:$page";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
@@ -298,9 +303,12 @@ class SearchService {
                 'products.*',
 
                 'parent_categories.id as parent_category_id',
+
                 'parent_categories.name as parent_category_name',
                 'child_categories.id as child_category_id',
                 'child_categories.name as child_category_name',
+
+                'product_groups.name as product_group_name',
 
                 'promotions.store_type_id as promotion_store_type_id',
                 'promotions.name as promotion_name',
@@ -320,6 +328,7 @@ class SearchService {
             ->join('category_products','category_products.parent_category_id','parent_categories.id')
             ->join('products','products.id','category_products.product_id')
             ->join('child_categories','child_categories.id','category_products.child_category_id')
+            ->leftJoin('product_groups','product_groups.id','category_products.product_group_id')
             ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
             ->groupBy('products.id')
             ->where([ ['products.store_type_id', $store_type_id], [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
@@ -348,6 +357,8 @@ class SearchService {
     private function search_where($type, $detail, $store_type_id, Builder $base_query){
         if($type == 'products'){
             $base_query = $base_query->where([ ['products.store_type_id',  $store_type_id], ['products.name', 'like', "$detail%"] ]);
+        } elseif($type == 'product_groups'){
+            $base_query = $base_query->where([ ['child_categories.store_type_id', $store_type_id], ['product_groups.name',$detail] ]);
         } elseif($type == 'child_categories'){
             $base_query = $base_query->where([ ['child_categories.store_type_id', $store_type_id], ['child_categories.name',$detail] ]);
         } elseif($type == 'parent_categories'){
@@ -372,6 +383,8 @@ class SearchService {
 
             if($type == 'products'){
                 $base_query = $base_query->whereIn('products.id', $item_ids);
+            } elseif($type == 'product_groups'){
+                $base_query = $base_query->where('product_groups.id',$item_ids);
             } elseif($type == 'child_categories'){
                 $base_query = $base_query->where('child_categories.id',$item_ids);
             } elseif($type == 'parent_categories'){
@@ -509,7 +522,7 @@ class SearchService {
         ];
 
         // if($index == 'categories'){
-        //     dd(json_encode($params));
+            // dd(json_encode($params));
         // }
         
         return $client->search($params);

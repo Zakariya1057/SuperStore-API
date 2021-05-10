@@ -49,7 +49,7 @@ class SearchController extends Controller {
             'data.order' => '', // asc/desc
 
             'data.dietary' => '', // Halal, Vegetarian
-            'data.child_category' => '',
+            'data.product_group' => '',
             'data.brand' => '',
             'data.promotion' => '',
 
