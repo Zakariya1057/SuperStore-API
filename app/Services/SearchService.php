@@ -426,6 +426,7 @@ class SearchService {
         if($index == 'products'){
 
             $fields_should = [
+                'product_group_names',
                 'child_category_names', 
                 'parent_category_names',
 
