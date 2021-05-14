@@ -266,7 +266,7 @@ class SearchService {
 
             // If searched and no results found then might be a multi word problem. Use or instead again.
             $total_results = $response['hits']['total']['value'];
-            if($total_results < 3){
+            if($total_results != 0 && $total_results < 3){
                 $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50, true, $fuzziness,'or');
             }
 
