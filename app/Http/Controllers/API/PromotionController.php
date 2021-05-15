@@ -16,13 +16,17 @@ class PromotionController extends Controller {
         $this->promotion_service = $promotion_service;
     }
 
-    public function all($store_type_id){
+    public function all($store_type_id, Request $request){
+        $this->logger_service->log('promotion.all', $request);
+
         $promotions = $this->promotion_service->all($store_type_id);
         
         return response()->json(['data' => $promotions]);
     }
 
-    public function groups($store_type_id, $title){
+    public function groups($store_type_id, $title, Request $request){
+        $this->logger_service->log('promotion.all', $request);
+        
         $promotions = $this->promotion_service->group($store_type_id, $title);
         
         return response()->json(['data' => $promotions]);
