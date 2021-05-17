@@ -28,6 +28,8 @@ class CreateProductsTable extends Migration
             $table->json('dimensions')->nullable();
             $table->text('storage')->nullable();
 
+            $table->string('availability_type'); // In-Store or Ship To Home
+
             $table->string('country_of_origin')->nullable();
 
             $table->string('currency')->default('Pounds');
