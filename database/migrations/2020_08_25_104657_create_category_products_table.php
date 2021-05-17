@@ -26,14 +26,18 @@ class CreateCategoryProductsTable extends Migration
 
             $table->unsignedBigInteger('store_id')->nullable();
             
+            $table->foreign('product_group_id')->references('id')->on('product_groups');
             $table->foreign('child_category_id')->references('id')->on('child_categories');
             $table->foreign('parent_category_id')->references('id')->on('parent_categories');
+            
             $table->foreign('grand_parent_category_id')->references('id')->on('grand_parent_categories');
+
             $table->foreign('store_id')->references('id')->on('stores');
             $table->foreign('product_id')->references('id')->on('products');
 
 
             $table->index('product_id');
+            $table->index('product_group_id');
             $table->index('child_category_id');
             $table->index('parent_category_id');
             $table->index('grand_parent_category_id');
