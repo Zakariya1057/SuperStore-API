@@ -20,7 +20,7 @@ class CategoryService {
     }
     
     public function grand_parent_categories($store_type_id){
-        $grand_parent_categories = GrandParentCategory::where([ ['enabled', 1], ['grand_parent_categories.store_type_id', $store_type_id]])->get();
+        $grand_parent_categories = GrandParentCategory::where([ ['enabled', 1], ['grand_parent_categories.store_type_id', $store_type_id]])->orderBy('index', 'ASC')->get();
 
         foreach($grand_parent_categories as $category){
             $category->parent_categories;
@@ -30,7 +30,7 @@ class CategoryService {
     }
 
     public function child_categories($parent_category_id){
-        return ChildCategory::where([ ['enabled', 1], ['child_categories.parent_category_id', $parent_category_id] ])->get();
+        return ChildCategory::where([ ['enabled', 1], ['child_categories.parent_category_id', $parent_category_id] ])->orderBy('index', 'ASC')->get();
     }
 
     public function category_products($child_category_id, $data = []){
