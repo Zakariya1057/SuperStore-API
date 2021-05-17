@@ -19,6 +19,8 @@ class CreateGrandParentCategoriesTable extends Migration
             $table->id();
             $table->string('name');
 
+            $table->integer('index')->default(0);
+
             $table->string('site_category_id');
             $table->unsignedBigInteger('store_type_id');
 
