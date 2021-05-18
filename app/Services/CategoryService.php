@@ -44,8 +44,12 @@ class CategoryService {
             'products.*',
             'child_categories.store_type_id as store_type_id',
             
-            'child_categories.id as child_category_id','child_categories.name as child_category_name',
-            'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name',
+            'child_categories.id as child_category_id',
+            'child_categories.name as child_category_name', 
+            'child_categories.index as child_category_index',
+
+            'parent_categories.id as parent_category_id', 
+            'parent_categories.name as parent_category_name',
 
             'product_groups.name as product_group_name',
 
@@ -86,6 +90,7 @@ class CategoryService {
                 $category = [
                     'id' => $product->child_category_id,
                     'name' => $product->child_category_name,
+                    'index' => $product->child_category_index,
                     'parent_category_id' => $product->parent_category_id,
                     'store_type_id' => $product->store_type_id,
                     'products' => [],
