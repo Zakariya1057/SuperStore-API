@@ -18,7 +18,7 @@ class UserService extends UserAuthService {
 
     public function login($data): ?User{
 
-        $user = User::where('email', $data['email'])->get()->first();
+        $user = User::where('email', trim($data['email']))->get()->first();
 
         if(!$user){
             throw new Exception('Email address doesn\'t belongs to any user. Please create a new account.', 404);
@@ -46,8 +46,8 @@ class UserService extends UserAuthService {
         $store_type_id = $data['store_type_id'];
         
         $user_data = [
-            'name' => $data['name'],
-            'email' => $data['email'],
+            'name' => trim($data['name']),
+            'email' => trim($data['email']),
             'store_type_id' => $store_type_id,
             'password' => Hash::make($data['password']),
             'notification_token' => $data['notification_token']
@@ -85,21 +85,6 @@ class UserService extends UserAuthService {
         }
 
         $user = User::create($user_data);
-
-        // Create new shopping list for new user
-        
-        // try {
-        //     $uuid = Uuid::uuid4();
-        //     GroceryList::create([
-        //         'name' => 'Shopping List',
-        //         'user_id' => $user->id,
-        //         'store_type_id' => $store_type_id,
-        //         'currency' => $store_type_id == 1 ? 'Pounds' : 'Canadian Dollars',
-        //         'identifier' => $uuid->toString()
-        //     ]);
-        // } catch(Exception $e){
-        //     Log::error('Failed To Automatic Create List: ' . $e->getMessage());
-        // }
 
         return $user;
 
@@ -157,7 +142,7 @@ class UserService extends UserAuthService {
         }
 
         if($type == 'email'){
-           if(User::where('email',$value)->exists()){
+           if(User::where('id', '!=', $user_id)->where('email',$value)->exists()){
             throw new Exception('Email used by another user.', 422);
            }
         }
