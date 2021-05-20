@@ -42,6 +42,8 @@ class SearchController extends Controller {
         $validated_data = $request->validate([
             'data.store_type_id' => 'required',
 
+            'data.availability_type' => '',
+
             'data.query' => 'required',
             'data.type'  => 'required',
 

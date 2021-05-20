@@ -27,6 +27,7 @@ class RefineService {
             $base_query = $base_query->orderByRaw("FIELD(products.id, $product_ids)");
         }
 
+        $base_query = $this->search_availability_type($data, $base_query);
         $base_query = $this->search_dietary($data, $base_query);
         $base_query = $this->search_brand($data, $base_query);
         $base_query = $this->search_product_group($data, $base_query);
@@ -110,6 +111,15 @@ class RefineService {
         if(key_exists('promotion', $data) && !is_null($data['promotion'])){
             $promotion = $data['promotion'];
             $base_query = $base_query->where('promotions.name',$promotion);
+        }
+
+        return $base_query;
+    }
+
+    private function search_availability_type($data, Builder $base_query){
+        if(key_exists('availability_type', $data) && !is_null($data['availability_type'])){
+            $availability = $data['availability_type'];
+            $base_query = $base_query->where('products.availability_type',$availability);
         }
 
         return $base_query;

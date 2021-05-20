@@ -241,6 +241,8 @@ class SearchService {
         $product_group = $data['product_group'] ?? '';
         $brand = $data['brand'] ?? '';
 
+        $availability_type = $data['availability_type'] ?? '';
+
         $fuzziness = 0;
 
         $text_search = $data['text_search'] ?? false;
@@ -281,7 +283,7 @@ class SearchService {
             $item_ids = array_keys($item_ids);
         }
 
-        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_product_group:{$product_group}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_page:$page";
+        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_product_group:{$product_group}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_availability_type:{$availability_type}_page:$page";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
