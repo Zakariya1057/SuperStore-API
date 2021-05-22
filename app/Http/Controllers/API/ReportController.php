@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\LoggerService;
+use App\Services\Logger\LoggerService;
 use App\Services\ReportService;
 use Illuminate\Http\Request;
 

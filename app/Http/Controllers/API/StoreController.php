@@ -6,8 +6,8 @@ use App\Models\Store;
 use Exception;
 use App\Casts\Image;
 use App\Http\Controllers\Controller;
-use App\Services\LoggerService;
-use App\Services\SanitizeService;
+use App\Services\Logger\LoggerService;
+use App\Services\Sanitize\SanitizeService;
 use Illuminate\Http\Request;
 
 class StoreController extends Controller {

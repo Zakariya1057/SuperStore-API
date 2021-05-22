@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Category;
 
 use App\Casts\HTMLDecode;
 use App\Models\Product;
 use App\Models\ChildCategory;
 use App\Models\GrandParentCategory;
 use App\Models\FeaturedItem;
-
+use App\Services\Product\PromotionService;
+use App\Services\RefinePaginate\PaginateService;
+use App\Services\RefinePaginate\RefineService;
 
 class CategoryService {
     

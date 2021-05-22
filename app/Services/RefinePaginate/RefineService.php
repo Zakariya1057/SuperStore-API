@@ -1,6 +1,7 @@
 <?php
-namespace App\Services;
+namespace App\Services\RefinePaginate;
 
+use App\Services\Product\PromotionService;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 

@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Http\Controllers\Controller;
 use App\Models\GroceryListItem;
-use App\Services\ListService;
-use App\Services\LoggerService;
-use App\Services\SanitizeService;
+use App\Services\GroceryList\GroceryListService;
+use App\Services\Logger\LoggerService;
+use App\Services\Sanitize\SanitizeService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class ListController extends Controller {
 
     private $sanitize_service, $list_service, $logger_service;
 
-    function __construct(SanitizeService $sanitize_service, ListService $list_service, LoggerService $logger_service){
+    function __construct(SanitizeService $sanitize_service, GroceryListService $list_service, LoggerService $logger_service){
         $this->sanitize_service = $sanitize_service;
         $this->list_service = $list_service;
         $this->logger_service = $logger_service;

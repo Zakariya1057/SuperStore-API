@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Services\FeedbackService;
-use App\Services\LoggerService;
+use App\Services\Logger\LoggerService;
 use Illuminate\Http\Request;
 
 class FeedbackController extends Controller {

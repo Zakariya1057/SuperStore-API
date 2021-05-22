@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\ListItemService;
-use App\Services\LoggerService;
-use App\Services\SanitizeService;
+use App\Services\GroceryList\GroceryListItemService;
+use App\Services\Logger\LoggerService;
+use App\Services\Sanitize\SanitizeService;
 use Illuminate\Http\Request;
 
 class ListItemController extends Controller {
 
     private $sanitize_service, $list_item_service, $logger_service;
 
-    function __construct(SanitizeService $sanitize_service, ListItemService $list_item_service, LoggerService $logger_service){
+    function __construct(SanitizeService $sanitize_service, GroceryListItemService $list_item_service, LoggerService $logger_service){
         $this->sanitize_service = $sanitize_service;
         $this->list_item_service = $list_item_service;
         $this->logger_service = $logger_service;

@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\GroceryList;
 
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\Product;
+use App\Services\Product\PromotionService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;

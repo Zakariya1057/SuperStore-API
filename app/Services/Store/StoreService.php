@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Store;
 
 use App\Models\OpeningHour;
 use App\Models\Store;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Sanitize;
 
 class SanitizeService {
     public function sanitizeAllFields($data){
@@ -30,10 +30,6 @@ class SanitizeService {
         
         return $string;
     }
-
-
-
-    
 
     public function decodeAllFields($data){
         $data = (array)$data;

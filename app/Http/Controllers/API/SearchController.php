@@ -4,9 +4,9 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Services\LoggerService;
-use App\Services\SanitizeService;
-use App\Services\SearchService;
+use App\Services\Logger\LoggerService;
+use App\Services\Sanitize\SanitizeService;
+use App\Services\Search\SearchService;
 class SearchController extends Controller {
 
     private $sanitize_service, $search_service, $logger_service;

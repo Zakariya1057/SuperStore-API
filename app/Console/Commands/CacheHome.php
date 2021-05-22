@@ -3,11 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\StoreType;
-use App\Services\CategoryService;
-use App\Services\GroceryService;
-use App\Services\ProductService;
-use App\Services\PromotionService;
-use App\Services\StoreService;
+use App\Services\Category\CategoryService;
+use App\Services\Product\ProductService;
+use App\Services\Product\PromotionService;
+use App\Services\Store\StoreService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
 class CacheHome extends Command

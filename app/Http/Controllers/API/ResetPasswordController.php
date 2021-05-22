@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\LoggerService;
-use App\Services\SanitizeService;
-use App\Services\UserResetService;
+use App\Services\Logger\LoggerService;
+use App\Services\Sanitize\SanitizeService;
+use App\Services\User\UserResetService;
 use Illuminate\Http\Request;
 
 class ResetPasswordController extends Controller {

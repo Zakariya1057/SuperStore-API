@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\CategoryService;
-use App\Services\ListService;
-use App\Services\LocationService;
-use App\Services\LoggerService;
-use App\Services\MonitoringService;
-use App\Services\ProductService;
-use App\Services\PromotionService;
-use App\Services\SanitizeService;
-use App\Services\StoreService;
+use App\Services\Category\CategoryService;
+use App\Services\GroceryList\GroceryListService;
+use App\Services\User\LocationService;
+use App\Services\Logger\LoggerService;
+use App\Services\Product\MonitoringService;
+use App\Services\Product\ProductService;
+use App\Services\Product\PromotionService;
+use App\Services\Sanitize\SanitizeService;
+use App\Services\Store\StoreService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
@@ -30,7 +30,7 @@ class HomeController extends Controller {
 
     function __construct(
         SanitizeService $sanitize_service, 
-        ListService $list_service, 
+        GroceryListService $list_service, 
         CategoryService $category_service, 
         MonitoringService $monitoring_service, 
         StoreService $store_service, 

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\LoggerService;
+use App\Services\Logger\LoggerService;
 use Illuminate\Http\Request;
-use App\Services\ProductService;
-use App\Services\SanitizeService;
+use App\Services\Product\ProductService;
+use App\Services\Sanitize\SanitizeService;
 use Exception;
 
 class ProductController extends Controller {

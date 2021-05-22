@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\LoggerService;
-use App\Services\PromotionService;
+use App\Services\Logger\LoggerService;
+use App\Services\Product\PromotionService;
 use Illuminate\Http\Request;
 
 class PromotionController extends Controller {

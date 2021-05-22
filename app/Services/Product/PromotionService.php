@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Product;
 
 use App\Models\FeaturedItem;
 use App\Models\Product;
 use App\Models\Promotion;
+use App\Services\Sanitize\SanitizeService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Redis;

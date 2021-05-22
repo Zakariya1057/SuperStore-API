@@ -4,9 +4,9 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Services\LoggerService;
-use App\Services\ReviewService;
-use App\Services\SanitizeService;
+use App\Services\Logger\LoggerService;
+use App\Services\Product\ReviewService;
+use App\Services\Sanitize\SanitizeService;
 
 class ReviewController extends Controller {
 

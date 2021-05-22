@@ -1,15 +1,19 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Search;
+
+use Exception;
 
 use App\Models\ChildCategory;
 use App\Models\ParentCategory;
 use App\Models\Product;
 use App\Models\Promotion;
 use App\Models\StoreType;
+use App\Services\Product\PromotionService;
+use App\Services\RefinePaginate\RefineService;
+use App\Services\Store\StoreService;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;

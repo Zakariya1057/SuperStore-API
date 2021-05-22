@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Product;
-use App\Services\ImageService;
+use App\Services\Image\ImageService;
 use Illuminate\Console\Command;
 
 class CacheImages extends Command

@@ -4,14 +4,13 @@ namespace App\Http\Controllers\API;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
-use App\Services\LocationService;
-use App\Services\LoggerService;
-use App\Services\SanitizeService;
-use App\Services\UserService;
+use App\Services\User\LocationService;
+use App\Services\Logger\LoggerService;
+use App\Services\Sanitize\SanitizeService;
+use App\Services\User\UserService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller {
 

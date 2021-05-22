@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Message;
 
 use App\Models\FeedbackMessage;
+use App\Services\Sanitize\SanitizeService;
 
 class FeedbackService {
 

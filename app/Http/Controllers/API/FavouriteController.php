@@ -5,8 +5,8 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\FavouriteService;
-use App\Services\LoggerService;
-use App\Services\SanitizeService;
+use App\Services\Logger\LoggerService;
+use App\Services\Sanitize\SanitizeService;
 
 class FavouriteController extends Controller {
 

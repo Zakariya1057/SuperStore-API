@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\CategoryService;
-use App\Services\LoggerService;
-use App\Services\SanitizeService;
+use App\Services\Category\CategoryService;
+use App\Services\Logger\LoggerService;
+use App\Services\Sanitize\SanitizeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 

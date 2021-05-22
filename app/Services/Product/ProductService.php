@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Product;
 
 use App\Models\FavouriteProducts;
 use App\Models\FeaturedItem;
 use App\Models\MonitoredProduct;
 use App\Models\Product;
 use App\Models\Recommended;
+use App\Services\Sanitize\SanitizeService;
 
 class ProductService {
 

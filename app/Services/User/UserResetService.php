@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
 use App\Models\User;
+use App\Services\Mail\MailService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 
 class UserResetService extends UserAuthService {
 

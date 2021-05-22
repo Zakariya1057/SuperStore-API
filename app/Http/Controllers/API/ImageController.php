@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\ImageService;
-use App\Services\SanitizeService;
+use App\Services\Image\ImageService;
+use App\Services\Sanitize\SanitizeService;
 
 class ImageController extends Controller {
 
