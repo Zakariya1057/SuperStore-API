@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Cache;
 
-use App\Models\GrandParentCategory;
 use App\Models\StoreType;
 use App\Services\Category\CategoryService;
-use App\Services\GroceryService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 

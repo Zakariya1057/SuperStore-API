@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Cache;
 
 use App\Models\Product;
 use App\Services\Image\ImageService;

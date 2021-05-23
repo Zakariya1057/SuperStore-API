@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Expire;
 
 use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
@@ -11,14 +11,14 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class PromotionExpired extends Command
+class ExpirePromotion extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'promotion:expired';
+    protected $signature = 'expire:promotion';
 
     /**
      * The console command description.
@@ -67,7 +67,7 @@ class PromotionExpired extends Command
 
             $list_ids = GroceryListItem::whereIn('product_id', $product_ids)->groupBy('grocery_list_items.list_id')->pluck('grocery_list_items.list_id');
 
-            $lists =  GroceryList::whereIn('id', $list_ids)->get();
+            $lists = GroceryList::whereIn('id', $list_ids)->get();
 
             foreach($lists as $list){
                 $this->info('List Found Using Product: ' . $list->id);

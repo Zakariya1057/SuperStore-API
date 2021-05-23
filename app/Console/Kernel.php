@@ -14,10 +14,11 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         'App\Console\Commands\BackupDatabase',
-        'App\Console\Commands\CacheHome',
-        'App\Console\Commands\CacheGroceries',
-        'App\Console\Commands\PromotionExpired',
-        'App\Console\Commands\SaleExpired',
+        'App\Console\Commands\Cache\CacheHome',
+        'App\Console\Commands\Cache\CacheGroceries',
+        'App\Console\Commands\Expire\ExpirePromotion',
+        'App\Console\Commands\Expire\ExpireSale',
+        'App\Console\Commands\Expire\ExpireFlyer',
     ];
 
     /**
@@ -28,8 +29,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('promotion:expired')->daily()->at('00:00')->runInBackground();
-        $schedule->command('sale:expired')->daily()->at('00:00')->runInBackground();
+        $schedule->command('expire:promotion')->daily()->at('00:00')->runInBackground();
+        $schedule->command('expire:sale')->daily()->at('00:00')->runInBackground();
+        $schedule->command('expire:flyer')->daily()->at('00:00')->runInBackground();
 
         $schedule->command('backup:database')->weekly()->at('05:00')->runInBackground();
         $schedule->command('cache:home')->mondays()->at('06:00')->runInBackground();

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Cache;
 
 use App\Models\StoreType;
 use App\Services\Category\CategoryService;
@@ -9,6 +9,7 @@ use App\Services\Product\PromotionService;
 use App\Services\Store\StoreService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
+
 class CacheHome extends Command
 {
     /**

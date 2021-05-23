@@ -1,24 +1,23 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Expire;
 
 use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\Product;
-use App\Models\Promotion;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class SaleExpired extends Command
+class ExpireSale extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'sale:expired';
+    protected $signature = 'expire:sale';
 
     /**
      * The console command description.
