@@ -43,6 +43,10 @@ Route::prefix('image')->group(function () {
     Route::get('/{type}/{name}', 'API\ImageController@show')->name('image.show');
 });
 
+Route::prefix('flyers')->group(function () {
+    Route::get('/store/{store_id}', 'API\FlyerController@index')->name('flyer.index');
+    Route::get('/{name}', 'API\FlyerController@show')->name('flyer.show');
+});
 
 Route::middleware(OptionalAuthentication::class)->group(function () { # Optional Authentication
     Route::post('/home', 'API\HomeController@show')->name('home.show');
