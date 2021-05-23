@@ -8,7 +8,7 @@ use App\Models\GroceryListItem;
 use App\Models\Product;
 use Exception;
 
-class GroceryListItemService extends ListSharedService {
+class GroceryListItemService extends GroceryListSharedService {
     
     public function create($list_id, $data){
         $product_id = $data['product_id'];

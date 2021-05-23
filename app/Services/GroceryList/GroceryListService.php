@@ -9,7 +9,7 @@ use App\Models\Product;
 use App\Models\StoreType;
 use Exception;
 
-class GroceryListService extends ListSharedService {
+class GroceryListService extends GroceryListSharedService {
 
     public function create($data, $user_id){
         $list_name = $data['name'];

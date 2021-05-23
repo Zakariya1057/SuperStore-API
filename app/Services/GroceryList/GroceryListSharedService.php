@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-class ListSharedService {
+class GroceryListSharedService {
 
     private $promotion_service;
 
