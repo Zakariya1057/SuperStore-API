@@ -34,13 +34,6 @@ class CreateProductsTable extends Migration
 
             $table->string('currency')->default('Pounds');
 
-            $table->decimal('price', 9,2);
-            $table->decimal('old_price', 9,2)->nullable();
-
-            $table->boolean('is_on_sale')->nullable();
-            $table->timestamp('sale_ends_at')->nullable();
-            
-            $table->unsignedBigInteger('promotion_id')->nullable();
             $table->string('site_product_id')->nullable();
 
             $table->boolean('enabled')->default(1);
@@ -68,14 +61,12 @@ class CreateProductsTable extends Migration
             $table->timestamp('last_checked')->useCurrent();
             
             $table->foreign('store_type_id')->references('id')->on('store_types');
-            $table->foreign('promotion_id')->references('id')->on('promotions');
 
             $table->unique('site_product_id');
 
             $table->index('name');
             $table->index('dietary_info');
             $table->index('allergen_info');
-            $table->index('promotion_id');
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
