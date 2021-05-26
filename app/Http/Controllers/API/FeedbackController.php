@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\FeedbackService;
 use App\Services\Logger\LoggerService;
+use App\Services\Message\FeedbackService;
 use Illuminate\Http\Request;
 
 class FeedbackController extends Controller {

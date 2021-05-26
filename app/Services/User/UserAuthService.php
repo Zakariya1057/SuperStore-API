@@ -125,6 +125,7 @@ class UserAuthService {
             'name' => $user->name, 
             'email' => $user->email,
             'store_type_id' => (int)$user->store_type_id,
+            'region_id' => (int)$user->region_id,
             'send_notifications' => $send_notifications
         ];
 

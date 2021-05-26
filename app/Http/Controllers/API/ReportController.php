@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Services\Logger\LoggerService;
-use App\Services\ReportService;
+use App\Services\Message\ReportService;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller {

@@ -4,10 +4,7 @@ namespace App\Listeners;
 
 use App\Events\GroceryListChanged;
 use App\Events\GroceryListChangedEvent;
-use App\Services\ListSharedService;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Log;
+use App\Services\GroceryList\GroceryListSharedService;
 
 class UpdateGroceryListListener
 {
@@ -18,7 +15,7 @@ class UpdateGroceryListListener
      *
      * @return void
      */
-    public function __construct(ListSharedService $list_service)
+    public function __construct(GroceryListSharedService $list_service)
     {
         $this->list_service = $list_service;
     }

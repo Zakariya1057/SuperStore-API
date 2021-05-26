@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Services\FavouriteService;
+use App\Services\Product\FavouriteService;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
 
