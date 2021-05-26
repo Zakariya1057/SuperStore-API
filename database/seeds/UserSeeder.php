@@ -17,12 +17,14 @@ class UserSeeder extends Seeder
 
         DB::table('users')->insert([
             'name' => Str::random(10),
+            'region_id' => 1,
             'email' => Str::random(10).'@gmail.com',
             'password' => Hash::make('password'),
         ]);
 
         DB::table('users')->insert([
             'name' => Str::random(10),
+            'region_id' => 1,
             'email' => Str::random(10).'@gmail.com',
             'password' => Hash::make('password'),
         ]);
