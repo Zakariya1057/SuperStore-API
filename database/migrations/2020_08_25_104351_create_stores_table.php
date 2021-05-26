@@ -32,6 +32,7 @@ class CreateStoresTable extends Migration
             $table->timestamp('last_checked')->useCurrent();
 
             $table->string('site_store_id')->unique();
+
             $table->unsignedBigInteger('store_type_id');
 
             $table->boolean('enabled')->default(1);
@@ -40,6 +41,7 @@ class CreateStoresTable extends Migration
             $table->index('site_store_id');
 
             $table->foreign('store_type_id')->references('id')->on('store_types');
+            
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

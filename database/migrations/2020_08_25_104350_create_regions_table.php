@@ -18,6 +18,7 @@ class CreateRegionsTable extends Migration
             $table->id();
 
             $table->string('name');
+            $table->string('country');
             $table->unsignedBigInteger('store_type_id');
 
             $table->foreign('store_type_id')->references('id')->on('store_types');
@@ -25,7 +26,6 @@ class CreateRegionsTable extends Migration
             $table->index('name');
             $table->index('store_type_id');
 
-            
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

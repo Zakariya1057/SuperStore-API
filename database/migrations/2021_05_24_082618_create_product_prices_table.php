@@ -20,6 +20,8 @@ class CreateProductPricesTable extends Migration
             $table->decimal('price', 9,2);
             $table->decimal('old_price', 9,2)->nullable();
 
+            $table->boolean('available')->default(1);
+            
             $table->boolean('is_on_sale')->nullable();
             $table->timestamp('sale_ends_at')->nullable();
             
@@ -35,6 +37,8 @@ class CreateProductPricesTable extends Migration
             $table->index('promotion_id');
             $table->index('region_id');
             $table->index('product_id');
+
+            $table->unique(['region_id','product_id']);
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

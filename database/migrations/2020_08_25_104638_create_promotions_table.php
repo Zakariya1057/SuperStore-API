@@ -31,6 +31,8 @@ class CreatePromotionsTable extends Migration
 
             $table->unsignedBigInteger('site_category_id')->nullable();
 
+            $table->unsignedBigInteger('region_id')->nullable();
+
             $table->integer('minimum')->nullable();
             $table->integer('maximum')->nullable();
 
@@ -49,6 +51,8 @@ class CreatePromotionsTable extends Migration
             $table->index('store_type_id');
 
             $table->foreign('store_type_id')->references('id')->on('store_types');
+            $table->foreign('region_id')->references('id')->on('regions');
+            
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

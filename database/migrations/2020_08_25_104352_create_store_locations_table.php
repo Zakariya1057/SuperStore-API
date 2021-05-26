@@ -19,10 +19,11 @@ class CreateStoreLocationsTable extends Migration
 
             $table->unsignedBigInteger('store_id');
 
-            $table->string('country');
-            $table->string('region')->nullable();
             $table->string('city');
             
+            $table->string('country');
+            $table->unsignedBigInteger('region_id');
+
             $table->string('address_line1');
             $table->string('address_line2')->nullable();
             $table->string('address_line3')->nullable();
@@ -33,7 +34,9 @@ class CreateStoreLocationsTable extends Migration
             $table->decimal('longitude',11,8)->nullable();
 
             $table->unique('store_id');
+
             $table->foreign('store_id')->references('id')->on('stores');
+            $table->foreign('region_id')->references('id')->on('regions');
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

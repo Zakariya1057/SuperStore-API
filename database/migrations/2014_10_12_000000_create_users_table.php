@@ -30,6 +30,8 @@ class CreateUsersTable extends Migration
             $table->double('latitude', 11, 8)->nullable();
             $table->double('longitude', 11, 8)->nullable();
 
+            $table->unsignedBigInteger('region_id');
+
             $table->rememberToken();
 
             $table->timestamp('token_sent_at')->nullable();

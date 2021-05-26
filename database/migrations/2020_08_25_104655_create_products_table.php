@@ -37,7 +37,6 @@ class CreateProductsTable extends Migration
             $table->string('site_product_id')->nullable();
 
             $table->boolean('enabled')->default(1);
-            $table->boolean('available')->default(1);
 
             $table->boolean('recommended_searched')->nullable();
             $table->boolean('reviews_searched')->nullable();
