@@ -18,6 +18,7 @@ class UserAuthService {
         $type_validations = [
             'name' => ['field' => 'name', 'validation' => 'required|string|max:255'],
             'store_type_id' => ['field' => 'store_type_id', 'validation' => 'required|integer'],
+            'region_id' => ['field' => 'region_id', 'validation' => 'required|integer'],
             'notification_token' => ['field' => 'notification_token', 'validation' => 'required|string|max:255'],
             'code' => ['field' => 'code', 'validation' => 'required|integer'],
             'email' => ['field' => 'email', 'validation' => 'required|email|max:255'],

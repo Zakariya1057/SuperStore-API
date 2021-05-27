@@ -30,6 +30,7 @@ class UserController extends Controller {
         $validated_data = $request->validate([
             'data.name' => 'required|string|max:255',
             'data.email' => 'required|email|max:255',
+            'data.region_id' => 'required',
             'data.store_type_id' => 'required',
             'data.password' => 'required|confirmed|string|min:8|max:255',
             'data.identifier' => '',
@@ -87,6 +88,7 @@ class UserController extends Controller {
         $validated_data = $request->validate([
             'data.name' => [],
             'data.email' => [],
+            'data.region_id' => [],
             'data.store_type_id' => [],
             'data.password' => [],
             'data.password_confirmation' => [],

@@ -43,12 +43,17 @@ class UserService extends UserAuthService {
         $identifier = $data['identifier'] ?? '';
         $user_token = $data['user_token'] ?? '';
         $notification_token = $data['notification_token'] ?? null;
+
+        $region_id = $data['region_id'];
         $store_type_id = $data['store_type_id'];
         
         $user_data = [
             'name' => trim($data['name']),
             'email' => trim($data['email']),
+
+            'region_id' => $region_id,
             'store_type_id' => $store_type_id,
+            
             'password' => Hash::make($data['password']),
             'notification_token' => $data['notification_token']
         ];
