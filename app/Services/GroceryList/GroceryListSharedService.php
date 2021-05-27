@@ -83,7 +83,6 @@ class GroceryListSharedService {
         ->withCasts(
             $casts
         )
-        ->groupBy('product_prices.product_id')
         ->get();
 
         $list->categories = $this->group_by_categories($items);
@@ -121,9 +120,10 @@ class GroceryListSharedService {
 
     }
 
-    public function item_price($product_id, $quantity=1){
-
-        $region_id = Auth::user()->region_id;
+    public function item_price($product_id, $quantity=1, ?int $region_id = null){
+        if(is_null($region_id)){
+            $region_id = Auth::user()->region_id;
+        }
 
         $product = Product::leftJoin('product_prices', 'products.id','=','product_prices.product_id')
         ->groupBy('product_prices.product_id')
@@ -205,9 +205,10 @@ class GroceryListSharedService {
 
     ////////////////////////////////////////////    UPDATE List    //////////////////////////////////////////// 
 
-    public function update_list(GroceryList $list){
-        
-        $region_id = Auth::user()->region_id;
+    public function update_list(GroceryList $list, ?int $region_id = null){
+        if(is_null($region_id)){
+            $region_id = Auth::user()->region_id;
+        }
 
         $product = new Product();
         $casts = $product->casts;
@@ -243,12 +244,12 @@ class GroceryListSharedService {
 
             'promotions.enabled as promotion_enabled',
         )
-        ->where([ ['product_prices.region_id', $region_id], ['list_id',$list->id] ])
+        ->where([ ['list_id',$list->id], ['product_prices.region_id', $region_id] ])
         ->withCasts($casts)
         ->groupBy('product_prices.product_id')
         ->get();
 
-        $list_data = $this->group_list_items($items);
+        $list_data = $this->group_list_items($items, $region_id);
 
         $promotions = $list_data['promotions'];
         $total_price = $list_data['total_price'];
@@ -347,7 +348,7 @@ class GroceryListSharedService {
 
     }
 
-    private function group_list_items($items): array{
+    private function group_list_items($items, ?int $region_id = null): array{
 
         $promotions = [];
         $total_price = 0;
@@ -355,7 +356,7 @@ class GroceryListSharedService {
         $ticked_off_items = 0;
 
         foreach($items as $item){
-            $item->total_price = $this->item_price($item->product_id, $item->product_quantity);
+            $item->total_price = $this->item_price($item->product_id, $item->product_quantity, $region_id);
 
             $this->promotion_service->set_product_promotion($item);
 

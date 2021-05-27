@@ -2,26 +2,29 @@
 
 namespace App\Events;
 
-use App\Models\GroceryList;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class GroceryListChangedEvent
+class RegionChangedEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $list;
+    public $user_id, $region_id;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(GroceryList $list)
+    public function __construct(int $user_id, int $region_id)
     {
-        $this->list = $list;
+        $this->user_id = $user_id;
+        $this->region_id = $region_id;
     }
 
     /**

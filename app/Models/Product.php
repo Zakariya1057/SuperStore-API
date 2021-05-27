@@ -56,7 +56,9 @@ class Product extends Model
     }
 
     public function promotion(){
-        return $this->belongsTo('App\Models\Promotion')->where('promotions.enabled', 1);
+        return $this->belongsTo('App\Models\ProductPrice')
+        ->join('promotions','promotions.id','product_prices.promotion_id')
+        ->where('promotions.enabled', 1);
     }
 
 }

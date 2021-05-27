@@ -2,6 +2,8 @@
 
 namespace App\Services\User;
 
+use Illuminate\Support\Facades\Hash;
+use App\Events\RegionChangedEvent;
 use App\Models\FavouriteProducts;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
@@ -10,9 +12,6 @@ use App\Models\Review;
 use App\Models\StoreType;
 use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Uuid;
 
 class UserService extends UserAuthService {
 
@@ -53,7 +52,7 @@ class UserService extends UserAuthService {
 
             'region_id' => $region_id,
             'store_type_id' => $store_type_id,
-            
+
             'password' => Hash::make($data['password']),
             'notification_token' => $data['notification_token']
         ];
@@ -153,6 +152,10 @@ class UserService extends UserAuthService {
         }
 
         User::where('id',$user_id)->update($update_fields);
+
+        if($type == 'region_id'){
+            event(new RegionChangedEvent($user_id, $value));
+        }
     }
 
 }
