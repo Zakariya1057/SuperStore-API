@@ -6,13 +6,26 @@ use App\Models\MonitoredProduct;
 use App\Models\Product;
 
 class MonitoringService {
-    public function all($user_id, $store_type_id){
+    public function all(int $user_id, int $region_id, int $store_type_id){
         $product = new Product();
 
-        $products =  MonitoredProduct::where([ ['products.store_type_id', $store_type_id], ['user_id', $user_id] ])
-        ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+        $products =  MonitoredProduct::where([ ['product_prices.region_id', $region_id], ['products.store_type_id', $store_type_id], ['user_id', $user_id] ])
+        ->select(
+            'products.*' ,
+            
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
+            
+            'parent_categories.id as parent_category_id', 
+            'parent_categories.name as parent_category_name'
+        )
         ->join('products','products.id','monitored_products.product_id')
         ->join('category_products','category_products.product_id','products.id')
+        ->join('product_prices', 'products.id','=','product_prices.product_id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->withCasts(
             $product->casts

@@ -25,7 +25,9 @@ class ProductController extends Controller {
 
         $product_id = $this->sanitize_service->sanitizeField($product_id);
 
-        $product = $this->product_service->get($product_id, $user);
+        $region_id =  $this->sanitize_service->sanitizeField($request->input('region_id') ?? 1);
+
+        $product = $this->product_service->get($region_id, $product_id, $user);
         
         $this->logger_service->log('product.show', $request);
 

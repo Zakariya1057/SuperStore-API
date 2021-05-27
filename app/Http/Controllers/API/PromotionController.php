@@ -27,7 +27,9 @@ class PromotionController extends Controller {
     public function groups($store_type_id, $title, Request $request){
         $this->logger_service->log('promotion.all', $request);
         
-        $promotions = $this->promotion_service->group($store_type_id, $title);
+        $region_id = $request->input('region_id') ?? 1;
+
+        $promotions = $this->promotion_service->group($region_id, $store_type_id, $title);
         
         return response()->json(['data' => $promotions]);
     }
@@ -35,7 +37,9 @@ class PromotionController extends Controller {
     public function show($promotion_id, Request $request){
         $this->logger_service->log('promotion.index', $request);
 
-        $promotion = $this->promotion_service->get($promotion_id);
+        $region_id = $request->input('region_id') ?? 1;
+
+        $promotion = $this->promotion_service->get($region_id, $promotion_id);
         
         return response()->json(['data' => $promotion]);
     }

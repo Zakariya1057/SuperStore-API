@@ -7,10 +7,14 @@ use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\Product;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class GroceryListItemService extends GroceryListSharedService {
     
     public function create($list_id, $data){
+
+        $region_id = Auth::user()->region_id;
+
         $product_id = $data['product_id'];
         $parent_category_id = $data['parent_category_id'];
        
@@ -38,7 +42,10 @@ class GroceryListItemService extends GroceryListSharedService {
 
             $list_item->product_id = (int)$product_id;
 
-            $product_details = Product::where('id', $product_id)->first();
+            $product_details = Product::leftJoin('product_prices', 'products.id','=','product_prices.product_id')
+            ->groupBy('product_prices.product_id')
+            ->where([['region_id', $region_id],['products.id',$product_id]])
+            ->get()->first();
 
             if($product_details){
                 $list_item->name = $product_details->name;

@@ -47,12 +47,21 @@ class Promotion extends Model
     ];
 
     public function products() {
-        return $this->hasMany('App\Models\Product','promotion_id')
-        ->join('promotions','promotions.id','products.promotion_id')
+        return $this->hasMany('App\Models\ProductPrice','promotion_id')
+        ->join('products','products.id','product_prices.product_id')
+        ->join('promotions','promotions.id','product_prices.promotion_id')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','parent_categories.id','category_products.parent_category_id')
         ->select(
-            'products.*',            
+            'products.*',    
+            
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
+
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
         )->where('products.enabled', 1)->groupBy('products.id')->withCasts($this->casts);

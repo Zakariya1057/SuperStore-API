@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class StoreService {
 
-    public function stores_by_type($store_type_id, $opening_hours=true, $latitude = null, $longitude=null){
+    public function stores_by_type(int $store_type_id, $opening_hours=true, $latitude = null, $longitude=null){
 
         $hour = new OpeningHour();
         $store_type = new StoreType();

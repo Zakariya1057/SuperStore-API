@@ -37,7 +37,10 @@ class PromotionService {
         return $promotions;
     }
 
-    public function group($store_type_id, $title){
+    public function group(int $region_id, int $store_type_id, string $title){
+
+        $region_id = $this->sanitize_service->sanitizeField($region_id);
+
         $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
         $title = $this->sanitize_service->sanitizeField($title);
 
@@ -45,7 +48,7 @@ class PromotionService {
         $promotions = Redis::get($cache_key);
 
         if(is_null($promotions)){
-            $products = Product::where([ ['promotions.store_type_id', $store_type_id],['title', $title] ])
+            $products = Product::where([ ['promotions.store_type_id', $store_type_id], ['title', $title] ])
             ->select(
                 'products.*',
     
@@ -56,6 +59,13 @@ class PromotionService {
                 'promotions.price as promotion_price',
                 'promotions.for_quantity as promotion_for_quantity',
         
+                'product_prices.price', 
+                'product_prices.old_price',
+                'product_prices.is_on_sale', 
+                'product_prices.sale_ends_at', 
+                'product_prices.promotion_id', 
+                'product_prices.region_id',
+
                 'promotions.minimum as promotion_minimum',
                 'promotions.maximum as promotion_maximum',
                 
@@ -65,7 +75,11 @@ class PromotionService {
         
                 'promotions.enabled as promotion_enabled',
             )
-            ->join('promotions','promotions.id', 'promotion_id')->get();
+            ->join('product_prices','product_prices.product_id','products.id')
+            ->join('promotions','promotions.id', 'promotion_id')
+            ->where('product_prices.region_id', $region_id)
+            ->groupBy('product_prices.product_id')
+            ->get();
     
             $promotions = [];
     
@@ -99,7 +113,9 @@ class PromotionService {
         return $promotions;
     }
 
-    public function get($promotion_id){
+    public function get(int $region_id, int $promotion_id){
+
+        $region_id = $this->sanitize_service->sanitizeField($region_id);
 
         $promotion_id = $this->sanitize_service->sanitizeField($promotion_id);
 

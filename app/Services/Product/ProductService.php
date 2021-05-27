@@ -17,7 +17,7 @@ class ProductService {
         $this->sanitize_service = $sanitize_service;
     }
 
-    public function get(int $product_id, $user): ?Product {
+    public function get(int $region_id, int $product_id, $user): ?Product {
 
         $product = new Product();
         $casts = $product->casts;
@@ -26,16 +26,25 @@ class ProductService {
         ->select(
             'products.*',
 
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
+
             'child_categories.id as child_category_id',
             'child_categories.name as child_category_name',
 
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
         )
+        ->join('product_prices','product_prices.product_id','products.id')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->join('child_categories','category_products.child_category_id','child_categories.id')
         ->withCasts($casts)
+        ->where('product_prices.region_id', $region_id)
         ->get()
         ->first();
 
@@ -77,12 +86,25 @@ class ProductService {
         return $product;
     }
 
-    public function featured($store_type_id){
+    public function featured(int $region_id, int $store_type_id){
         $product = new Product();
 
-        return FeaturedItem::select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
-        ->where([ ['products.enabled', 1], ['products.store_type_id', $store_type_id],['type', 'products'] ])
+        return FeaturedItem::select(
+            'products.*',
+
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
+
+            'parent_categories.id as parent_category_id', 
+            'parent_categories.name as parent_category_name'
+        )
+        ->where([ ['products.enabled', 1], ['product_prices.region_id', $region_id], ['products.store_type_id', $store_type_id], ['type', 'products'] ])
         ->join('products', 'products.id','=','featured_id')
+        ->join('product_prices', 'products.id','=','product_prices.product_id')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->orderBy('featured_items.updated_at', 'DESC')

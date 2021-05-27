@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Services\Product\PromotionService;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class GroceryListSharedService {
@@ -21,7 +22,9 @@ class GroceryListSharedService {
     
     ////////////////////////////////////////////    SELECT List    //////////////////////////////////////////// 
 
-    public function show_list($list_id, $user_id){
+    public function show_list(int $list_id, int $user_id){
+
+        $region_id = Auth::user()->region_id;
 
         $product = new Product();
 
@@ -34,7 +37,7 @@ class GroceryListSharedService {
         $product = new Product();
         $casts = $product->casts;
 
-        $items = GroceryListItem::where([ ['list_id', $list->id] ])
+        $items = GroceryListItem::where([ ['list_id', $list->id], ['product_prices.region_id', $region_id] ])
         ->select([
             'grocery_list_items.id as id',
             'grocery_list_items.product_id as product_id',
@@ -42,13 +45,19 @@ class GroceryListSharedService {
             'parent_categories.id as category_id',
             'products.name as name',
             'grocery_list_items.total_price as total_price',
-            'products.price as price',
             'products.currency as currency',
             'grocery_list_items.quantity as quantity',
             'products.weight as weight',
             'products.small_image as small_image',
             'products.large_image as large_image',
             'grocery_list_items.ticked_off as ticked_off',
+
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
 
             'promotions.id as promotion_id',
             'promotions.store_type_id as promotion_store_type_id',
@@ -68,11 +77,13 @@ class GroceryListSharedService {
         ])
         ->join('parent_categories', 'parent_categories.id','=','grocery_list_items.parent_category_id')
         ->join('products', 'products.id','=','grocery_list_items.product_id')
-        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
+        ->join('product_prices','product_prices.product_id','products.id')
+        ->leftJoin('promotions', 'promotions.id','=','product_prices.promotion_id')
         ->orderBy('grocery_list_items.id','ASC')
         ->withCasts(
             $casts
         )
+        ->groupBy('product_prices.product_id')
         ->get();
 
         $list->categories = $this->group_by_categories($items);
@@ -110,9 +121,14 @@ class GroceryListSharedService {
 
     }
 
-    public function item_price($product_id,$quantity=1){
+    public function item_price($product_id, $quantity=1){
 
-        $product = Product::where('products.id',$product_id)->get()->first();
+        $region_id = Auth::user()->region_id;
+
+        $product = Product::leftJoin('product_prices', 'products.id','=','product_prices.product_id')
+        ->groupBy('product_prices.product_id')
+        ->where([['region_id', $region_id],['products.id',$product_id]])
+        ->get()->first();
     
         $promotion = $product->promotion;
 
@@ -191,20 +207,27 @@ class GroceryListSharedService {
 
     public function update_list(GroceryList $list){
         
+        $region_id = Auth::user()->region_id;
+
         $product = new Product();
         $casts = $product->casts;
 
         $items = GroceryListItem::
         join('products','products.id','grocery_list_items.product_id')
-        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
-        ->where('list_id',$list->id)
+        ->join('product_prices','product_prices.product_id','products.id')
+        ->leftJoin('promotions', 'promotions.id','=','product_prices.promotion_id')
         ->select(
             'products.id as product_id',
             'grocery_list_items.quantity as product_quantity',
-            'products.price as product_price',
             'grocery_list_items.ticked_off',
 
-            'promotions.id as promotion_id',
+            'product_prices.price as product_price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id as promotion_id', 
+            'product_prices.region_id',
+
             'promotions.store_type_id as promotion_store_type_id',
             'promotions.name as promotion_name',
             'promotions.quantity as promotion_quantity',
@@ -220,7 +243,9 @@ class GroceryListSharedService {
 
             'promotions.enabled as promotion_enabled',
         )
+        ->where([ ['product_prices.region_id', $region_id], ['list_id',$list->id] ])
         ->withCasts($casts)
+        ->groupBy('product_prices.product_id')
         ->get();
 
         $list_data = $this->group_list_items($items);

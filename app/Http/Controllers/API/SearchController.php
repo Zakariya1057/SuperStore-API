@@ -40,10 +40,6 @@ class SearchController extends Controller {
     public function product_results(Request $request){
 
         $validated_data = $request->validate([
-            'data.store_type_id' => 'required',
-
-            'data.availability_type' => '',
-
             'data.query' => 'required',
             'data.type'  => 'required',
 
@@ -55,7 +51,12 @@ class SearchController extends Controller {
             'data.brand' => '',
             'data.promotion' => '',
 
-            'data.text_search' => ''
+            'data.availability_type' => '',
+
+            'data.text_search' => '',
+
+            'data.region_id' => 'required',
+            'data.store_type_id' => 'required',
         ]);
 
         $data = $validated_data['data'];

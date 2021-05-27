@@ -11,7 +11,7 @@ use Exception;
 
 class GroceryListService extends GroceryListSharedService {
 
-    public function create($data, $user_id){
+    public function create($data, int $user_id){
         $list_name = $data['name'];
         $store_type_id = $data['store_type_id'];
         $identifier = $data['identifier'];
@@ -35,7 +35,7 @@ class GroceryListService extends GroceryListSharedService {
         }
     }
 
-    public function update($data, $user_id){
+    public function update($data, int $user_id){
 
         $name = $data['name'];
         $store_type_id = $data['store_type_id'];
@@ -59,7 +59,7 @@ class GroceryListService extends GroceryListSharedService {
     }
 
 
-    public function sync_edited_lists($lists, $user_id){
+    public function sync_edited_lists($lists, int $user_id){
         foreach($lists as $list){
             $list = (object)$list;
 
@@ -105,7 +105,7 @@ class GroceryListService extends GroceryListSharedService {
 
 
 
-    public function reset($list_id, $user_id){
+    public function reset(int $list_id, int $user_id){
         $list = GroceryList::where([ ['id',$list_id], ['user_id', $user_id] ]);
 
         if($list->exists()){
@@ -129,22 +129,35 @@ class GroceryListService extends GroceryListSharedService {
 
 
     // Additional Functionality
-    public function recent_items($user_id, $store_type_id){
+    public function recent_items(int $user_id, int $region_id, int $store_type_id){
         
         $product = new Product();
 
         return GroceryList::where('user_id', $user_id)
-        ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+        ->select(
+            'products.*',
+
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
+
+            'parent_categories.id as parent_category_id',
+            'parent_categories.name as parent_category_name'
+        )
         ->join('grocery_list_items','grocery_list_items.list_id','grocery_lists.id')
         ->join('products', 'products.id','=','grocery_list_items.product_id')
+        ->join('product_prices', 'products.id','=','product_prices.product_id')
         ->orderBy('grocery_lists.updated_at', 'DESC')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
-        ->where('products.store_type_id', $store_type_id)
+        ->where([ ['product_prices.region_id', $region_id], ['products.store_type_id', $store_type_id] ])
         ->limit(15)->groupBy('category_products.product_id')->withCasts($product->casts)->get();
     }
 
-    public function lists_progress($user_id, $store_type_id){
+    public function lists_progress(int $user_id, int $store_type_id){
         return GroceryList::where([ ['user_id', $user_id],['store_type_id', $store_type_id] ])
         ->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')
         ->limit(4)->get();

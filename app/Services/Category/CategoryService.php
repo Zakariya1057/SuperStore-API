@@ -13,15 +13,13 @@ use App\Services\RefinePaginate\RefineService;
 
 class CategoryService {
     
-    private $promotion_service, $paginate_service, $refine_service;
+    private $refine_service;
 
-    public function __construct(PromotionService $promotion_service, PaginateService $paginate_service, RefineService $refine_service){
-        $this->paginate_service = $paginate_service;
-        $this->promotion_service = $promotion_service;
+    public function __construct(RefineService $refine_service){
         $this->refine_service = $refine_service;
     }
     
-    public function grand_parent_categories($store_type_id){
+    public function grand_parent_categories(int $store_type_id){
         $grand_parent_categories = GrandParentCategory::where([ ['enabled', 1], ['grand_parent_categories.store_type_id', $store_type_id]])->orderBy('index', 'ASC')->get();
 
         foreach($grand_parent_categories as $category){
@@ -31,20 +29,28 @@ class CategoryService {
         return $grand_parent_categories;
     }
 
-    public function child_categories($parent_category_id){
+    public function child_categories(int $parent_category_id){
         return ChildCategory::where([ ['enabled', 1], ['child_categories.parent_category_id', $parent_category_id] ])->orderBy('index', 'ASC')->get();
     }
 
-    public function category_products($child_category_id, $data = []){
+    public function category_products(int $child_category_id, $data = []){
         $product = new Product();
         $casts = $product->casts;
+
+        $region_id = $data['region_id'];
 
         $casts['category_name'] = HTMLDecode::class;
         
         $base_query = ChildCategory::where('child_categories.id', $child_category_id)
         ->select(
             'products.*',
-            'child_categories.store_type_id as store_type_id',
+
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
             
             'child_categories.id as child_category_id',
             'child_categories.name as child_category_name', 
@@ -74,9 +80,10 @@ class CategoryService {
         ->join('category_products','category_products.child_category_id','child_categories.id')
         ->join('parent_categories','parent_categories.id','child_categories.parent_category_id')
         ->join('products', 'products.id', 'category_products.product_id')
+        ->join('product_prices','product_prices.product_id','products.id')
         ->leftJoin('product_groups','product_groups.id','category_products.product_group_id')
-        ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
-        ->where('products.enabled', 1)
+        ->leftJoin('promotions', 'promotions.id','=','product_prices.promotion_id')
+        ->where([ ['products.enabled', 1], ['product_prices.region_id', $region_id] ])
         ->whereRaw('products.store_type_id = child_categories.store_type_id')
         ->withCasts( $casts );
         
@@ -109,7 +116,7 @@ class CategoryService {
     }
 
 
-    public function featured($store_type_id){
+    public function featured(int $region_id, int $store_type_id){
 
         $product = new Product();
         $casts = $product->casts;
@@ -125,11 +132,27 @@ class CategoryService {
         $results = [];
 
         foreach($categories as $category){
-            $products = ChildCategory::where('child_categories.parent_category_id', $category->id)
+            $products = ChildCategory::where([ ['product_prices.region_id', $region_id], ['child_categories.parent_category_id', $category->id]])
+            ->select(
+                'products.*',
+
+                'product_prices.price', 
+                'product_prices.old_price',
+                'product_prices.is_on_sale', 
+                'product_prices.sale_ends_at', 
+                'product_prices.promotion_id', 
+                'product_prices.region_id',
+
+                'parent_categories.id as parent_category_id',
+                 'parent_categories.name as parent_category_name'
+            )
+            
             ->join('category_products','category_products.child_category_id','child_categories.id')
             ->join('products','products.id','category_products.product_id')
+            ->join('product_prices', 'products.id','=','product_prices.product_id')
+            ->join('product_groups','product_groups.id','products.id')
             ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
-            ->select('products.*' ,'parent_categories.id as parent_category_id', 'parent_categories.name as parent_category_name')
+
             ->limit(15)->groupBy('category_products.product_id')->withCasts($casts)->get();
 
             $category->enabled = (bool)$category->enabled;

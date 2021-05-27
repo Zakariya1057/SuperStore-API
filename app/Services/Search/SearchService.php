@@ -234,6 +234,7 @@ class SearchService {
         $type = strtolower($data['type']);
 
         $store_type_id = $data['store_type_id'];
+        $region_id = $data['region_id'];
 
         $products_limit_elastic = 300;
 
@@ -287,7 +288,7 @@ class SearchService {
             $item_ids = array_keys($item_ids);
         }
 
-        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_product_group:{$product_group}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_availability_type:{$availability_type}_page:$page";
+        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_region_id:{$region_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_product_group:{$product_group}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_availability_type:{$availability_type}_page:$page";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
@@ -307,6 +308,13 @@ class SearchService {
             $base_query = ParentCategory::
             select(
                 'products.*',
+
+                'product_prices.price', 
+                'product_prices.old_price',
+                'product_prices.is_on_sale', 
+                'product_prices.sale_ends_at', 
+                'product_prices.promotion_id', 
+                'product_prices.region_id',
 
                 'parent_categories.id as parent_category_id',
 
@@ -333,11 +341,12 @@ class SearchService {
             )
             ->join('category_products','category_products.parent_category_id','parent_categories.id')
             ->join('products','products.id','category_products.product_id')
+            ->join('product_prices','product_prices.product_id','products.id')
             ->join('child_categories','child_categories.id','category_products.child_category_id')
             ->leftJoin('product_groups','product_groups.id','category_products.product_group_id')
-            ->leftJoin('promotions', 'promotions.id','=','products.promotion_id')
+            ->leftJoin('promotions', 'promotions.id','=','product_prices.promotion_id')
             ->groupBy('products.id')
-            ->where([ ['products.store_type_id', $store_type_id], [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
+            ->where([ ['products.store_type_id', $store_type_id], ['product_prices.region_id', $region_id], [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
             ->withCasts($casts);
             
             if($text_search){
@@ -376,8 +385,8 @@ class SearchService {
         } elseif($type == 'store_sales'){
             $base_query = $base_query
             ->where('products.store_type_id', $store_type_id)
-            ->orderBy('products.price', 'DESC')
-            ->whereNotNull('products.promotion_id');
+            ->orderBy('product_price.price', 'DESC')
+            ->whereNotNull('product_prices.promotion_id');
         }
 
         return $base_query;
