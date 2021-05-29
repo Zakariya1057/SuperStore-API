@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Casts\HTMLDecode;
+use App\Casts\Image;
 
 class Promotion extends Model
 {
@@ -38,6 +39,9 @@ class Promotion extends Model
 
         'price' => 'double',
         
+        'large_image' => Image::class,
+        'small_image' => Image::class,
+
         'expires' => 'Bool',
 
         'enabled' => 'Bool',
