@@ -22,16 +22,18 @@ class MonitoredController extends Controller {
         $user_id = $request->user()->id;
 
         $validated_data = $request->validate([
+            'data.region_id' => 'required',
             'data.store_type_id' => 'required',
         ]);
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
+        $region_id = $data['region_id'];
         $store_type_id = $data['store_type_id'];
 
         $this->logger_service->log('monitor.index', $request);
 
-        $products = $this->monitoring_service->all($user_id, $store_type_id);
+        $products = $this->monitoring_service->all($user_id, $region_id, $store_type_id);
         return response()->json(['data' => $products ]);
     }
 
