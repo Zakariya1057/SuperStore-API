@@ -119,7 +119,7 @@ class PromotionService {
 
         $promotion_id = $this->sanitize_service->sanitizeField($promotion_id);
 
-        $promotion = Promotion::where('id', $promotion_id)->first();
+        $promotion = Promotion::where([ ['id', $promotion_id], ['region_id', $region_id] ])->first();
 
         if(!is_null($promotion)){
             $promotion->products;
