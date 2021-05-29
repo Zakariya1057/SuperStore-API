@@ -15,37 +15,37 @@ class RegionSeeder extends Seeder
         DB::table('regions')->insert([
             'name' => 'Onatario',
             'country' => 'Canada',
-            'storeTypeID' => 2
+            'store_type_id' => 2
         ]);
  
         DB::table('regions')->insert([
             'name' => 'Alberta',
             'country' => 'Canada',
-            'storeTypeID' => 2
+            'store_type_id' => 2
         ]);
 
         DB::table('regions')->insert([
             'name' => 'Manitoba',
             'country' => 'Canada',
-            'storeTypeID' => 2
+            'store_type_id' => 2
         ]);
 
         DB::table('regions')->insert([
             'name' => 'British Columbia',
             'country' => 'Canada',
-            'storeTypeID' => 2
+            'store_type_id' => 2
         ]);
 
         DB::table('regions')->insert([
             'name' => 'Saskatchewan',
             'country' => 'Canada',
-            'storeTypeID' => 2
+            'store_type_id' => 2
         ]);
 
         DB::table('regions')->insert([
             'name' => 'Yukon',
             'country' => 'Canada',
-            'storeTypeID' => 2
+            'store_type_id' => 2
         ]);
     }
 }
