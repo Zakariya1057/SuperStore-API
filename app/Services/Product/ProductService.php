@@ -6,6 +6,7 @@ use App\Models\FavouriteProducts;
 use App\Models\FeaturedItem;
 use App\Models\MonitoredProduct;
 use App\Models\Product;
+use App\Models\Promotion;
 use App\Models\Recommended;
 use App\Services\Sanitize\SanitizeService;
 
@@ -65,8 +66,9 @@ class ProductService {
         $product->features = is_null($product->features) ? null : $this->sanitize_service->decodeAllFields($product->features);
         $product->dimensions = is_null($product->dimensions) ? null : $this->sanitize_service->decodeAllFields($product->dimensions);
 
-        $product->recommended = Recommended::where([ ['recommended.product_id',$product->id] ])
+        $product->recommended = Recommended::where([ ['recommended.product_id',$product->id], ['product_prices.region_id', $region_id] ])
         ->join('products','products.id','recommended_product_id')
+        ->join('product_prices','product_prices.product_id','products.id')
         ->withCasts(
             $product->casts
         )->where('products.enabled', 1)->get();
