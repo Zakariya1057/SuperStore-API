@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GroceryListSharedService {
 
@@ -125,11 +126,21 @@ class GroceryListSharedService {
             $region_id = Auth::user()->region_id;
         }
 
-        $product = Product::leftJoin('product_prices', 'products.id','=','product_prices.product_id')
-        ->groupBy('product_prices.product_id')
-        ->where([['region_id', $region_id],['products.id',$product_id]])
+        $product = Product::join('product_prices', 'products.id','=','product_prices.product_id')
+        ->select(
+            'products.*',
+
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
+        )
+        ->where([['region_id', $region_id], ['products.id',$product_id]])
         ->get()->first();
-    
+
+        $product->region_id = $region_id;
         $promotion = $product->promotion;
 
         $price = $product->price;
@@ -169,7 +180,22 @@ class GroceryListSharedService {
                         $total = $quantity * $price;
                     }
     
-                } else if (!is_null($promotion->quantity)){
+                } 
+                // else if (!is_null($promotion->maximum)){
+                    // $maximum_quantity = $promotion->maximum;
+
+                    // // If 4 products, max is 2. 
+                    // // Then promotion price for two first.
+                    // // Then normal for the rest of products
+                    // for($i = 0; $i < $quantity; $i++){
+                    //     if($i < $maximum_quantity){
+                    //         $total += $promotion->price;
+                    //     } else {
+                    //         $total += $product->total_price;
+                    //     }
+                    // }
+                // } 
+                else if (!is_null($promotion->quantity)){
                     $remainder = ($quantity % $promotion->quantity);
                     $goes_into_fully = floor($quantity / $promotion->quantity);
     
@@ -246,7 +272,6 @@ class GroceryListSharedService {
         )
         ->where([ ['list_id',$list->id], ['product_prices.region_id', $region_id] ])
         ->withCasts($casts)
-        ->groupBy('product_prices.product_id')
         ->get();
 
         $list_data = $this->group_list_items($items, $region_id);
@@ -282,11 +307,10 @@ class GroceryListSharedService {
             $promotion_details = $promotion->details;
             $products = $promotion->products;
 
-            $total_quantity = 0;
+            $total_quantity = count($products);
             $total_items_price = 0;
 
             foreach($products as $product){
-                $total_quantity += $product->product_quantity;
                 $total_items_price += $product->total_price;
             }
             
@@ -334,7 +358,30 @@ class GroceryListSharedService {
                 } else {
                     $new_promotion_total_price += $total_items_price;
                 }
-            }  else {
+            } else if(!is_null($promotion_details->maximum)){
+
+                $maximum_quantity = $promotion_details->maximum;
+
+                // If 4 products, max is 2. 
+                // Then promotion price for two first.
+                // Then normal for the rest of products
+                $index = 0;
+
+                Log::debug("Products Count: " . sizeof($products));
+
+                foreach($products as $product){
+                    if($index < $maximum_quantity){
+                        Log::debug("$index | Product Price: ". $promotion_details->price);
+                        $new_promotion_total_price += $promotion_details->price;
+                    } else {
+                        Log::debug("$index | Total Price: ". $product->product_price);
+                        $new_promotion_total_price += $product->product_price;
+                    }
+
+                    $index++;
+                }
+
+            } else {
                 $new_promotion_total_price += $total_items_price;
             }
 
@@ -361,32 +408,35 @@ class GroceryListSharedService {
             $this->promotion_service->set_product_promotion($item);
 
             $promotion = $item->promotion;
-            
-            if(!is_null($promotion) && $promotion->enabled){
 
-                $promotion_expired = false;
-
-                if(!is_null($promotion->ends_at)){
-                    if(Carbon::now()->diffInDays($promotion->ends_at) < 0){
-                        $promotion_expired = true;
+            for($i =0; $i < $item->product_quantity; $i++){
+                if(!is_null($promotion) && $promotion->enabled){
+    
+                    $promotion_expired = false;
+                    
+                    if(!is_null($promotion->ends_at)){
+                        if(Carbon::now()->diffInDays($promotion->ends_at) < 0){
+                            $promotion_expired = true;
+                        }
                     }
-                }
-                
-                if(!$promotion_expired){
-                    if(key_exists($promotion->id,$promotions)){
-                        $promotions[$promotion->id]['products'][] = $item;
-                    } else {
-                        $promotions[$promotion->id] = [
-                            'details' => $promotion,
-                            'products' => [$item],
-                        ];
+                    
+                    if(!$promotion_expired){
+                        if(key_exists($promotion->id,$promotions)){
+                            $promotions[$promotion->id]['products'][] = $item;
+                        } else {
+                            $promotions[$promotion->id] = [
+                                'details' => $promotion,
+                                'products' => [$item],
+                            ];
+                        }
                     }
+                } else {
+                    $total_price_without_promotion_items += $item->total_price;
                 }
-            } else {
-                $total_price_without_promotion_items += $item->total_price;
+    
+                $total_price += $item->total_price;
             }
 
-            $total_price += $item->total_price;
 
             if($item->ticked_off == 1){
                 $ticked_off_items++;
