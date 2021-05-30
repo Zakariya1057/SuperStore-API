@@ -9,6 +9,9 @@ use App\Casts\Image;
 
 class Product extends Model
 {
+
+    public $region_id = 1;
+
     public $casts = [
         'name' => HTMLDecode::class,
 
@@ -56,9 +59,13 @@ class Product extends Model
     }
 
     public function promotion(){
-        return $this->belongsTo('App\Models\ProductPrice')
+        $promotion = new Promotion();
+
+        return $this->hasOne('App\Models\ProductPrice', 'product_id')
+        ->select('promotions.*')
         ->join('promotions','promotions.id','product_prices.promotion_id')
-        ->where('promotions.enabled', 1);
+        ->withCasts($promotion->casts)
+        ->where([ ['promotions.enabled', 1], ['promotions.region_id', $this->region_id] ]);
     }
 
 }
