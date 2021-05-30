@@ -53,6 +53,7 @@ class ProductService {
             return null;
         }
 
+        $product->region_id = $region_id;
         $product->promotion;
 
         $product->images;
@@ -67,6 +68,16 @@ class ProductService {
         $product->dimensions = is_null($product->dimensions) ? null : $this->sanitize_service->decodeAllFields($product->dimensions);
 
         $product->recommended = Recommended::where([ ['recommended.product_id',$product->id], ['product_prices.region_id', $region_id] ])
+        ->select(
+            'products.*',
+
+            'product_prices.price', 
+            'product_prices.old_price',
+            'product_prices.is_on_sale', 
+            'product_prices.sale_ends_at', 
+            'product_prices.promotion_id', 
+            'product_prices.region_id',
+        )
         ->join('products','products.id','recommended_product_id')
         ->join('product_prices','product_prices.product_id','products.id')
         ->withCasts(
