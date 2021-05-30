@@ -431,10 +431,10 @@ class GroceryListSharedService {
                         }
                     }
                 } else {
-                    $total_price_without_promotion_items += $item->total_price;
+                    $total_price_without_promotion_items += $item->product_price;
                 }
     
-                $total_price += $item->total_price;
+                $total_price += $item->product_price;
             }
 
 
