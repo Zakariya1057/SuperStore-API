@@ -84,6 +84,9 @@ class ExpirePromotion extends Command
         }
 
         // Get all promotions without products
+        $empty_promotions = Promotion::leftJoin('product_prices', 'promotions.id', 'product_prices.promotion_id')->where([ ['store_type_id', 2] ])->whereNull('product_id')->pluck('promotions.id');
+        $this->info('Num Empty Promotions: ' . count($empty_promotions));
+        Promotion::whereIn('id', $empty_promotions)->delete();
 
         if($promotions_count > 0){
             Artisan::call('cache:home');
