@@ -5,11 +5,13 @@ namespace App\Console\Commands\Expire;
 use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
-use App\Models\Product;
+use App\Models\ProductPrice;
 use App\Models\Promotion;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 
 class ExpirePromotion extends Command
 {
@@ -61,7 +63,7 @@ class ExpirePromotion extends Command
 
             $this->info('Removing Product Promotions Linked');
 
-            $product_ids = Product::where('promotion_id', $id)->pluck('id');
+            $product_ids = ProductPrice::where('promotion_id', $id)->pluck('product_id');
 
             $this->info('Finding Grocery Lists Containing Product');
 
@@ -70,14 +72,18 @@ class ExpirePromotion extends Command
             $lists = GroceryList::whereIn('id', $list_ids)->get();
 
             foreach($lists as $list){
+                $user = User::where('id', $list->user_id)->get()->first();
+                Auth::login($user);
+
                 $this->info('List Found Using Product: ' . $list->id);
                 event(new GroceryListChangedEvent($list));
             }
 
-            Product::where('promotion_id', $id)->update(['promotion_id' => null]);
+            ProductPrice::where('promotion_id', $id)->update(['promotion_id' => null]);
             Promotion::where('id', $id)->delete();
-
         }
+
+        // Get all promotions without products
 
         if($promotions_count > 0){
             Artisan::call('cache:home');
