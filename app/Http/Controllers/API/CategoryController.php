@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryProductRequest;
 use App\Services\Category\CategoryService;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
@@ -45,20 +46,9 @@ class CategoryController extends Controller {
         return response()->json(['data' => $categories]);
     }
 
-    public function category_products($child_category_id, Request $request){
+    public function category_products($child_category_id, CategoryProductRequest $request){
 
-        $validated_data = $request->validate([
-            'data.availability_type' => '',
-
-            'data.sort' => '',
-            'data.order' => '',
-            'data.dietary' => '',
-            'data.brand' => '',
-            'data.promotion' => '',
-            'data.product_group' => '',
-
-            'data.region_id' => '',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $validated_data['data'];
         $data = $this->sanitize_service->sanitizeAllFields($data);
@@ -77,8 +67,6 @@ class CategoryController extends Controller {
         $product_group = $data['product_group'] ?? '';
         $availability_type = $data['availability_type'] ?? '';
         $region_id = $data['region_id'];
-
-        // $categories = $this->category_service->category_products($child_category_id, $data);
         
         $categories = Cache::remember("category_products_{$child_category_id}_region_{$region_id}_page_{$page}_sort_{$sort}_order_{$order}_brand_{$brand}_promotion_{$promotion}_dietary_{$dietary}_product_group_{$product_group}_availability_type_{$availability_type}" , now()->addWeek(1), function () use ($child_category_id, $data){
             return $this->category_service->category_products($child_category_id, $data);

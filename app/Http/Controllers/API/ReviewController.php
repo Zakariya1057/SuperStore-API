@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ReviewCreateRequest;
 use App\Services\Logger\LoggerService;
 use App\Services\Product\ReviewService;
 use App\Services\Sanitize\SanitizeService;
@@ -19,7 +20,7 @@ class ReviewController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function create($product_id, Request $request){
+    public function create($product_id, ReviewCreateRequest $request){
 
         $user = $request->user();
 
@@ -27,11 +28,7 @@ class ReviewController extends Controller {
 
         $this->logger_service->log('review.create', $request);
 
-        $validated_data = $request->validate([
-            'data.text' => 'required',
-            'data.rating' => 'required',
-            'data.title' => 'required',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $validated_data['data'];
         $data = $this->sanitize_service->sanitizeAllFields($data);
@@ -64,6 +61,7 @@ class ReviewController extends Controller {
 
     public function delete(Request $request, $product_id){
         $user_id = Auth::id();
+
         $product_id = $this->sanitize_service->sanitizeField($product_id);
 
         $this->logger_service->log('review.delete', $request);

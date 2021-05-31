@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ResetPasswordNewPasswordRequest;
+use App\Http\Requests\ResetPasswordSendCodeRequest;
+use App\Http\Requests\ResetPasswordValidateCodeRequest;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
 use App\Services\User\UserResetService;
@@ -22,13 +25,11 @@ class ResetPasswordController extends Controller {
     // 2. Validate -> Validate code
     // 3. New Password -> Update Password & Send code
 
-    public function send_code(Request $request){
+    public function send_code(ResetPasswordSendCodeRequest $request){
 
         $this->logger_service->log('reset password.send_code', $request);
 
-        $validated_data = $request->validate([
-            'data.email' => 'required|email|max:255',
-        ]);
+        $validated_data = $request->validated();
 
         $validated_data = $this->sanitize_service->sanitizeAllFields($validated_data);
 
@@ -40,14 +41,11 @@ class ResetPasswordController extends Controller {
 
     }
 
-    public function validate_code(Request $request){
+    public function validate_code(ResetPasswordValidateCodeRequest $request){
 
         $this->logger_service->log('reset password.validate_code', $request);
 
-        $validated_data = $request->validate([
-            'data.email' => 'required|email|max:255',
-            'data.code' => 'required'
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
@@ -56,16 +54,11 @@ class ResetPasswordController extends Controller {
         return response()->json(['data' => ['status' => 'success']]);
     }
 
-    public function new_password(Request $request){
+    public function new_password(ResetPasswordNewPasswordRequest $request){
 
         $this->logger_service->log('reset password.new_password', $request);
 
-        $validated_data = $request->validate([
-            'data.code' => 'required|integer',
-            'data.email' => 'required|email|max:255',
-            'data.password' => 'required|confirmed|string|min:8|max:255',
-            'data.notification_token' => ''
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 

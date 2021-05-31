@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SearchProductResultRequest;
+use App\Http\Requests\SearchStoreResultRequest;
+use App\Http\Requests\SearchSuggestionRequest;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
 use App\Services\Search\SearchService;
@@ -17,12 +19,9 @@ class SearchController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function suggestions(Request $request){
+    public function suggestions(SearchSuggestionRequest $request){
 
-        $validated_data = $request->validate([
-            'data.query' => 'required',
-            'data.store_type_id' => 'required'
-        ]);
+        $validated_data = $request->validated();
         
         $data = $validated_data['data'];
 
@@ -37,27 +36,9 @@ class SearchController extends Controller {
         return response()->json(['data' => $results]);
     }
 
-    public function product_results(Request $request){
+    public function product_results(SearchProductResultRequest $request){
 
-        $validated_data = $request->validate([
-            'data.query' => 'required',
-            'data.type'  => 'required',
-
-            'data.sort' => '', // Rating, Price, Sugar, etc.
-            'data.order' => '', // asc/desc
-
-            'data.dietary' => '', // Halal, Vegetarian
-            'data.product_group' => '',
-            'data.brand' => '',
-            'data.promotion' => '',
-
-            'data.availability_type' => '',
-
-            'data.text_search' => '',
-
-            'data.region_id' => 'required',
-            'data.store_type_id' => 'required',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $validated_data['data'];
 
@@ -73,14 +54,10 @@ class SearchController extends Controller {
 
     }
 
-    public function store_results(Request $request){
+    public function store_results(SearchStoreResultRequest $request){
         $this->logger_service->log('search.store_results',$request);
 
-        $validated_data = $request->validate([
-            'data.store_type_id' => 'required',
-            'data.latitude' => '',
-            'data.longitude' => '',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 

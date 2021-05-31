@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FeedbackRequest;
 use App\Services\Logger\LoggerService;
 use App\Services\Message\FeedbackService;
-use Illuminate\Http\Request;
 
 class FeedbackController extends Controller {
 
@@ -16,13 +16,11 @@ class FeedbackController extends Controller {
         $this->logger_service = $logger_service;
     }
     
-    public function create(Request $request){
+    public function create(FeedbackRequest $request){
         
         $this->logger_service->log('feedback.create', $request);
 
-        $validated_data = $request->validate([
-            'data.message' => 'required',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $validated_data['data'];
 

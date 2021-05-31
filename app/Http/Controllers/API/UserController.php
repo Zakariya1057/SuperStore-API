@@ -4,6 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserLocationRequest;
+use App\Http\Requests\UserLoginRequest;
+use App\Http\Requests\UserRegisterRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Services\User\LocationService;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
@@ -24,20 +28,11 @@ class UserController extends Controller {
         $this->location_service = $location_service;
     }
 
-    public function register(Request $request){
+    public function register(UserRegisterRequest $request){
 
         $this->logger_service->log('user.register', $request);
 
-        $validated_data = $request->validate([
-            'data.name' => 'required|string|max:255',
-            'data.email' => 'required|email|max:255',
-            'data.region_id' => 'required',
-            'data.store_type_id' => 'required',
-            'data.password' => 'required|confirmed|string|min:8|max:255',
-            'data.identifier' => '',
-            'data.user_token' => '',
-            'data.notification_token' => ''
-        ]);
+        $validated_data = $request->validated();
         
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
         
@@ -51,15 +46,11 @@ class UserController extends Controller {
     }
     
 
-    public function login(Request $request){
+    public function login(UserLoginRequest $request){
 
         $this->logger_service->log('user.login', $request);
 
-        $validated_data = $request->validate([
-            'data.email' => 'required|email|max:255',
-            'data.password' => 'required|string|min:8|max:255',
-            'data.notification_token' => ''
-        ]);
+        $validated_data = $request->validated();
         
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
         
@@ -87,24 +78,13 @@ class UserController extends Controller {
         return response()->json(['data' => ['status' => 'success']]);
     }
 
-    public function update(Request $request){
+    public function update(UserUpdateRequest $request){
 
         $this->logger_service->log('user.update', $request);
 
         $user_id = Auth::id();
 
-        $validated_data = $request->validate([
-            'data.name' => [],
-            'data.email' => [],
-            'data.region_id' => [],
-            'data.store_type_id' => [],
-            'data.password' => [],
-            'data.password_confirmation' => [],
-            'data.current_password' => [],
-            'data.type' => [],
-            'data.send_notifications' => [],
-            'data.notification_token' =>  []
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
@@ -118,14 +98,11 @@ class UserController extends Controller {
 
     }
 
-    public function location(Request $request){
+    public function location(UserLocationRequest $request){
 
         $this->logger_service->log('user.location', $request);
 
-        $validated_data = $request->validate([
-            'data.latitude' => 'required',
-            'data.longitude' => 'required',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 

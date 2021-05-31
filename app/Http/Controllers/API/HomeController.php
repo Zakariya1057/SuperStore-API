@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\HomeRequest;
 use App\Services\Category\CategoryService;
 use App\Services\GroceryList\GroceryListService;
 use App\Services\User\LocationService;
@@ -12,7 +13,6 @@ use App\Services\Product\ProductService;
 use App\Services\Product\PromotionService;
 use App\Services\Sanitize\SanitizeService;
 use App\Services\Store\StoreService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
 
@@ -52,15 +52,10 @@ class HomeController extends Controller {
         $this->location_service = $location_service;
     }
 
-    public function show(Request $request){
+    public function show(HomeRequest $request){
         $user_id = Auth::id();
         
-        $validated_data = $request->validate([
-            'data.region_id' => 'required',
-            'data.store_type_id' => 'required',
-            'data.latitude' => '',
-            'data.longitude' => '',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
         $store_type_id = $data['store_type_id'];

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MonitorUpdateRequest;
+use App\Http\Requests\MonitorViewRequest;
 use App\Services\Logger\LoggerService;
 use App\Services\Product\MonitoringService;
 use App\Services\Sanitize\SanitizeService;
@@ -19,13 +20,10 @@ class MonitoredController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function index(Request $request){
+    public function index(MonitorViewRequest $request){
         $user_id = Auth::id();
 
-        $validated_data = $request->validate([
-            'data.region_id' => 'required',
-            'data.store_type_id' => 'required',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
@@ -38,14 +36,12 @@ class MonitoredController extends Controller {
         return response()->json(['data' => $products ]);
     }
 
-    public function update($product_id, Request $request){
+    public function update($product_id, MonitorUpdateRequest $request){
         $user_id = Auth::id();
 
         $this->logger_service->log('monitor.update', $request);
 
-        $validated_data = $request->validate([
-            'data.monitor' => 'required',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 

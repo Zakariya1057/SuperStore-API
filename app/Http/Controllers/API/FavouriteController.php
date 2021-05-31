@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FavouriteRequest;
 use App\Services\Product\FavouriteService;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
@@ -30,14 +31,12 @@ class FavouriteController extends Controller {
         return response()->json(['data' => $products ]);
     }
 
-    public function update($product_id, Request $request){
+    public function update($product_id, FavouriteRequest $request){
         $user_id = Auth::id();
 
         $this->logger_service->log('favourite.update', $request);
 
-        $validated_data = $request->validate([
-            'data.favourite' => 'required|bool',
-        ]);
+        $validated_data = $request->validated();
 
         $product_id = $this->sanitize_service->sanitizeField($product_id);
         $favourite = (bool)$this->sanitize_service->sanitizeField($validated_data['data']['favourite']);

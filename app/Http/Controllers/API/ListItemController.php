@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ListItemCreateRequest;
+use App\Http\Requests\ListItemDeleteRequest;
+use App\Http\Requests\ListItemUpdateRequest;
 use App\Services\GroceryList\GroceryListItemService;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ListItemController extends Controller {
@@ -19,14 +21,11 @@ class ListItemController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function create($list_id, Request $request){
+    public function create($list_id, ListItemCreateRequest $request){
 
         $this->logger_service->log('list item.create', $request);
 
-        $validated_data = $request->validate([
-            'data.product_id' => 'required',
-            'data.parent_category_id' => 'required'
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
@@ -34,19 +33,14 @@ class ListItemController extends Controller {
         
         // Set off message queue to update list total.
         return response()->json(['data' => $list_item]);
-
     }
     
-    public function update($list_id, Request $request){
+    public function update($list_id, ListItemUpdateRequest $request){
         // Item ticked off, or quantity changed
 
         $this->logger_service->log('list item.update', $request);
 
-        $validated_data = $request->validate([
-            'data.product_id' => 'required',
-            'data.quantity' => 'required',
-            'data.ticked_off' => 'required'
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
@@ -58,13 +52,11 @@ class ListItemController extends Controller {
         return response()->json(['data' => ['status' => 'success']]);
     }
 
-    public function delete($list_id, Request $request){
+    public function delete($list_id, ListItemDeleteRequest $request){
 
         $this->logger_service->log('list item.delete', $request);
 
-        $validated_data = $request->validate([
-            'data.product_id' => 'required',
-        ]);
+        $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
