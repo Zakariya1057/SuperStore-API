@@ -87,7 +87,7 @@ class HomeController extends Controller {
             $data['monitoring'] = $data['lists'] = $data['groceries'] = [];
         }
 
-        $cache_key = 'home_page_'.$store_type_id;
+        $cache_key = "home_page_{$store_type_id}_{$region_id}";
 
         $retrieved_data = Redis::get($cache_key);
         

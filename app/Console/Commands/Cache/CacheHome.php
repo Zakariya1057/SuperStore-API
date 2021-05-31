@@ -63,7 +63,7 @@ class CacheHome extends Command
     
                 $this->info("---- $store_name Home Cache Start ----");
                 
-                $cache_key = 'home_page_'. $store_type_id;
+                $cache_key = "home_page_{$store_type_id}_{$region_id}";
     
                 $this->info("Caching Featured Products");
                 $featured_items = $this->product_service->featured($store_type_id, $region_id);
