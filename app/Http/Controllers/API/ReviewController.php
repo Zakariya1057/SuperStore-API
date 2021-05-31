@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Logger\LoggerService;
 use App\Services\Product\ReviewService;
 use App\Services\Sanitize\SanitizeService;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller {
 
@@ -62,7 +63,7 @@ class ReviewController extends Controller {
     }
 
     public function delete(Request $request, $product_id){
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
         $product_id = $this->sanitize_service->sanitizeField($product_id);
 
         $this->logger_service->log('review.delete', $request);

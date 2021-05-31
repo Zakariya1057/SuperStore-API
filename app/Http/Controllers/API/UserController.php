@@ -11,6 +11,7 @@ use App\Services\User\UserService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller {
 
@@ -74,8 +75,15 @@ class UserController extends Controller {
 
     public function logout(Request $request){
         $this->logger_service->log('user.logout', $request);
-        $request->user()->tokens()->delete();
+
+        Auth::logout();
+
+        $request->session()->invalidate();
+    
+        $request->session()->regenerateToken();
+
         User::where('id', $request->user()->id)->update(['logged_out_at' => Carbon::now(), 'notification_token' => NULL]);
+        
         return response()->json(['data' => ['status' => 'success']]);
     }
 
@@ -83,7 +91,7 @@ class UserController extends Controller {
 
         $this->logger_service->log('user.update', $request);
 
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $validated_data = $request->validate([
             'data.name' => [],
@@ -124,7 +132,7 @@ class UserController extends Controller {
         $latitude = $data['latitude'];
         $longitude = $data['longitude'];
 
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $this->location_service->update_location($user_id, $latitude, $longitude);
 

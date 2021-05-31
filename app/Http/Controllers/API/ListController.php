@@ -9,6 +9,7 @@ use App\Services\GroceryList\GroceryListService;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ListController extends Controller {
 
@@ -35,7 +36,7 @@ class ListController extends Controller {
 
     public function create(Request $request){
 
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $this->logger_service->log('list.create', $request);
 
@@ -55,7 +56,7 @@ class ListController extends Controller {
     }
 
     public function show(Request $request, $list_id){
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
         
         $this->logger_service->log('list.show', $request);
 
@@ -72,7 +73,7 @@ class ListController extends Controller {
 
     public function delete(Request $request){
         // Delete shopping list and all shopping items within
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $this->logger_service->log('list.delete', $request);
 
@@ -91,7 +92,7 @@ class ListController extends Controller {
 
     public function update(Request $request){
         // Item ticked off, or quantity changed
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $this->logger_service->log('list.update', $request);
 
@@ -113,7 +114,7 @@ class ListController extends Controller {
 
     public function restart(Request $request){
 
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $validated_data = $request->validate([
             'data.list_id' => 'required'
@@ -134,7 +135,7 @@ class ListController extends Controller {
     // Offline Sync
 
     public function offline_delete(Request $request){
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $validated_data = $request->validate([
             'data.list_ids' => 'required'
@@ -163,7 +164,7 @@ class ListController extends Controller {
 
 
     public function offline_edited(Request $request){
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $validated_data = $request->validate([
             'data.lists' => 'required'

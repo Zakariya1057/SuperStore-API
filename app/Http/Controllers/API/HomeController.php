@@ -13,6 +13,7 @@ use App\Services\Product\PromotionService;
 use App\Services\Sanitize\SanitizeService;
 use App\Services\Store\StoreService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
 
 class HomeController extends Controller {
@@ -52,7 +53,7 @@ class HomeController extends Controller {
     }
 
     public function show(Request $request){
-        $user = $request->user();
+        $user_id = Auth::id();
         
         $validated_data = $request->validate([
             'data.region_id' => 'required',
@@ -73,15 +74,15 @@ class HomeController extends Controller {
 
         $data['stores'] = $this->store_service->stores_by_type($store_type_id, false, $latitude, $longitude);
 
-        if(!is_null($user)){
+        if(Auth::check()){
 
             if(!is_null($latitude) && !is_null($longitude)){
-                $this->location_service->update_location($user->id, $latitude, $longitude);
+                $this->location_service->update_location($user_id, $latitude, $longitude);
             }
             
-            $data['monitoring'] = $this->monitoring_service->all($user->id, $region_id, $store_type_id);
-            $data['lists'] = $this->list_service->lists_progress($user->id, $store_type_id);
-            $data['groceries'] = $this->list_service->recent_items($user->id, $region_id, $store_type_id);
+            $data['monitoring'] = $this->monitoring_service->all($user_id, $region_id, $store_type_id);
+            $data['lists'] = $this->list_service->lists_progress($user_id, $store_type_id);
+            $data['groceries'] = $this->list_service->recent_items($user_id, $region_id, $store_type_id);
         } else {
             $data['monitoring'] = $data['lists'] = $data['groceries'] = [];
         }

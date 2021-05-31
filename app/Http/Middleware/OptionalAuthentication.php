@@ -6,6 +6,7 @@ use App\Models\User;
 use Closure;
 use Exception;
 use GuzzleHttp\Ring\Client\Middleware;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class OptionalAuthentication extends Middleware
@@ -28,12 +29,8 @@ class OptionalAuthentication extends Middleware
                 $token_row = DB::select("SELECT * FROM `personal_access_tokens` WHERE token = ?", [$decrypyed_token])[0];
         
                 $user = User::where('id', $token_row->tokenable_id)->first();
-        
-                $request->merge(['user' => $user ]);
-        
-                $request->setUserResolver(function () use ($user) {
-                    return $user;
-                });
+
+                Auth::login($user);
             }
         } catch(Exception $e){
             // No Auth Headers

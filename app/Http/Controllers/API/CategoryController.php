@@ -25,8 +25,6 @@ class CategoryController extends Controller {
 
         $this->logger_service->log('category.grand_parent_categories', $request);
 
-        // $grand_parent_categories =  $this->category_service->grand_parent_categories($store_type_id);
-
         $grand_parent_categories = Cache::remember('grand_parent_category_'.$store_type_id, now()->addWeek(1), function () use ($store_type_id){
             return $this->category_service->grand_parent_categories($store_type_id);
         });
@@ -39,8 +37,6 @@ class CategoryController extends Controller {
         $parent_cateogy_id = $this->sanitize_service->sanitizeField($parent_cateogy_id);
 
         $this->logger_service->log('category.child_categories', $request);
-
-        // $categories = $this->category_service->child_categories($parent_cateogy_id);
 
         $categories = Cache::remember('child_category_'.$parent_cateogy_id, now()->addWeek(1), function () use ($parent_cateogy_id){
             return $this->category_service->child_categories($parent_cateogy_id);

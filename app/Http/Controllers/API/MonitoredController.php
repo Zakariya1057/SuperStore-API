@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Logger\LoggerService;
 use App\Services\Product\MonitoringService;
 use App\Services\Sanitize\SanitizeService;
+use Illuminate\Support\Facades\Auth;
 
 class MonitoredController extends Controller {
     
@@ -19,7 +20,7 @@ class MonitoredController extends Controller {
     }
 
     public function index(Request $request){
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $validated_data = $request->validate([
             'data.region_id' => 'required',
@@ -38,7 +39,7 @@ class MonitoredController extends Controller {
     }
 
     public function update($product_id, Request $request){
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $this->logger_service->log('monitor.update', $request);
 

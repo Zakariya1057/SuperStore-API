@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Product\FavouriteService;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
+use Illuminate\Support\Facades\Auth;
 
 class FavouriteController extends Controller {
 
@@ -19,7 +20,7 @@ class FavouriteController extends Controller {
     }
 
     public function index(Request $request){
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $region_id = $this->sanitize_service->sanitizeField($request->input('region_id') ?? 1);
 
@@ -30,7 +31,7 @@ class FavouriteController extends Controller {
     }
 
     public function update($product_id, Request $request){
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $this->logger_service->log('favourite.update', $request);
 

@@ -7,6 +7,7 @@ use App\Services\GroceryList\GroceryListItemService;
 use App\Services\Logger\LoggerService;
 use App\Services\Sanitize\SanitizeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ListItemController extends Controller {
 
@@ -49,7 +50,7 @@ class ListItemController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $this->list_item_service->update($list_id, $data, $user_id);
 
@@ -68,7 +69,7 @@ class ListItemController extends Controller {
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $product_id = $data['product_id'];
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
 
         $this->list_item_service->delete($list_id, $product_id, $user_id);
 
