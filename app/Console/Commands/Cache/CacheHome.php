@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Cache;
 
+use App\Models\Region;
 use App\Models\StoreType;
 use App\Services\Category\CategoryService;
 use App\Services\Product\ProductService;
@@ -51,40 +52,45 @@ class CacheHome extends Command
     {
         $this->info('---- Weekly Home Cache Start ----');
 
-        foreach(StoreType::get() as $store_type){
+        $regions = Region::get()->pluck('id');
 
-            $store_type_id = $store_type->id;
-            $store_name = $store_type->name;
+        foreach($regions as $region_id){
 
-            $this->info("---- $store_name Home Cache Start ----");
-            
-            $cache_key = 'home_page_'. $store_type_id;
+            foreach(StoreType::get() as $store_type){
 
-            $this->info("Caching Featured Products");
-            $featured_items = $this->product_service->featured($store_type_id);
-
-            $this->info("Caching Featured Stores");
-            $stores = $this->store_service->stores_by_type($store_type_id);
-
-            $this->info("Caching Featured Categories");
-            $categories = $this->category_service->featured($store_type_id);
-
-            $this->info("Caching Featured Promotions");
-            $promotions = $this->promotion_service->featured($store_type_id);
+                $store_type_id = $store_type->id;
+                $store_name = $store_type->name;
     
-            $data = [
-                'stores' => $stores,
-                'featured' => $featured_items,
-                'promotions' => $promotions,
-                'categories' => $categories,
-            ];
+                $this->info("---- $store_name Home Cache Start ----");
+                
+                $cache_key = 'home_page_'. $store_type_id;
     
-            Redis::set($cache_key, json_encode($data));
-            Redis::expire($cache_key, 604800);
+                $this->info("Caching Featured Products");
+                $featured_items = $this->product_service->featured($store_type_id, $region_id);
+    
+                $this->info("Caching Featured Stores");
+                $stores = $this->store_service->stores_by_type($store_type_id);
+    
+                $this->info("Caching Featured Categories");
+                $categories = $this->category_service->featured($store_type_id, $region_id);
+    
+                $this->info("Caching Featured Promotions");
+                $promotions = $this->promotion_service->featured($store_type_id);
+        
+                $data = [
+                    'stores' => $stores,
+                    'featured' => $featured_items,
+                    'promotions' => $promotions,
+                    'categories' => $categories,
+                ];
+        
+                Redis::set($cache_key, json_encode($data));
+                Redis::expire($cache_key, 604800);
+    
+                $this->info("---- $store_name Home Cache Complete ----");
+            }
 
-            $this->info("---- $store_name Home Cache Complete ----");
         }
-
 
         $this->info('---- Weekly Home Cache Complete ----');
         
