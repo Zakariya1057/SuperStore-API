@@ -37,7 +37,7 @@ class CategoryService {
         $product = new Product();
         $casts = $product->casts;
 
-        $region_id = $data['region_id'] ?? 1;
+        $region_id = $data['region_id'] ?? 8;
 
         $casts['category_name'] = HTMLDecode::class;
         
