@@ -23,7 +23,7 @@ class FavouriteController extends Controller {
     public function index(Request $request){
         $user_id = Auth::id();
 
-        $region_id = $this->sanitize_service->sanitizeField($request->input('region_id') ?? 1);
+        $region_id = $this->sanitize_service->sanitizeField($request->input('region_id') ?? 8);
 
         $this->logger_service->log('favourite.index', $request);
         $products = $this->favourite_service->products($region_id, $user_id);

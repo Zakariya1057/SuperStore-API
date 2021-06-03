@@ -66,7 +66,7 @@ class CategoryController extends Controller {
         $promotion = $data['promotion'] ?? '';
         $product_group = $data['product_group'] ?? '';
         $availability_type = $data['availability_type'] ?? '';
-        $region_id = $data['region_id'] ?? 1;
+        $region_id = $data['region_id'] ?? 8;
         
         $categories = Cache::remember("category_products_{$child_category_id}_region_{$region_id}_page_{$page}_sort_{$sort}_order_{$order}_brand_{$brand}_promotion_{$promotion}_dietary_{$dietary}_product_group_{$product_group}_availability_type_{$availability_type}" , now()->addWeek(1), function () use ($child_category_id, $data){
             return $this->category_service->category_products($child_category_id, $data);
