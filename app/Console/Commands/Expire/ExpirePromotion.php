@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ExpirePromotion extends Command
 {
@@ -48,6 +49,8 @@ class ExpirePromotion extends Command
     {
         // Fetch all expired promotions, get all matching products remove product_id and then delete them
         $this->info('Fetching All Expired Promotions');
+
+        DB::beginTransaction();
 
         $promotions = Promotion::whereDate('ends_at', '<', Carbon::now())->get();
         $promotions_count = count($promotions);
@@ -91,6 +94,8 @@ class ExpirePromotion extends Command
         if($promotions_count > 0){
             Artisan::call('cache:home');
         }
+
+        DB::commit();
 
     }
 
