@@ -122,7 +122,7 @@ class CategoryService {
         $casts = $product->casts;
 
         $categories = FeaturedItem::select('parent_categories.*')
-        ->where([ ['enabled', 1], ['parent_categories.store_type_id', $store_type_id],['type', 'categories'] ])
+        ->where([ ['enabled', 1], ['featured_items.region_id', $region_id], ['parent_categories.store_type_id', $store_type_id],['type', 'categories'] ])
         ->join('parent_categories','parent_categories.id','featured_id')
         ->withCasts(['name' => HTMLDecode::class])
         ->groupBy('featured_id')

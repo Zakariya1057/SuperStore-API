@@ -66,16 +66,16 @@ class CacheHome extends Command
                 $cache_key = "home_page_{$store_type_id}_{$region_id}";
     
                 $this->info("Caching Featured Products");
-                $featured_items = $this->product_service->featured($store_type_id, $region_id);
+                $featured_items = $this->product_service->featured($region_id, $store_type_id);
     
                 $this->info("Caching Featured Stores");
                 $stores = $this->store_service->stores_by_type($store_type_id);
     
                 $this->info("Caching Featured Categories");
-                $categories = $this->category_service->featured($store_type_id, $region_id);
+                $categories = $this->category_service->featured($region_id, $store_type_id);
     
                 $this->info("Caching Featured Promotions");
-                $promotions = $this->promotion_service->featured($store_type_id);
+                $promotions = $this->promotion_service->featured($region_id, $store_type_id);
         
                 $data = [
                     'stores' => $stores,

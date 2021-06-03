@@ -94,7 +94,7 @@ class HomeController extends Controller {
         } else {
             $data['featured'] = $this->product_service->featured($region_id, $store_type_id);
             $data['categories'] = $this->category_service->featured($region_id, $store_type_id);
-            $data['promotions'] = $this->promotion_service->featured($store_type_id);
+            $data['promotions'] = $this->promotion_service->featured($region_id, $store_type_id);
     
             Redis::set($cache_key, json_encode($data));
             Redis::expire($cache_key, 604800);

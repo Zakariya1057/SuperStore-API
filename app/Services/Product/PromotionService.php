@@ -20,21 +20,12 @@ class PromotionService {
 
     public function all(int $store_type_id, int $region_id){
         $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
-
-        $cache_key = 'all_promotions_' . $store_type_id;
-        // $promotions = Redis::get($cache_key);
-        $promotions = null;
-
-        if(is_null($promotions)){
-            $promotions = Promotion::where([ ['store_type_id', $store_type_id], ['region_id', $region_id]])->whereNotNull('title')->limit(200)->groupBy('title')->pluck('title');
-
-            Redis::set($cache_key, json_encode($promotions));
-            Redis::expire($cache_key, 604800);
-        } else {
-            $promotions = json_decode($promotions);
-        }
-
-        return $promotions;
+        return Promotion::where([ ['store_type_id', $store_type_id], ['region_id', $region_id]])
+        ->whereNotNull('title')
+        ->limit(200)
+        ->groupBy('title')
+        ->orderBy('title', 'ASC')
+        ->pluck('title');
     }
 
     public function group(int $region_id, int $store_type_id, string $title){
@@ -130,7 +121,7 @@ class PromotionService {
         return $promotion;
     }
 
-    public function featured($store_type_id){
+    public function featured(int $region_id, int $store_type_id){
         $promotion = new Promotion();
         
         $promotions = [];
@@ -154,7 +145,7 @@ class PromotionService {
 
             'promotions.enabled as promotion_enabled',
         )
-        ->where([ ['featured_items.store_type_id', $store_type_id], ['type', 'promotions'], ['promotions.store_type_id', $store_type_id] ])
+        ->where([ ['featured_items.region_id', $region_id], ['featured_items.store_type_id', $store_type_id], ['type', 'promotions'], ['promotions.store_type_id', $store_type_id] ])
         ->join('promotions','promotions.id','featured_id')
         ->groupBy('featured_id')
         ->withCasts($promotion->casts)->limit(10)
