@@ -18,7 +18,7 @@ class PromotionService {
         $this->sanitize_service = $sanitize_service;
     }
 
-    public function all($store_type_id){
+    public function all(int $store_type_id, int $region_id){
         $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
 
         $cache_key = 'all_promotions_' . $store_type_id;
@@ -26,7 +26,7 @@ class PromotionService {
         $promotions = null;
 
         if(is_null($promotions)){
-            $promotions = Promotion::where('store_type_id', $store_type_id)->whereNotNull('title')->limit(200)->groupBy('title')->pluck('title');
+            $promotions = Promotion::where([ ['store_type_id', $store_type_id], ['region_id', $region_id]])->whereNotNull('title')->limit(200)->groupBy('title')->pluck('title');
 
             Redis::set($cache_key, json_encode($promotions));
             Redis::expire($cache_key, 604800);

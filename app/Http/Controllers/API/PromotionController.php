@@ -19,7 +19,9 @@ class PromotionController extends Controller {
     public function all($store_type_id, Request $request){
         $this->logger_service->log('promotion.all', $request);
 
-        $promotions = $this->promotion_service->all($store_type_id);
+        $region_id = $request->input('region_id') ?? 8;
+
+        $promotions = $this->promotion_service->all($store_type_id, $region_id);
         
         return response()->json(['data' => $promotions]);
     }
