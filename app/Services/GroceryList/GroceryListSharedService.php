@@ -142,7 +142,13 @@ class GroceryListSharedService {
 
         $product->region_id = $region_id;
         $promotion = $product->promotion;
+    
+        return $this->calculate_item_price($product, $promotion, $quantity);
 
+    }
+
+    private function calculate_item_price($product, $promotion, int $quantity){
+        
         $price = $product->price;
 
         // Check if sale expired, use old price instead of new
@@ -222,7 +228,6 @@ class GroceryListSharedService {
         }
         
         return $total;
-
     }
 
     ////////////////////////////////////////////    SELECT List    //////////////////////////////////////////// 
@@ -274,7 +279,7 @@ class GroceryListSharedService {
         ->withCasts($casts)
         ->get();
 
-        $list_data = $this->group_list_items($items, $region_id);
+        $list_data = $this->group_list_items($items);
 
         $promotions = $list_data['promotions'];
         $total_price = $list_data['total_price'];
@@ -395,7 +400,7 @@ class GroceryListSharedService {
 
     }
 
-    private function group_list_items($items, ?int $region_id = null): array{
+    private function group_list_items($items): array{
 
         $promotions = [];
         $total_price = 0;
@@ -403,11 +408,14 @@ class GroceryListSharedService {
         $ticked_off_items = 0;
 
         foreach($items as $item){
-            $item->total_price = $this->item_price($item->product_id, $item->product_quantity, $region_id);
 
             $this->promotion_service->set_product_promotion($item);
 
             $promotion = $item->promotion;
+
+            $item->price = $item->product_price;
+
+            $item->total_price = $this->calculate_item_price($item, $promotion, $item->product_quantity);
 
             for($i =0; $i < $item->product_quantity; $i++){
                 if(!is_null($promotion) && $promotion->enabled){
