@@ -234,7 +234,7 @@ class SearchService {
         $type = strtolower($data['type']);
 
         $store_type_id = $data['store_type_id'];
-        $region_id = $data['region_id'];
+        $region_id = $data['region_id'] ?? 1;
 
         $products_limit_elastic = 300;
 

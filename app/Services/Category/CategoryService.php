@@ -37,7 +37,7 @@ class CategoryService {
         $product = new Product();
         $casts = $product->casts;
 
-        $region_id = $data['region_id'];
+        $region_id = $data['region_id'] ?? 1;
 
         $casts['category_name'] = HTMLDecode::class;
         
@@ -150,7 +150,7 @@ class CategoryService {
             ->join('category_products','category_products.child_category_id','child_categories.id')
             ->join('products','products.id','category_products.product_id')
             ->join('product_prices', 'products.id','=','product_prices.product_id')
-            ->join('product_groups','product_groups.id','products.id')
+            ->join('product_groups','product_groups.id','category_products.product_group_id')
             ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
 
             ->limit(15)->groupBy('category_products.product_id')->withCasts($casts)->get();

@@ -65,7 +65,7 @@ class HomeController extends Controller {
         $latitude = $data['latitude'] ?? null;
         $longitude = $data['longitude'] ?? null;
 
-        $region_id = $data['region_id'];
+        $region_id = $data['region_id'] ?? 1;
 
         $data['stores'] = $this->store_service->stores_by_type($store_type_id, false, $latitude, $longitude);
 

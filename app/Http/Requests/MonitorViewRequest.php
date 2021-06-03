@@ -24,7 +24,8 @@ class MonitorViewRequest extends FormRequest
     public function rules()
     {
         return [
-            'data.region_id' => 'required',
+            // 'data.region_id' => 'required',
+            'data.region_id' => '',
             'data.store_type_id' => 'required',
         ];
     }

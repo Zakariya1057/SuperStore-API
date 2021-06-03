@@ -39,7 +39,8 @@ class SearchProductResultRequest extends FormRequest
 
             'data.text_search' => '',
 
-            'data.region_id' => 'required',
+            // 'data.region_id' => 'required',
+            'data.region_id' => '',
             'data.store_type_id' => 'required',
         ];
     }

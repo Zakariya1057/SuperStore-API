@@ -33,6 +33,7 @@ class CategoryProductRequest extends FormRequest
             'data.promotion' => '',
             'data.product_group' => '',
 
+            // 'data.region_id' => 'required',
             'data.region_id' => '',
         ];
     }
