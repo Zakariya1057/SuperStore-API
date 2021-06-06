@@ -6,16 +6,29 @@ use App\Models\OpeningHour;
 use App\Models\Store;
 use App\Models\StoreLocation;
 use App\Models\StoreType;
+use App\Services\User\LocationService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class StoreService {
+
+    private $location_service;
+
+    public function __construct(LocationService $location_service){
+        $this->location_service = $location_service;
+    }
 
     public function stores_by_type(int $store_type_id, $opening_hours=true, $latitude = null, $longitude=null){
 
         $hour = new OpeningHour();
         $store_type = new StoreType();
         $location = new StoreLocation();
+
+
+        if(!is_null($latitude) && !is_null($longitude)){
+            $this->location_service->record_location($latitude, $longitude, request()->ip(), Auth::id(), null, $store_type_id);
+        }
 
         $casts = array_merge($hour->casts, $store_type->casts,$location->casts);
 

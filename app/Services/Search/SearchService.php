@@ -365,7 +365,7 @@ class SearchService {
         return $results;
     }
 
-    public function store_results($store_type_id, $latitude, $longitude){
+    public function store_results(int $store_type_id, $latitude, $longitude){
         return $this->store_service->stores_by_type($store_type_id, true, $latitude, $longitude);
     }
 

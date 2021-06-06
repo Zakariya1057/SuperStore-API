@@ -69,12 +69,11 @@ class HomeController extends Controller {
 
         $data['stores'] = $this->store_service->stores_by_type($store_type_id, false, $latitude, $longitude);
 
-        if(Auth::check()){
+        if(!is_null($latitude) && !is_null($longitude)){
+            $this->location_service->record_location($latitude, $longitude, $request->ip(), Auth::id(), $region_id, $store_type_id);
+        }
 
-            if(!is_null($latitude) && !is_null($longitude)){
-                $this->location_service->update_location($user_id, $latitude, $longitude);
-            }
-            
+        if(Auth::check()){
             $data['monitoring'] = $this->monitoring_service->all($user_id, $region_id, $store_type_id);
             $data['lists'] = $this->list_service->lists_progress($user_id, $store_type_id);
             $data['groceries'] = $this->list_service->recent_items($user_id, $region_id, $store_type_id);

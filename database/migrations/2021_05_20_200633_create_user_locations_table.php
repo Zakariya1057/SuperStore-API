@@ -19,6 +19,9 @@ class CreateUserLocationsTable extends Migration
 
             $table->unsignedBigInteger('user_id')->nullable();
 
+            $table->unsignedBigInteger('region_id')->nullable();
+            $table->unsignedBigInteger('store_type_id')->nullable();
+
             $table->string('ip_address');
 
             $table->double('latitude', 11, 8)->nullable();
