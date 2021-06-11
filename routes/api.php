@@ -80,8 +80,8 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         });
     });
 
-    Route::post('/feedback/create', 'API\FeedbackController@create')->name('feedback.create');
-    Route::post('/report/issue', 'API\ReportController@create')->name('report.create');
+    Route::post('/feedback/create', 'API\FeedbackController@create')->name('feedback.create'); // Remove later
+    Route::post('/message/issue', 'API\ReportController@create')->name('report.create'); // Remove later
 });
 
 Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
@@ -127,5 +127,10 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
         });
     });
 
+
+    Route::prefix('message')->group(function () {
+        Route::get('/', 'API\MessageController@index')->name('message.index');
+        Route::post('/create', 'API\MessageController@create')->name('message.create');
+    });
 });
 
