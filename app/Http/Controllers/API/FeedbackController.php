@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FeedbackRequest;
 use App\Services\Logger\LoggerService;
-use App\Services\Message\FeedbackService;
+use App\Services\Feedback\FeedbackService;
 
 class FeedbackController extends Controller {
 
@@ -24,12 +24,14 @@ class FeedbackController extends Controller {
 
         $data = $validated_data['data'];
 
+        $message = $data['message'];
+        $type = $data['type'];
+
         $user = $request->user();
         $user_id = $user->id ?? null;
-
         $ip_address = $request->ip();
 
-        $this->feedback_service->create($data['message'], $user_id, $ip_address);
+        $this->feedback_service->create($message, $type, $user_id, $ip_address);
 
         return response()->json(['data' => ['status' => 'success']]);
     }

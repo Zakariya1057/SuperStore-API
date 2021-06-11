@@ -80,8 +80,7 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         });
     });
 
-    Route::post('/feedback/create', 'API\FeedbackController@create')->name('feedback.create'); // Remove later
-    Route::post('/message/issue', 'API\ReportController@create')->name('report.create'); // Remove later
+    Route::post('/feedback/create', 'API\FeedbackController@create')->name('feedback.create');
 });
 
 Route::middleware('auth:sanctum')->group(function () { # Authenticate Users

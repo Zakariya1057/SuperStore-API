@@ -24,6 +24,7 @@ class FeedbackRequest extends FormRequest
     public function rules()
     {
         return [
+            'data.type' => 'required',
             'data.message' => 'required',
         ];
     }

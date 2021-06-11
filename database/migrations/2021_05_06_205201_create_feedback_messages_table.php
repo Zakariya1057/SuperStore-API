@@ -18,6 +18,8 @@ class CreateFeedbackMessagesTable extends Migration
             $table->id();
 
             $table->text('message');
+            $table->string('type');
+            
             $table->unsignedBigInteger('user_id')->nullable();
             $table->string('ip_address');
 

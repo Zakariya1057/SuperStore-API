@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Message;
+namespace App\Services\Feedback;
 
 use App\Models\FeedbackMessage;
 use App\Services\Sanitize\SanitizeService;
@@ -14,10 +14,12 @@ class FeedbackService {
         $this->sanitize_service = $sanitize_service;
     }
     
-    public function create($message, $user_id, $ip_address){
+    public function create(string $message, string $type, ?int $user_id, $ip_address){
         $feedback = new FeedbackMessage();
         
         $feedback->message = $this->sanitize_service->sanitizeField($message);
+        $feedback->type = $this->sanitize_service->sanitizeField($type);
+        
         $feedback->ip_address = $ip_address;
         $feedback->user_id = $user_id;
 
