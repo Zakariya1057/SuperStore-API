@@ -24,6 +24,8 @@ class CreateMessagesTable extends Migration
             $table->unsignedBigInteger('from_user_id')->nullable();
             $table->unsignedBigInteger('to_user_id')->nullable();
 
+            $table->boolean('message_read')->default(0);
+
             $table->foreign('from_user_id')->references('id')->on('users');
             $table->foreign('to_user_id')->references('id')->on('users');
 
