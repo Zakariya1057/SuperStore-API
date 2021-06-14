@@ -43,11 +43,6 @@ Route::prefix('image')->group(function () {
     Route::get('/{type}/{name}', 'API\ImageController@show')->name('image.show');
 });
 
-Route::prefix('flyers')->group(function () {
-    Route::get('/store/{store_id}', 'API\FlyerController@index')->name('flyer.index');
-    Route::get('/{name}', 'API\FlyerController@show')->name('flyer.show');
-});
-
 Route::middleware(OptionalAuthentication::class)->group(function () { # Optional Authentication
     Route::post('/home', 'API\HomeController@show')->name('home.show');
 
@@ -79,6 +74,12 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
             Route::post('promotion', 'API\SearchController@promotion_results')->name('search.promotion_results');
         });
     });
+
+    Route::prefix('flyers')->group(function () {
+        Route::get('/store/{store_id}', 'API\FlyerController@index')->name('flyer.index');
+        Route::get('/{name}', 'API\FlyerController@show')->name('flyer.show');
+    });
+    
 
     Route::post('/feedback/create', 'API\FeedbackController@create')->name('feedback.create');
 });
@@ -125,7 +126,6 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
             Route::post('/delete', 'API\ListItemController@delete')->name('list_item.delete');
         });
     });
-
 
     Route::prefix('message')->group(function () {
         Route::get('/', 'API\MessageController@index')->name('message.index');
