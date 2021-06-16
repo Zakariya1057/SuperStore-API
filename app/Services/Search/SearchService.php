@@ -373,7 +373,10 @@ class SearchService {
         if($type == 'products'){
             $base_query = $base_query->where([ ['products.store_type_id',  $store_type_id], ['products.name', 'like', "$detail%"] ]);
         } elseif($type == 'product_groups'){
-            $base_query = $base_query->where([ ['child_categories.store_type_id', $store_type_id], ['product_groups.name',$detail] ]);
+            $base_query = $base_query->where('child_categories.store_type_id', $store_type_id)
+            ->where(function ($query) use($detail){
+                $query->where('product_groups.name',$detail)->orWhere('child_categories.name',$detail);
+            });
         } elseif($type == 'child_categories'){
             $base_query = $base_query->where([ ['child_categories.store_type_id', $store_type_id], ['child_categories.name',$detail] ]);
         } elseif($type == 'parent_categories'){
