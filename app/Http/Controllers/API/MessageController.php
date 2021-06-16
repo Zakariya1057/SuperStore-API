@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MessageRequest;
 use App\Services\Logger\LoggerService;
 use App\Services\Message\MessageService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {

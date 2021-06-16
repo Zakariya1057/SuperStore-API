@@ -8,6 +8,7 @@ use App\Services\Category\CategoryService;
 use App\Services\GroceryList\GroceryListService;
 use App\Services\User\LocationService;
 use App\Services\Logger\LoggerService;
+use App\Services\Message\MessageService;
 use App\Services\Product\MonitoringService;
 use App\Services\Product\ProductService;
 use App\Services\Product\PromotionService;
@@ -27,7 +28,8 @@ class HomeController extends Controller {
         $promotion_service, 
         $product_service, 
         $logger_service,
-        $location_service;
+        $location_service,
+        $message_service;
 
     function __construct(
         SanitizeService $sanitize_service, 
@@ -38,7 +40,8 @@ class HomeController extends Controller {
         PromotionService $promotion_service, 
         ProductService $product_service,
         LoggerService $logger_service,
-        LocationService $location_service
+        LocationService $location_service,
+        MessageService $message_service
         ){
 
         $this->sanitize_service = $sanitize_service;
@@ -50,6 +53,7 @@ class HomeController extends Controller {
         $this->product_service = $product_service;
         $this->logger_service = $logger_service;
         $this->location_service = $location_service;
+        $this->message_service = $message_service;
     }
 
     public function show(HomeRequest $request){
@@ -77,8 +81,9 @@ class HomeController extends Controller {
             $data['monitoring'] = $this->monitoring_service->all($user_id, $region_id, $store_type_id);
             $data['lists'] = $this->list_service->lists_progress($user_id, $store_type_id);
             $data['groceries'] = $this->list_service->recent_items($user_id, $region_id, $store_type_id);
+            $data['messages'] = $this->message_service->unread_messages($user_id);
         } else {
-            $data['monitoring'] = $data['lists'] = $data['groceries'] = [];
+            $data['monitoring'] = $data['messages'] = $data['lists'] = $data['groceries'] = [];
         }
 
         $cache_key = "home_page_{$store_type_id}_{$region_id}";

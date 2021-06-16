@@ -36,17 +36,22 @@ class MessageService {
                 'feature' => 'Hey, what features would you like added to this app?'
             ];
 
-            return new Collection([ $this->create($question_types[$message_type], $message_type, static::TO_USER_ID, $user_id, 'received') ]);
+            return new Collection([ $this->create($question_types[$message_type], $message_type, static::TO_USER_ID, $user_id, 'received', true) ]);
         } else {
+            $message_ids = [];
+
             foreach($messages as $message){
                 $message->direction = $message->from_user_id == $user_id ? 'sent' : 'received';
+                $message_ids[] = $message->id;
             }
+
+            Message::whereIn('id', $message_ids)->update(['message_read' => 1]);
         }
 
         return $messages;
     }
 
-    public function create(string $text, string $type, int $from_user_id, ?int $to_user_id = null, $direction = 'sent'): Message {
+    public function create(string $text, string $type, int $from_user_id, ?int $to_user_id = null, $direction = 'sent', $message_read = false): Message {
         $message = new Message();
 
         $message->type = $type;
@@ -56,11 +61,22 @@ class MessageService {
         $message->from_user_id = $from_user_id;
         $message->to_user_id = $to_user_id ?? static::TO_USER_ID;
 
+        $message->message_read = $message_read;
+
         $message->save();
 
         $message->direction = $direction;
 
         return $message;
+    }
+
+    public function unread_messages(int $user_id): Collection {
+        $messages = Message::where([ ['to_user_id', $user_id], ['message_read', 0] ])->get();
+        foreach($messages as $message){
+            $message->direction = 'received';
+        }
+
+        return $messages;
     }
 }
 ?>
