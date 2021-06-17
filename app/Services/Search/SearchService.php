@@ -266,26 +266,7 @@ class SearchService {
         }
 
         if($text_search){
-            // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
-            $search_type = preg_replace('/child_|parent_/i','',$type);
-
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, $fuzziness);
-
-            // If searched and no results found then might be a multi word problem. Use or instead again.
-            $total_results = $response['hits']['total']['value'];
-            if($total_results < 3){
-                $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50, true, $fuzziness,'or');
-            }
-
-            // dd($response['hits']['hits']);
-
-            foreach($response['hits']['hits'] as $item){
-                $source = $item['_source'];
-                $name = trim($source['name']);
-                $item_ids[ $source['id'] ] = $name;
-            }
-
-            $item_ids = array_keys($item_ids);
+            $item_ids = $this->text_search_ids($type, $query, $store_type_id, $fuzziness);
         }
 
         $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_region_id:{$region_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_product_group:{$product_group}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_availability_type:{$availability_type}_page:$page";
@@ -349,13 +330,25 @@ class SearchService {
             ->where([ ['products.store_type_id', $store_type_id], ['product_prices.region_id', $region_id], [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
             ->withCasts($casts);
             
+            $base_query_without_where = clone $base_query;
+
             if($text_search){
-                $base_query = $this->text_search_where($item_ids, $type, $base_query);
+                $this->text_search_where($item_ids, $type, $base_query);
             } else {
-                $base_query = $this->search_where($type, $query, $store_type_id, $base_query);
+                $this->search_where($type, $query, $store_type_id, $base_query);
             }   
 
+            // If search results less then 3, not a search_text but product_group. Then increase results number with text search.
             $results = $this->refine_service->refine_results($base_query, $data, $item_ids);
+            $products = $results['products'];
+
+            if(!$text_search && $type == 'product_groups' && count($products) < 3 ){
+                $item_ids = $this->text_search_ids('products', $query, $store_type_id, $fuzziness);
+                $base_query = $this->text_search_where($item_ids, 'products', $base_query_without_where);
+                $results = $this->refine_service->refine_results($base_query, $data, $item_ids);
+
+                $results['products'] = array_merge($products, $results['products']);
+            }
 
             Redis::set($cache_key, json_encode($results));
             Redis::expire($cache_key, 86400);
@@ -363,6 +356,33 @@ class SearchService {
         }
 
         return $results;
+    }
+
+    private function text_search_ids($type, $query, $store_type_id, $fuzziness, $products_limit_elastic = 300){
+
+        $item_ids = [];
+
+        // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
+        $search_type = preg_replace('/child_|parent_/i','',$type);
+
+        $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, $fuzziness);
+
+        // If searched and no results found then might be a multi word problem. Use or instead again.
+        $total_results = $response['hits']['total']['value'];
+        if($total_results < 3){
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50, true, $fuzziness, 'or');
+        }
+
+        // dd($response['hits']['hits']);
+
+        foreach($response['hits']['hits'] as $item){
+            $source = $item['_source'];
+            $name = trim($source['name']);
+            $item_ids[ $source['id'] ] = $name;
+        }
+
+        return array_keys($item_ids);
+
     }
 
     public function store_results(int $store_type_id, $latitude, $longitude){
