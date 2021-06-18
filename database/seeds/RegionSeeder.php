@@ -13,7 +13,7 @@ class RegionSeeder extends Seeder
     public function run()
     {
         DB::table('regions')->insert([
-            'name' => 'Onatario',
+            'name' => 'Ontario',
             'country' => 'Canada',
             'store_type_id' => 2
         ]);
