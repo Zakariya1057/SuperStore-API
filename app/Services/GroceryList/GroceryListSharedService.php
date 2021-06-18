@@ -140,6 +140,10 @@ class GroceryListSharedService {
         ->where([['region_id', $region_id], ['products.id',$product_id]])
         ->get()->first();
 
+        if(is_null($product)){
+            return 0;
+        }
+
         $product->region_id = $region_id;
         $promotion = $product->promotion;
     

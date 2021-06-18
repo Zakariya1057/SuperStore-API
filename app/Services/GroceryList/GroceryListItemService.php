@@ -6,8 +6,8 @@ use App\Events\GroceryListChangedEvent;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\Product;
-use Exception;
 use Illuminate\Support\Facades\Auth;
+use Exception;
 
 class GroceryListItemService extends GroceryListSharedService {
     
@@ -23,6 +23,10 @@ class GroceryListItemService extends GroceryListSharedService {
         $list = GroceryList::where('id', $list_id)->first();
 
         $total_price = $this->item_price($product_id, $quantity);
+
+        if($total_price == 0){
+            throw new Exception('Product not found for current region.');
+        }
 
         if($list){
 
