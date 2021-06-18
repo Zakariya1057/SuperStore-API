@@ -79,7 +79,6 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
         Route::get('/store/{store_id}', 'API\FlyerController@index')->name('flyer.index');
         Route::get('/{name}', 'API\FlyerController@show')->name('flyer.show');
     });
-    
 
     Route::post('/feedback/create', 'API\FeedbackController@create')->name('feedback.create');
 });
