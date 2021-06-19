@@ -53,8 +53,7 @@ return [
             'tap' => [App\Logger\RequestLogFiles::class],
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
-            'permission' => 0775,
-            'level' => 'critical',
+            'permission' => 0775
         ],
         
         'daily' => [
@@ -62,8 +61,7 @@ return [
             'tap' => [App\Logger\CustomLogFiles::class],
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
-            'permission' => 0775,
-            'level' => 'critical',
+            'permission' => 0775
         ],
 
         'slack' => [
