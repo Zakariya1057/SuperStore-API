@@ -26,4 +26,9 @@ class FlyerController extends Controller {
         return response($flyer, 200)->header('Content-Type', 'application/pdf');
 
     }
+
+    public function products($flyer_id, Request $request){
+        $this->logger_service->log('flyer.products', $request);
+        return response()->json(['data' => $this->flyer_service->products($flyer_id) ]);
+    }
 }

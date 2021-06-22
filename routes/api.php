@@ -77,6 +77,7 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
 
     Route::prefix('flyers')->group(function () {
         Route::get('/store/{store_id}', 'API\FlyerController@index')->name('flyer.index');
+        Route::get('/products/{flyer_id}', 'API\FlyerController@products')->name('flyer.products');
         Route::get('/{name}', 'API\FlyerController@show')->name('flyer.show');
     });
 
