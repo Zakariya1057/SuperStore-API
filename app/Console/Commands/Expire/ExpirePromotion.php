@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Expire;
 
 use App\Events\GroceryListChangedEvent;
+use App\Models\FlyerProduct;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\ProductPrice;
@@ -84,18 +85,20 @@ class ExpirePromotion extends Command
 
             ProductPrice::where('promotion_id', $id)->update(['promotion_id' => null]);
             Promotion::where('id', $id)->delete();
+            FlyerProduct::where('flyer_id', $id)->delete();
         }
 
         // Get all promotions without products
         $empty_promotions = Promotion::leftJoin('product_prices', 'promotions.id', 'product_prices.promotion_id')->where([ ['store_type_id', 2] ])->whereNull('product_id')->pluck('promotions.id');
         $this->info('Num Empty Promotions: ' . count($empty_promotions));
         Promotion::whereIn('id', $empty_promotions)->delete();
+        FlyerProduct::whereIn('flyer_id', $empty_promotions)->delete();
+
+        DB::commit();
 
         if($promotions_count > 0){
             Artisan::call('cache:home');
         }
-
-        DB::commit();
 
     }
 
