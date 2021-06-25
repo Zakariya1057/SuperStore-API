@@ -48,6 +48,9 @@ class CreateProductsTable extends Migration
             $table->string('dietary_info', 500)->nullable();
             $table->string('allergen_info', 500)->nullable();
 
+            $table->string('serving_size')->nullable();
+            $table->string('household_serving_size')->nullable();
+
             $table->decimal('avg_rating', 5,2)->nullable();
             $table->integer('total_reviews_count')->nullable();
             

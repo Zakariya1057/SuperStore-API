@@ -62,6 +62,7 @@ class HomeController extends Controller {
         $validated_data = $request->validated();
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
+        
         $store_type_id = $data['store_type_id'];
 
         $this->logger_service->log('home.show', $request);

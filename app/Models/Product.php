@@ -58,6 +58,10 @@ class Product extends Model
         return $this->hasMany('App\Models\Review')->orderBy('reviews.created_at','DESC')->limit(1);
     }
 
+    public function nutritions() {
+        return $this->hasMany('App\Models\Nutrition')->with('childNutritions');
+    }
+
     public function promotion(){
         $promotion = new Promotion();
 

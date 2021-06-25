@@ -60,6 +60,8 @@ class ProductService {
 
         $product->ingredients;
 
+        $product->nutritions;
+
         if (count($product->reviews) > 0){
             $product->reviews[0]->name = $product->reviews[0]->user->name;
         }
