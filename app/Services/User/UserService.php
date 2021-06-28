@@ -7,6 +7,7 @@ use App\Events\RegionChangedEvent;
 use App\Models\FavouriteProducts;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
+use App\Models\Message;
 use App\Models\MonitoredProduct;
 use App\Models\Review;
 use App\Models\StoreType;
@@ -114,6 +115,8 @@ class UserService extends UserAuthService {
         
         FavouriteProducts::where('user_id', $user->id)->delete();
         MonitoredProduct::where('user_id', $user->id)->delete();
+
+        Message::where('from_user_id', $user->id)->update(['from_user_id' => 1]);
 
         User::where('id', $user->id)->delete();
     }
