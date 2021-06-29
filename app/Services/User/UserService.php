@@ -116,7 +116,7 @@ class UserService extends UserAuthService {
         FavouriteProducts::where('user_id', $user->id)->delete();
         MonitoredProduct::where('user_id', $user->id)->delete();
 
-        Message::where('from_user_id', $user->id)->update(['from_user_id' => 1]);
+        Message::where('from_user_id', $user->id)->orWhere('to_user_id', $user->id)->update(['from_user_id' => 1, 'to_user_id' => 1]);
 
         User::where('id', $user->id)->delete();
     }
