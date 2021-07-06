@@ -26,9 +26,9 @@ class UserRegisterRequest extends FormRequest
         return [
             'data.name' => 'required|string|max:255',
             'data.email' => 'required|email|max:255',
-            // 'data.region_id' => 'required',
+            'data.region_id' => 'required',
             'data.region_id' => '',
-            'data.store_type_id' => 'required',
+            'data.supermarket_chain_id' => 'required',
             'data.password' => 'required|confirmed|string|min:8|max:255',
             'data.identifier' => '',
             'data.user_token' => '',

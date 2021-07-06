@@ -61,6 +61,7 @@ class FlyerService {
                 'product_prices.sale_ends_at', 
                 'product_prices.promotion_id', 
                 'product_prices.region_id',
+                'product_prices.supermarket_chain_id',
             )
             ->join('products', 'products.id', 'flyer_products.product_id')
             ->join('product_prices','product_prices.product_id','products.id')

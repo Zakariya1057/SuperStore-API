@@ -23,10 +23,11 @@ class FavouriteController extends Controller {
     public function index(Request $request){
         $user_id = Auth::id();
 
-        $region_id = $this->sanitize_service->sanitizeField($request->input('region_id') ?? 8);
+        $region_id = $this->sanitize_service->sanitizeField($request->input('region_id'));
+        $supermarket_chain_id = $this->sanitize_service->sanitizeField($request->input('supermarket_chain_id'));
 
         $this->logger_service->log('favourite.index', $request);
-        $products = $this->favourite_service->products($region_id, $user_id);
+        $products = $this->favourite_service->products($region_id, $supermarket_chain_id, $user_id);
 
         return response()->json(['data' => $products ]);
     }

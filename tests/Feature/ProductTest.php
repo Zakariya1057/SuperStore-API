@@ -24,7 +24,7 @@ class ProductTest extends TestCase
             'large_image',
             'images',
             
-            'store_type_id',
+            'supermarket_chain_id',
             
             'description',
             'features',
@@ -76,7 +76,7 @@ class ProductTest extends TestCase
                 'large_image',
                 'images',
                 
-                'store_type_id',
+                'supermarket_chain_id',
                 
                 'description',
                 'features',

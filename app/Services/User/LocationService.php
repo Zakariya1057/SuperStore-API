@@ -13,7 +13,7 @@ class LocationService {
         ]);
     }
 
-    public function record_location(float $latitude, float $longitude, $ip_address, ?int $user_id, ?int $region_id = null, ?int $store_type_id = null){
+    public function record_location(float $latitude, float $longitude, $ip_address, ?int $user_id, ?int $region_id = null, ?int $supermarket_chain_id = null){
 
         if(!is_null($user_id)){
             $this->update_location($user_id, $latitude, $longitude);
@@ -29,7 +29,7 @@ class LocationService {
         $user_location->user_id = $user_id;
 
         $user_location->region_id = $region_id;
-        $user_location->store_type_id = $store_type_id;
+        $user_location->supermarket_chain_id = $supermarket_chain_id;
 
         $user_location->save();
     }

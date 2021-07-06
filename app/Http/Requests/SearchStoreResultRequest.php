@@ -24,7 +24,7 @@ class SearchStoreResultRequest extends FormRequest
     public function rules()
     {
         return [
-            'data.store_type_id' => 'required',
+            'data.supermarket_chain_id' => 'required',
             'data.latitude' => '',
             'data.longitude' => '',
         ];

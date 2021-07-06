@@ -18,7 +18,7 @@ class HomeTest extends TestCase
             'data' => [
                 'latitude' => 43.6532,
                 'longitude' => -79.3832,
-                'store_type_id' => 2
+                'supermarket_chain_id' => 2
             ]
         ]);
 

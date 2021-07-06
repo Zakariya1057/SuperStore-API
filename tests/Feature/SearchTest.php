@@ -16,7 +16,7 @@ class SearchTest extends TestCase
     public function testSearchSuggestionsResponse(){
         $response = $this->postJson('/api/search/suggestions', ['data' => [
             'query' => 'Bread', 
-            'store_type_id' => 2
+            'supermarket_chain_id' => 2
         ]]);
 
         $response->assertStatus(200)->assertJsonStructure(['data' => [
@@ -38,7 +38,7 @@ class SearchTest extends TestCase
     public function testSearchProductResultsResponse(){
         $response = $this->post('/api/search/results/product?page=1', [
             'data' => [
-                'store_type_id' => 2, 
+                'supermarket_chain_id' => 2, 
                 'type' => 'child_categories', 
                 'dietary' => '', 
                 'brand' => '', 
@@ -66,7 +66,7 @@ class SearchTest extends TestCase
     public function testSearchStoresResultsResponse(){
         $response = $this->post('/api/search/results/stores', [
             'data' => [
-                "store_type_id" => 2,
+                "supermarket_chain_id" => 2,
                 "latitude" => 43.6532,
                 "longitude" => -79.3832
             ]
@@ -83,7 +83,7 @@ class SearchTest extends TestCase
                 'url',
                 'last_checked',
                 'site_store_id',
-                'store_type_id',
+                'supermarket_chain_id',
                 'created_at',
                 'updated_at',
                 'large_logo',

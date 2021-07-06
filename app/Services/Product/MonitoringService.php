@@ -6,10 +6,10 @@ use App\Models\MonitoredProduct;
 use App\Models\Product;
 
 class MonitoringService {
-    public function all(int $user_id, int $region_id, int $store_type_id){
+    public function all(int $user_id, int $region_id, int $supermarket_chain_id){
         $product = new Product();
 
-        $products =  MonitoredProduct::where([ ['product_prices.region_id', $region_id], ['products.store_type_id', $store_type_id], ['user_id', $user_id] ])
+        $products =  MonitoredProduct::where([ ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['user_id', $user_id] ])
         ->select(
             'products.*' ,
             
@@ -19,6 +19,7 @@ class MonitoringService {
             'product_prices.sale_ends_at', 
             'product_prices.promotion_id', 
             'product_prices.region_id',
+            'product_prices.supermarket_chain_id',
             
             'parent_categories.id as parent_category_id', 
             'parent_categories.name as parent_category_name'

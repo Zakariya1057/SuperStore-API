@@ -5,7 +5,7 @@ namespace App\Services\Store;
 use App\Models\OpeningHour;
 use App\Models\Store;
 use App\Models\StoreLocation;
-use App\Models\StoreType;
+use App\Models\SupermarketChain;
 use App\Services\User\LocationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -19,23 +19,20 @@ class StoreService {
         $this->location_service = $location_service;
     }
 
-    public function stores_by_type(int $store_type_id, $opening_hours=true, $latitude = null, $longitude=null){
+    public function stores_by_supermarket_chains(int $supermarket_chain_id, $opening_hours=true, $latitude = null, $longitude=null){
 
         $hour = new OpeningHour();
-        $store_type = new StoreType();
+        $supermarket_chain = new SupermarketChain();
         $location = new StoreLocation();
 
-
         if(!is_null($latitude) && !is_null($longitude)){
-            $this->location_service->record_location($latitude, $longitude, request()->ip(), Auth::id(), null, $store_type_id);
+            $this->location_service->record_location($latitude, $longitude, request()->ip(), Auth::id(), null, $supermarket_chain_id);
         }
 
-        $casts = array_merge($hour->casts, $store_type->casts,$location->casts);
+        $casts = array_merge($hour->casts, $supermarket_chain->casts, $location->casts);
 
         $select = [
             'stores.*', 
-            'store_types.large_logo', 
-            'store_types.small_logo',
 
             'store_locations.city',
             'store_locations.postcode',
@@ -46,8 +43,8 @@ class StoreService {
             'store_locations.latitude',
         ];
 
-        $query_builder = Store::where('store_type_id', $store_type_id)
-        ->join('store_types', 'store_types.id', '=', 'stores.store_type_id')
+        $query_builder = Store::where('supermarket_chain_id', $supermarket_chain_id)
+        ->join('supermarket_chains', 'supermarket_chains.id', '=', 'stores.supermarket_chain_id')
         ->join('store_locations','store_locations.store_id', '=','stores.id')
         ->where([ ['stores.enabled', 1]])
         ->whereNotNull('longitude')

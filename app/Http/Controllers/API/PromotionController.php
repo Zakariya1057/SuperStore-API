@@ -16,22 +16,22 @@ class PromotionController extends Controller {
         $this->promotion_service = $promotion_service;
     }
 
-    public function all($store_type_id, Request $request){
+    public function all($supermarket_chain_id, Request $request){
         $this->logger_service->log('promotion.all', $request);
 
-        $region_id = $request->input('region_id') ?? 8;
+        $region_id = $request->input('region_id');
 
-        $promotions = $this->promotion_service->all($store_type_id, $region_id);
+        $promotions = $this->promotion_service->all($supermarket_chain_id, $region_id);
         
         return response()->json(['data' => $promotions]);
     }
 
-    public function groups($store_type_id, $title, Request $request){
+    public function groups($supermarket_chain_id, $title, Request $request){
         $this->logger_service->log('promotion.all', $request);
         
-        $region_id = $request->input('region_id') ?? 8;
+        $region_id = $request->input('region_id');
 
-        $promotions = $this->promotion_service->group($region_id, $store_type_id, $title);
+        $promotions = $this->promotion_service->group($region_id, $supermarket_chain_id, $title);
         
         return response()->json(['data' => $promotions]);
     }
@@ -39,7 +39,7 @@ class PromotionController extends Controller {
     public function show($promotion_id, Request $request){
         $this->logger_service->log('promotion.index', $request);
 
-        $region_id = $request->input('region_id') ?? 8;
+        $region_id = $request->input('region_id');
 
         $promotion = $this->promotion_service->get($region_id, $promotion_id);
         

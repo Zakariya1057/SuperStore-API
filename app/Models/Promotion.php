@@ -21,7 +21,7 @@ class Promotion extends Model
         'minimum',
         'maximum',
 
-        'store_type_id',
+        'supermarket_chain_id',
         'products',
         'site_promotion_id',
 
@@ -65,6 +65,7 @@ class Promotion extends Model
             'product_prices.sale_ends_at', 
             'product_prices.promotion_id', 
             'product_prices.region_id',
+            'product_prices.supermarket_chain_id',
 
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',

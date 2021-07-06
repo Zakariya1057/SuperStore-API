@@ -17,7 +17,7 @@ class UserAuthService {
 
         $type_validations = [
             'name' => ['field' => 'name', 'validation' => 'required|string|max:255'],
-            'store_type_id' => ['field' => 'store_type_id', 'validation' => 'required|integer'],
+            'supermarket_chain_id' => ['field' => 'supermarket_chain_id', 'validation' => 'required|integer'],
             'region_id' => ['field' => 'region_id', 'validation' => 'required|integer'],
             'notification_token' => ['field' => 'notification_token', 'validation' => 'required|string|max:255'],
             'code' => ['field' => 'code', 'validation' => 'required|integer'],
@@ -125,7 +125,7 @@ class UserAuthService {
             'token' => $token, 
             'name' => $user->name, 
             'email' => $user->email,
-            'store_type_id' => (int)$user->store_type_id,
+            'supermarket_chain_id' => (int)$user->supermarket_chain_id,
             'region_id' => (int)$user->region_id,
             'send_notifications' => $send_notifications
         ];

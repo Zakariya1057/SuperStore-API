@@ -33,8 +33,8 @@ class CategoryProductRequest extends FormRequest
             'data.promotion' => '',
             'data.product_group' => '',
 
-            // 'data.region_id' => 'required',
-            'data.region_id' => '',
+            'data.region_id' => 'required',
+            'data.supermarket_chain_id' => 'required'
         ];
     }
 }

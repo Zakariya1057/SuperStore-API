@@ -14,17 +14,16 @@ class RegionChangedEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $user_id, $region_id;
+    public $user;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(int $user_id, int $region_id)
+    public function __construct($user)
     {
-        $this->user_id = $user_id;
-        $this->region_id = $region_id;
+        $this->user = $user;
     }
 
     /**

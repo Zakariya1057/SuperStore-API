@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\Cache;
 
-use App\Models\StoreType;
+use App\Models\SupermarketChain;
 use App\Services\Category\CategoryService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -46,15 +46,15 @@ class CacheGroceries extends Command
         
         $this->info('Daily Grocery Cache Start');
 
-        foreach(StoreType::get() as $store_type){
+        foreach(SupermarketChain::get() as $supermarket_chain){
 
-            $this->info("\n---- Starting Caching Categories For Store: " . $store_type->name);
+            $this->info("\n---- Starting Caching Categories For Store: " . $supermarket_chain->name);
 
-            $store_type_id = $store_type->id;
+            $supermarket_chain_id = $supermarket_chain->id;
 
-            $grand_parent_categories = $this->category_service->grand_parent_categories($store_type_id);
+            $grand_parent_categories = $this->category_service->grand_parent_categories($supermarket_chain_id);
 
-            Cache::put('grand_parent_category_'.$store_type_id, $grand_parent_categories);
+            Cache::put('grand_parent_category_'.$supermarket_chain_id, $grand_parent_categories);
 
             foreach($grand_parent_categories as $grand_parent_category){
                 $grand_parent_category_id = $grand_parent_category->id;
@@ -91,7 +91,7 @@ class CacheGroceries extends Command
 
             }
 
-            $this->info('---- Complete Caching Categories For Store: ' . $store_type->name);
+            $this->info('---- Complete Caching Categories For Store: ' . $supermarket_chain->name);
         }
 
         $this->info('Daily Grocery Cache Complete');

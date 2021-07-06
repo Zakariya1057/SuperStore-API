@@ -89,7 +89,7 @@ class ExpirePromotion extends Command
         }
 
         // Get all promotions without products
-        $empty_promotions = Promotion::leftJoin('product_prices', 'promotions.id', 'product_prices.promotion_id')->where([ ['store_type_id', 2] ])->whereNull('product_id')->pluck('promotions.id');
+        $empty_promotions = Promotion::leftJoin('product_prices', 'promotions.id', 'product_prices.promotion_id')->where([ ['supermarket_chain_id', 2] ])->whereNull('product_id')->pluck('promotions.id');
         $this->info('Num Empty Promotions: ' . count($empty_promotions));
         Promotion::whereIn('id', $empty_promotions)->delete();
         FlyerProduct::whereIn('flyer_id', $empty_promotions)->delete();

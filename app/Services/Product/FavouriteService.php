@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class FavouriteService {
 
-    public function products(int $region_id, int $user_id): Collection {
+    public function products(int $region_id, int $supermarket_chain_id, int $user_id): Collection {
 
         $product = new Product();
         
@@ -22,6 +22,7 @@ class FavouriteService {
             'product_prices.sale_ends_at', 
             'product_prices.promotion_id', 
             'product_prices.region_id',
+            'product_prices.supermarket_chain_id',
 
             'parent_categories.id as parent_category_id', 
             'parent_categories.name as parent_category_name'
@@ -33,7 +34,7 @@ class FavouriteService {
         ->withCasts(
             $product->casts
         )->groupBy('products.id')
-        ->where([ ['region_id', $region_id], ['products.enabled', 1]])
+        ->where([ ['region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['products.enabled', 1]])
         ->orderBy('favourite_products.created_at','DESC')->get();
 
         foreach($products as $product){
