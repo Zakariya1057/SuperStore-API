@@ -25,5 +25,19 @@ class SupermarketChainSeeder extends Seeder
             'user_id' => 2,
             'company_id' => 1
         ]);
+
+        DB::table('supermarket_chains')->insert([
+            'name' => 'Atlantic Superstore',
+            'currency' => 'Canadian Dollars',
+            'user_id' => 2,
+            'company_id' => 1
+        ]);
+
+        DB::table('supermarket_chains')->insert([
+            'name' => 'Maxi',
+            'currency' => 'Canadian Dollars',
+            'user_id' => 2,
+            'company_id' => 1
+        ]);
     }
 }

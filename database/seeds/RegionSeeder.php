@@ -53,5 +53,41 @@ class RegionSeeder extends Seeder
             'country' => 'Canada',
             'company_id' => 1
         ]);
+
+        // Add New Ones
+        DB::table('regions')->insert([
+            'id' => 14,
+            'name' => 'Newfoundland and Labrador',
+            'country' => 'Canada',
+            'company_id' => 1
+        ]);
+
+        DB::table('regions')->insert([
+            'id' => 15,
+            'name' => 'Nova Scotia',
+            'country' => 'Canada',
+            'company_id' => 1
+        ]);
+
+        DB::table('regions')->insert([
+            'id' => 16,
+            'name' => 'Prince Edward Island',
+            'country' => 'Canada',
+            'company_id' => 1
+        ]);
+
+        DB::table('regions')->insert([
+            'id' => 17,
+            'name' => 'New Brunswick',
+            'country' => 'Canada',
+            'company_id' => 1
+        ]);
+
+        DB::table('regions')->insert([
+            'id' => 18,
+            'name' => 'Quebec',
+            'country' => 'Canada',
+            'company_id' => 1
+        ]);
     }
 }
