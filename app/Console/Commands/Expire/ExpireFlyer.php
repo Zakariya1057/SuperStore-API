@@ -20,7 +20,7 @@ class ExpireFlyer extends Command
      *
      * @var string
      */
-    protected $description = 'Remove expired flyers from database.';
+    protected $description = 'Remove all expired flyers from database.';
 
     /**
      * Create a new command instance.

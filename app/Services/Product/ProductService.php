@@ -55,6 +55,8 @@ class ProductService {
         }
 
         $product->region_id = $region_id;
+        $product->supermarket_chain_id = $supermarket_chain_id;
+
         $product->promotion;
 
         $product->images;
