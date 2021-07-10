@@ -45,7 +45,10 @@ class FlyerService {
 
     public function products(int $flyer_id){
         $flyer_id = $this->sanitize_service->sanitizeField($flyer_id);
-        $flyer = Flyer::where('flyers.id', $flyer_id)->join('store_locations', 'store_locations.store_id', 'flyers.store_id')->first();
+        $flyer = Flyer::where('flyers.id', $flyer_id)
+        ->join('store_locations', 'store_locations.store_id', 'flyers.store_id')
+        ->join('stores', 'stores.id', 'flyers.store_id')
+        ->first();
 
         if($flyer){
             $product = new Product();
@@ -65,7 +68,7 @@ class FlyerService {
             )
             ->join('products', 'products.id', 'flyer_products.product_id')
             ->join('product_prices','product_prices.product_id','products.id')
-            ->where('product_prices.region_id', $flyer->region_id)
+            ->where([ ['product_prices.region_id', $flyer->region_id], ['product_prices.supermarket_chain_id', $flyer->supermarket_chain_id] ])
             ->withCasts($casts)->get();
 
         } else {
