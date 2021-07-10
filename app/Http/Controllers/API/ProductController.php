@@ -33,7 +33,7 @@ class ProductController extends Controller {
         $this->logger_service->log('product.show', $request);
 
         if(!$product){
-            throw new Exception('No product found.', 404);
+            throw new Exception('Product not found for your region and store.', 404);
         }
 
         return response()->json(['data' => $product]);
