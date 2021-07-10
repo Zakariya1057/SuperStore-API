@@ -69,7 +69,7 @@ class PromotionService {
             )
             ->join('product_prices','product_prices.product_id','products.id')
             ->join('promotions','promotions.id', 'promotion_id')
-            ->where('product_prices.region_id', $region_id)
+            ->where([ ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id] ])
             ->groupBy('product_prices.product_id')
             ->get();
     
@@ -146,7 +146,12 @@ class PromotionService {
 
             'promotions.enabled as promotion_enabled',
         )
-        ->where([ ['featured_items.region_id', $region_id], ['featured_items.company_id', 1], ['type', 'promotions'], ['promotions.supermarket_chain_id', $supermarket_chain_id] ])
+        ->where([ 
+            ['featured_items.region_id', $region_id], 
+            ['featured_items.company_id', 1], 
+            ['type', 'promotions'], 
+            ['promotions.supermarket_chain_id', $supermarket_chain_id] 
+        ])
         ->join('promotions','promotions.id','featured_id')
         ->groupBy('featured_id')
         ->withCasts($promotion->casts)->limit(10)
