@@ -13,6 +13,10 @@ class CompanySeeder extends Seeder
     public function run()
     {
         DB::table('companies')->insert([
+            'name' => 'Asda'
+        ]);
+
+        DB::table('companies')->insert([
             'name' => 'Loblaws'
         ]);
     }
