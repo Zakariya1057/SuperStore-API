@@ -115,13 +115,13 @@ class CategoryService {
     }
 
 
-    public function featured(int $region_id, int $company_id){
+    public function featured(int $region_id, int $supermarket_chain_id){
 
         $product = new Product();
         $casts = $product->casts;
 
         $categories = FeaturedItem::select('parent_categories.*')
-        ->where([ ['enabled', 1], ['featured_items.region_id', $region_id], ['parent_categories.company_id', $company_id],['type', 'categories'] ])
+        ->where([ ['enabled', 1], ['type', 'categories'] ])
         ->join('parent_categories','parent_categories.id','featured_id')
         ->withCasts(['name' => HTMLDecode::class])
         ->groupBy('featured_id')
@@ -131,7 +131,11 @@ class CategoryService {
         $results = [];
 
         foreach($categories as $category){
-            $products = ChildCategory::where([ ['product_prices.region_id', $region_id], ['child_categories.parent_category_id', $category->id]])
+            $products = ChildCategory::where([ 
+                ['product_prices.region_id', $region_id], 
+                ['product_prices.supermarket_chain_id', $supermarket_chain_id], 
+                ['child_categories.parent_category_id', $category->id]
+            ])
             ->select(
                 'products.*',
 
@@ -141,6 +145,7 @@ class CategoryService {
                 'product_prices.sale_ends_at', 
                 'product_prices.promotion_id', 
                 'product_prices.region_id',
+                'product_prices.supermarket_chain_id',
 
                 'parent_categories.id as parent_category_id',
                  'parent_categories.name as parent_category_name'
