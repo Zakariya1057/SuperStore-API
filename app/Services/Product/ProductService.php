@@ -122,7 +122,7 @@ class ProductService {
             'parent_categories.id as parent_category_id', 
             'parent_categories.name as parent_category_name'
         )
-        ->where([ ['products.enabled', 1], ['featured_items.region_id', $region_id], ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['type', 'products'] ])
+        ->where([ ['products.enabled', 1], ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['type', 'products'] ])
         ->join('products', 'products.id','=','featured_id')
         ->join('product_prices', 'products.id','=','product_prices.product_id')
         ->join('category_products','category_products.product_id','products.id')
