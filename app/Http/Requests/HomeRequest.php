@@ -25,8 +25,7 @@ class HomeRequest extends FormRequest
     {
         return [
             'data.region_id' => 'required',
-            'data.region_id' => '',
-            'data.supermarket_chain_id' => 'required',
+            'data.supermarket_chain_id' => 'sometimes|integer',
             'data.latitude' => '',
             'data.longitude' => '',
         ];

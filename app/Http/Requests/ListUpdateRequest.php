@@ -25,7 +25,7 @@ class ListUpdateRequest extends FormRequest
     {
         return [
             'data.list_id' => 'required',
-            'data.supermarket_chain_id' => 'required',
+            'data.supermarket_chain_id' => 'sometimes|integer',
             'data.name' => 'required',
             'data.items' => '',
             'data.mode' => ''

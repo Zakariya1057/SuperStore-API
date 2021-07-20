@@ -40,8 +40,7 @@ class SearchProductResultRequest extends FormRequest
             'data.text_search' => '',
 
             'data.region_id' => 'required',
-            'data.region_id' => '',
-            'data.supermarket_chain_id' => 'required',
+            'data.supermarket_chain_id' => 'sometimes|integer',
         ];
     }
 }
