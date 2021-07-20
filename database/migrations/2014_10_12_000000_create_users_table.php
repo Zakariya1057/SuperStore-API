@@ -22,7 +22,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('identifier')->unique()->nullable();
             
-            $table->integer('store_type_id');
+            $table->integer('supermarket_chain_id');
 
             $table->boolean('send_notifications')->default(1); // Send notification to user phone if enabled.
             $table->string('notification_token')->unique()->nullable();

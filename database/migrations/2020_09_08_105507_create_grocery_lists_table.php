@@ -31,10 +31,10 @@ class CreateGroceryListsTable extends Migration
 
             $table->string('currency');
 
-            $table->unsignedBigInteger('store_type_id');
+            $table->unsignedBigInteger('supermarket_chain_id');
 
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('store_type_id')->references('id')->on('store_types');
+            $table->foreign('supermarket_chain_id')->references('id')->on('supermarket_chains');
             
             $table->index('user_id');
             $table->index('name');

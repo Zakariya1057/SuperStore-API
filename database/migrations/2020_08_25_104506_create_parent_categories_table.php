@@ -22,16 +22,16 @@ class CreateParentCategoriesTable extends Migration
             $table->integer('index')->default(0);
             
             $table->string('site_category_id');
-            $table->unsignedBigInteger('store_type_id');
+            $table->unsignedBigInteger('company_id');
 
             $table->boolean('enabled')->default(1);
             
             $table->unsignedBigInteger('store_id')->nullable();
             
-            $table->foreign('store_type_id')->references('id')->on('store_types');
+            $table->foreign('company_id')->references('id')->on('companies');
             $table->foreign('parent_category_id')->references('id')->on('grand_parent_categories');
 
-            $table->unique(['name', 'store_type_id', 'parent_category_id'], 'parent_categories_unique');
+            $table->unique(['name', 'company_id', 'parent_category_id'], 'parent_categories_unique');
             
             $table->index('site_category_id');
             

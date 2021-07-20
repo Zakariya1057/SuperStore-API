@@ -33,14 +33,14 @@ class CreateStoresTable extends Migration
 
             $table->string('site_store_id')->unique();
 
-            $table->unsignedBigInteger('store_type_id');
+            $table->unsignedBigInteger('supermarket_chain_id');
 
             $table->boolean('enabled')->default(1);
             
             $table->index('name');
-            $table->index('site_store_id');
+            $table->index('supermarket_chain_id');
 
-            $table->foreign('store_type_id')->references('id')->on('store_types');
+            $table->foreign('supermarket_chain_id')->references('id')->on('supermarket_chains');
             
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

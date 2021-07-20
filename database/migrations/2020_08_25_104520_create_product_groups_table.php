@@ -21,16 +21,16 @@ class CreateProductGroupsTable extends Migration
             $table->unsignedBigInteger('child_category_id');
 
             $table->string('site_product_group_id');
-            $table->unsignedBigInteger('store_type_id');
+            $table->unsignedBigInteger('company_id');
 
             $table->boolean('enabled')->default(1);
             
             $table->unsignedBigInteger('store_id')->nullable();
             
-            $table->foreign('store_type_id')->references('id')->on('store_types');
+            $table->foreign('company_id')->references('id')->on('companies');
             $table->foreign('child_category_id')->references('id')->on('child_categories');
 
-            $table->unique(['name', 'store_type_id', 'child_category_id'],'product_groups_unique');
+            $table->unique(['name', 'company_id', 'child_category_id'],'product_groups_unique');
             
             $table->index('site_product_group_id');
             

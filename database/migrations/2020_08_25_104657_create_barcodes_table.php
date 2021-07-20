@@ -21,12 +21,12 @@ class CreateBarcodesTable extends Migration
             $table->string('value')->nullable();
 
             $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('store_type_id');
+            $table->unsignedBigInteger('company_id');
 
             $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('store_type_id')->references('id')->on('store_types');
+            $table->foreign('company_id')->references('id')->on('companies');
 
-            $table->unique(['type', 'value', 'store_type_id', 'product_id'], 'unique_barcode');
+            $table->unique(['type', 'value', 'company_id', 'product_id'], 'unique_barcode');
 
             $table->index('product_id');
 

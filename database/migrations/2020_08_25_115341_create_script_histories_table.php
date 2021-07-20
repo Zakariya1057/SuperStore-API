@@ -17,7 +17,7 @@ class CreateScriptHistoriesTable extends Migration
         Schema::create('script_histories', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('store_type_id')->unique();
+            $table->unsignedBigInteger('company_id')->unique();
 
             $table->integer('grand_parent_category_index');
             $table->integer('parent_category_index');

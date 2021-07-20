@@ -40,7 +40,7 @@ class CreatePromotionsTable extends Migration
 
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();
-            $table->unsignedBigInteger('store_type_id');
+            $table->unsignedBigInteger('supermarket_chain_id');
             
             $table->boolean('enabled')->default(1);
             
@@ -48,9 +48,9 @@ class CreatePromotionsTable extends Migration
             
             $table->index('name');
             $table->index('title');
-            $table->index('store_type_id');
+            $table->index('supermarket_chain_id');
 
-            $table->foreign('store_type_id')->references('id')->on('store_types');
+            $table->foreign('supermarket_chain_id')->references('id')->on('supermarket_chains');
             $table->foreign('region_id')->references('id')->on('regions');
             
             $table->timestamp('created_at')->useCurrent();
