@@ -32,8 +32,11 @@ class StoreService {
         $casts = array_merge($hour->casts, $supermarket_chain->casts, $location->casts);
 
         $select = [
-            'stores.*', 
-
+            'stores.*',
+            
+            // Remove later
+            'supermarket_chains.company_id',
+            
             'store_locations.city',
             'store_locations.postcode',
             'store_locations.address_line1',
@@ -72,7 +75,7 @@ class StoreService {
         } 
 
         if(!is_null($latitude) && !is_null($longitude)){
-            $select[] = DB::raw('( 6367 * acos( cos( radians('.$latitude.') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( latitude ) ) ) ) AS distance');
+            $select[] = DB::raw('( 6367 * acos( cos( radians('.$latitude.') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians('.$latitude.') ) * sin( radians( latitude ) ) ) ) AS distance');
 
             $query_builder = $query_builder
             // ->having('distance', '<', 50)
@@ -85,6 +88,10 @@ class StoreService {
         foreach($stores as $store){
             $location = [];
             
+            // Remove later
+            $store->store_type_id = $store->company_id;
+            $store->small_logo = $store->large_logo = " ";
+
             if($opening_hours){
                 $hour = new OpeningHour();
 

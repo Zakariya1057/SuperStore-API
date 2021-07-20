@@ -25,7 +25,7 @@ class StoreController extends Controller {
 
         $this->logger_service->log('store.show', $request);
 
-        $store = Store::select('stores.*', 'supermarket_chains.large_logo', 'supermarket_chains.small_logo')
+        $store = Store::select('stores.*', 'company_id', 'supermarket_chains.large_logo', 'supermarket_chains.small_logo')
         ->where('stores.id', $store_id)
         ->join('supermarket_chains', 'supermarket_chains.id', '=', 'stores.supermarket_chain_id')
         ->withCasts([
@@ -35,6 +35,9 @@ class StoreController extends Controller {
         ->first();
 
         if($store){
+            // Remove later
+            $store->store_type_id = $store->company_id;
+
             $store->location;
             $store->opening_hours;
             $store->facilities;

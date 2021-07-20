@@ -13,7 +13,7 @@ class GroceryListService extends GroceryListSharedService {
 
     public function create($data, int $user_id){
         $list_name = $data['name'];
-        $supermarket_chain_id = $data['supermarket_chain_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
         $identifier = $data['identifier'];
 
         $currency = SupermarketChain::where('id', $supermarket_chain_id)->get()->first()->currency;
@@ -30,15 +30,20 @@ class GroceryListService extends GroceryListSharedService {
             ]);
 
             event(new GroceryListChangedEvent($list));
+            
+            $created_list = GroceryList::whereId($list->id)->get()->first();
 
-            return GroceryList::whereId($list->id)->get()->first();
+            // Remove later
+            $created_list->store_type_id = 2;
+
+            return $created_list;
         }
     }
 
     public function update($data, int $user_id){
 
         $name = $data['name'];
-        $supermarket_chain_id = $data['supermarket_chain_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
         $list_id = $data['list_id'];
 
         $list = GroceryList::where([['id', $list_id],['user_id', $user_id]])->get()->first();
@@ -136,6 +141,9 @@ class GroceryListService extends GroceryListSharedService {
         return GroceryList::where('user_id', $user_id)
         ->select(
             'products.*',
+            
+            // Remove later
+            'products.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',
@@ -159,9 +167,16 @@ class GroceryListService extends GroceryListSharedService {
     }
 
     public function lists_progress(int $user_id, int $supermarket_chain_id){
-        return GroceryList::where([ ['user_id', $user_id] ])
+        $lists = GroceryList::where([ ['user_id', $user_id] ])
         ->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')
         ->limit(4)->get();
+
+        // Remove later
+        foreach($lists as $list){
+            $list->store_type_id = 2;
+        }
+
+        return $lists;
     }
 }
 ?>

@@ -13,6 +13,9 @@ class MonitoringService {
         ->select(
             'products.*' ,
             
+            // Remove later
+            'products.company_id as store_type_id',
+
             'product_prices.price', 
             'product_prices.old_price',
             'product_prices.is_on_sale', 

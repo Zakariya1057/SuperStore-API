@@ -27,6 +27,9 @@ class ProductService {
         ->select(
             'products.*',
 
+            // Remove later
+            'products.company_id as store_type_id',
+
             'product_prices.price', 
             'product_prices.old_price',
             'product_prices.is_on_sale', 
@@ -57,7 +60,12 @@ class ProductService {
         $product->region_id = $region_id;
         $product->supermarket_chain_id = $supermarket_chain_id;
 
-        $product->promotion;
+        // Remove later
+        $promotion = $product->promotion;
+        if(!is_null($promotion)){
+            $promotion->store_type_id = 2;
+            $product->promotion = $promotion;
+        }
 
         $product->images;
 
@@ -75,6 +83,9 @@ class ProductService {
         $product->recommended = Recommended::where([ ['recommended.product_id',$product->id], ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id] ])
         ->select(
             'products.*',
+
+            // Remove later
+            'products.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',
@@ -110,6 +121,9 @@ class ProductService {
 
         return FeaturedItem::select(
             'products.*',
+
+            // Remove later
+            'products.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',

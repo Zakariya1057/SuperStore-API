@@ -35,6 +35,12 @@ class ListController extends Controller {
         $this->logger_service->log('list.index', $request);
 
         $lists = GroceryList::where([ ['user_id', $user_id] ])->orderBy('updated_at', 'DESC')->get();
+
+        // Remove later
+        foreach($lists as $list){
+            $list->store_type_id = 2;
+        }
+        
         return response()->json(['data' => $lists]);
     }
 

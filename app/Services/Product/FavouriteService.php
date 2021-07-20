@@ -38,6 +38,8 @@ class FavouriteService {
         ->orderBy('favourite_products.created_at','DESC')->get();
 
         foreach($products as $product){
+            // Remove later
+            $product->store_type_id = 2;
             $product->favourite = true;
         }
         

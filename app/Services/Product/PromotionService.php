@@ -111,9 +111,14 @@ class PromotionService {
 
         $promotion_id = $this->sanitize_service->sanitizeField($promotion_id);
 
-        $promotion = Promotion::where([ ['id', $promotion_id], ['region_id', $region_id] ])->first();
+        $promotion = Promotion::
+        where([ ['id', $promotion_id], ['region_id', $region_id] ])
+        ->first();
 
         if(!is_null($promotion)){
+            // Remove later
+            $promotion->store_type_id = 2;
+
             $promotion->products;
         } else {
             throw new Exception('Promotion not found.', 404);
@@ -147,19 +152,22 @@ class PromotionService {
             'promotions.enabled as promotion_enabled',
         )
         ->where([ 
-            ['featured_items.region_id', $region_id], 
-            ['featured_items.company_id', 1], 
             ['type', 'promotions'], 
-            ['promotions.supermarket_chain_id', $supermarket_chain_id] 
+            ['promotions.supermarket_chain_id', $supermarket_chain_id] ,
+            ['promotions.region_id', $region_id]
         ])
         ->join('promotions','promotions.id','featured_id')
-        ->groupBy('featured_id')
+        ->groupBy('promotions.title')
         ->withCasts($promotion->casts)->limit(10)
         ->get();
 
 
         foreach($featured_promotions as $promotion){
             $this->set_product_promotion($promotion);
+
+            // Remove later
+            $promotion->promotion->store_type_id = 2;
+
             if(!is_null($promotion->promotion)){
                 $promotions[] = $promotion->promotion;
             }
@@ -204,6 +212,8 @@ class PromotionService {
         if(is_null($promotion->id) || !$promotion->enabled){
             $item->promotion = null;
         } else {
+            $promotion->store_type_id = 2;
+
             $item->promotion = $promotion;
 
             // If promotion expired, don't return it

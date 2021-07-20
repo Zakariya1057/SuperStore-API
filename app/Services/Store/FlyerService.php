@@ -40,7 +40,15 @@ class FlyerService {
     public function all(int $store_id){
         // Get all flyers for store
         $store_id = $this->sanitize_service->sanitizeField($store_id);
-        return Flyer::where('store_id', $store_id)->get();
+
+        $flyers = Flyer::where('store_id', $store_id)->get();
+
+        // Remove later
+        foreach($flyers as $flyer){
+            $flyer->store_type_id = 2;
+        }
+
+        return $flyers;
     }
 
     public function products(int $flyer_id){
@@ -58,6 +66,9 @@ class FlyerService {
             ->select(
                 'products.*',
     
+                // Remove later
+                'products.company_id as store_type_id',
+
                 'product_prices.price', 
                 'product_prices.old_price',
                 'product_prices.is_on_sale', 

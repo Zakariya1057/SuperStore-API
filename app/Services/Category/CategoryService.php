@@ -18,17 +18,29 @@ class CategoryService {
     }
     
     public function grand_parent_categories(int $company_id){
-        $grand_parent_categories = GrandParentCategory::where([ ['enabled', 1], ['grand_parent_categories.company_id', $company_id]])->orderBy('index', 'ASC')->get();
-
-        foreach($grand_parent_categories as $category){
-            $category->parent_categories;
-        }
+        $grand_parent_categories = GrandParentCategory::select(
+            'grand_parent_categories.*', 
+            // Remove later
+            'grand_parent_categories.company_id as store_type_id'
+        )
+        ->where([ ['enabled', 1], ['grand_parent_categories.company_id', $company_id]])
+        ->with(['parent_categories' => function ($query) {
+            // Remove later
+            $query->select('parent_categories.*', 'parent_categories.company_id as store_type_id')->orderBy('index', 'ASC');
+        }])
+        ->orderBy('index', 'ASC')->get();
 
         return $grand_parent_categories;
     }
 
     public function child_categories(int $parent_category_id){
-        return ChildCategory::where([ ['enabled', 1], ['child_categories.parent_category_id', $parent_category_id] ])->orderBy('index', 'ASC')->get();
+        return ChildCategory::select(
+            'child_categories.*', 
+            // Remove later
+            'child_categories.company_id as store_type_id'
+        )
+        ->where([ ['enabled', 1], ['child_categories.parent_category_id', $parent_category_id] ])
+        ->orderBy('index', 'ASC')->get();
     }
 
     public function category_products(int $child_category_id, $data = []){
@@ -36,13 +48,16 @@ class CategoryService {
         $casts = $product->casts;
 
         $region_id = $data['region_id'];
-        $supermarket_chain_id = $data['supermarket_chain_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
         $casts['category_name'] = HTMLDecode::class;
         
         $base_query = ChildCategory::where('child_categories.id', $child_category_id)
         ->select(
             'products.*',
+
+            // Remove later
+            'child_categories.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',
@@ -100,6 +115,8 @@ class CategoryService {
                     'name' => $product->child_category_name,
                     'index' => $product->child_category_index,
                     'parent_category_id' => $product->parent_category_id,
+                    // Remove later
+                    'store_type_id' => $product->company_id,
                     'company_id' => $product->company_id,
                     'products' => [],
 
@@ -138,6 +155,9 @@ class CategoryService {
             ])
             ->select(
                 'products.*',
+                
+                // Remove later
+                'parent_categories.company_id as store_type_id',
 
                 'product_prices.price', 
                 'product_prices.old_price',
@@ -148,7 +168,7 @@ class CategoryService {
                 'product_prices.supermarket_chain_id',
 
                 'parent_categories.id as parent_category_id',
-                 'parent_categories.name as parent_category_name'
+                'parent_categories.name as parent_category_name'
             )
             
             ->join('category_products','category_products.child_category_id','child_categories.id')
@@ -160,6 +180,9 @@ class CategoryService {
             ->limit(15)->groupBy('category_products.product_id')->withCasts($casts)->get();
 
             $category->enabled = (bool)$category->enabled;
+
+            // Remove Later
+            $category->store_type_id = $category->company_id;
 
             $category->products = $products;
             $results[] = $category; 
