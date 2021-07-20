@@ -233,10 +233,8 @@ class SearchService {
         $query = $data['query'];
         $type = strtolower($data['type']);
 
-        $supermarket_chain_id = $data['supermarket_chain_id'];
         $region_id = $data['region_id'];
-
-        $products_limit_elastic = 300;
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
         $sort = $data['sort'] ?? '';
         $order = $data['order'] ?? '';
