@@ -63,14 +63,14 @@ class HomeController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
         
-        $supermarket_chain_id = $data['supermarket_chain_id'];
+        $region_id = $data['region_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
         $this->logger_service->log('home.show', $request);
         
         $latitude = $data['latitude'] ?? null;
         $longitude = $data['longitude'] ?? null;
 
-        $region_id = $data['region_id'];
 
         $data['stores'] = $this->store_service->stores_by_supermarket_chains($supermarket_chain_id, false, $latitude, $longitude);
 

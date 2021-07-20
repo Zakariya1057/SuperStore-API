@@ -24,7 +24,7 @@ class FavouriteController extends Controller {
         $user_id = Auth::id();
 
         $region_id = $this->sanitize_service->sanitizeField($request->input('region_id'));
-        $supermarket_chain_id = $this->sanitize_service->sanitizeField($request->input('supermarket_chain_id'));
+        $supermarket_chain_id = $this->sanitize_service->sanitizeField($request->input('supermarket_chain_id') ?? 1);
 
         $this->logger_service->log('favourite.index', $request);
         $products = $this->favourite_service->products($region_id, $supermarket_chain_id, $user_id);

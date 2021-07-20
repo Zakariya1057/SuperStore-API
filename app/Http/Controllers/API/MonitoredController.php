@@ -28,7 +28,7 @@ class MonitoredController extends Controller {
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
         $region_id = $data['region_id'];
-        $supermarket_chain_id = $data['supermarket_chain_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
         $this->logger_service->log('monitor.index', $request);
 

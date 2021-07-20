@@ -29,7 +29,7 @@ class SearchController extends Controller {
         $data = $this->sanitize_service->sanitizeAllFields($data);
         
         $query = $data['query'];
-        $supermarket_chain_id = $data['supermarket_chain_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
         $results = $this->search_service->suggestions($query, $supermarket_chain_id);
 
@@ -62,7 +62,7 @@ class SearchController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $supermarket_chain_id = $data['supermarket_chain_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
         $latitude = $data['latitude'] ?? null;
         $longitude = $data['longitude'] ?? null;
         
