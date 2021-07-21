@@ -89,6 +89,55 @@ class SearchService {
 
         }
 
+        $results = [
+                "stores" => [],
+                "product_groups" => [
+                    [
+                        "id" => 312,
+                        "name" => "Oranges Citrus"
+                    ],
+                    [
+                        "id" => 10852,
+                        "name" => "Oranges & Citrus"
+                    ],
+                    [
+                        "id" => 568,
+                        "name" => "Orange Juices"
+                    ]
+                ],
+                "child_categories" => [],
+                "parent_categories" => [],
+                "brands" => [
+                    [
+                        "id" => 54418,
+                        "name" => "Orange Naturals"
+                    ]
+                ],
+                "promotions" => [],
+                "store_sales" => [],
+                "products" => [
+                    [
+                        "id" => 13380,
+                        "name" => "Jell-O Orange Jelly Powder, Gelatin Mix"
+                    ],
+                    [
+                        "id" => 76122,
+                        "name" => "Tropicana Calcium and Vitamin D Orange Juice"
+                    ],
+                    [
+                        "id" => 54418,
+                        "name" => "Orange Naturals Magnesium Glycinate, 180 mg Capsules"
+                    ]
+                ],
+                "corrections" => [
+                    [
+                        "id" => 278,
+                        "name" => "Oranges"
+                    ]
+                ],
+                "categories" => []
+        ];
+
         return $results;
     }
 
@@ -201,10 +250,10 @@ class SearchService {
 
     private function database_suggestions($query, &$results, $supermarket_chain_id){
         $stores = SupermarketChain::select('id','name')->where([ ['id', $supermarket_chain_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
-        $child_categories = ChildCategory::select('id','name')->where([ ['supermarket_chain_id', $supermarket_chain_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
-        $parent_categories = ParentCategory::select('id','name')->where([ ['supermarket_chain_id', $supermarket_chain_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
+        $child_categories = ChildCategory::select('id','name')->where([ ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
+        $parent_categories = ParentCategory::select('id','name')->where([ ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
         $promotions = Promotion::select('id','name')->where([ ['supermarket_chain_id', $supermarket_chain_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
-        $brands = Product::select(['id','brand as name'])->where([ ['supermarket_chain_id', $supermarket_chain_id], ['brand', 'like', "%$query%"] ])->groupBy('brand')->orderByRaw('total_reviews_count / avg_rating desc')->limit(2)->get()->toArray();
+        $brands = Product::select(['id','brand as name'])->where([ ['brand', 'like', "%$query%"] ])->groupBy('brand')->orderByRaw('total_reviews_count / avg_rating desc')->limit(2)->get()->toArray();
 
         if((count($child_categories) + count($parent_categories)) <= 3 ){
             $product_limit = 10;
@@ -347,6 +396,12 @@ class SearchService {
                 $results = $this->refine_service->refine_results($base_query, $data, $item_ids);
 
                 $results['products'] = array_merge($products, $results['products']);
+                
+            }
+
+            // Remove later
+            foreach($results['products'] as $product){
+                $product->store_type_id = 2;
             }
 
             Redis::set($cache_key, json_encode($results));
@@ -390,7 +445,7 @@ class SearchService {
 
     private function search_where($type, $detail, int $supermarket_chain_id, Builder $base_query){
         if($type == 'products'){
-            $base_query = $base_query->where([ ['[product_prices.supermarket_chain_id',  $supermarket_chain_id], ['products.name', 'like', "$detail%"] ]);
+            $base_query = $base_query->where([ ['product_prices.supermarket_chain_id',  $supermarket_chain_id], ['products.name', 'like', "$detail%"] ]);
         } elseif($type == 'product_groups'){
             $base_query = $base_query->where('child_categories.company_id', 1)
             ->where(function ($query) use($detail){
@@ -403,10 +458,10 @@ class SearchService {
         } elseif($type == 'promotions'){
             $base_query = $base_query->where([ ['promotions.supermarket_chain_id', $supermarket_chain_id], ['promotions.name', $detail] ]);
         } elseif($type == 'brands'){
-            $base_query = $base_query->where([ ['[product_prices.supermarket_chain_id', $supermarket_chain_id], ['brand', $detail] ]);
+            $base_query = $base_query->where([ ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['brand', $detail] ]);
         } elseif($type == 'store_sales'){
             $base_query = $base_query
-            ->where('[product_prices.supermarket_chain_id', $supermarket_chain_id)
+            ->where('product_prices.supermarket_chain_id', $supermarket_chain_id)
             ->orderBy('product_price.price', 'DESC')
             ->whereNotNull('product_prices.promotion_id');
         }
@@ -515,7 +570,7 @@ class SearchService {
             $fields_match = ['name'];
             $fields_should = ['name', 'weight'];
         }
-
+        
         $params = [
             'index' => $index,
             'body'  => [
@@ -525,13 +580,13 @@ class SearchService {
 
                         'bool' => [
                             'must' => [
-                                [
-                                    'match' => [
-                                        'supermarket_chain_id' => [ 
-                                            'query' => $supermarket_chain_id
-                                        ]
-                                    ]
-                                ],
+                                // [
+                                //     'match' => [
+                                //         'supermarket_chain_id' => [ 
+                                //             'query' => $supermarket_chain_id
+                                //         ]
+                                //     ]
+                                // ],
                     
                                 [
                                     'multi_match' => [
