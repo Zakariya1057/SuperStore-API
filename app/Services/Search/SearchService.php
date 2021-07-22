@@ -89,55 +89,6 @@ class SearchService {
 
         }
 
-        $results = [
-                "stores" => [],
-                "product_groups" => [
-                    [
-                        "id" => 312,
-                        "name" => "Oranges Citrus"
-                    ],
-                    [
-                        "id" => 10852,
-                        "name" => "Oranges & Citrus"
-                    ],
-                    [
-                        "id" => 568,
-                        "name" => "Orange Juices"
-                    ]
-                ],
-                "child_categories" => [],
-                "parent_categories" => [],
-                "brands" => [
-                    [
-                        "id" => 54418,
-                        "name" => "Orange Naturals"
-                    ]
-                ],
-                "promotions" => [],
-                "store_sales" => [],
-                "products" => [
-                    [
-                        "id" => 13380,
-                        "name" => "Jell-O Orange Jelly Powder, Gelatin Mix"
-                    ],
-                    [
-                        "id" => 76122,
-                        "name" => "Tropicana Calcium and Vitamin D Orange Juice"
-                    ],
-                    [
-                        "id" => 54418,
-                        "name" => "Orange Naturals Magnesium Glycinate, 180 mg Capsules"
-                    ]
-                ],
-                "corrections" => [
-                    [
-                        "id" => 278,
-                        "name" => "Oranges"
-                    ]
-                ],
-                "categories" => []
-        ];
-
         return $results;
     }
 
@@ -261,7 +212,7 @@ class SearchService {
             $product_limit = 5;
         }
 
-        $products = Product::select('id','name')->where([ ['supermarket_chain_id', $supermarket_chain_id], ['name', 'like', "%$query%"] ])->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
+        $products = Product::select('id','name')->where([ ['name', 'like', "%$query%"] ])->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
 
         $results['stores'] = $stores ?? [];
         $results['parent_categories'] = $parent_categories ?? [];
@@ -514,6 +465,10 @@ class SearchService {
                 ]
             ]
         ];
+
+        if ($index == 'stores') {
+            $index = 'supermarket_chains';
+        }
 
         if($index == 'products'){
 
