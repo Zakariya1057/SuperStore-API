@@ -398,14 +398,14 @@ class SearchService {
         if($type == 'products'){
             $base_query = $base_query->where([ ['product_prices.supermarket_chain_id',  $supermarket_chain_id], ['products.name', 'like', "$detail%"] ]);
         } elseif($type == 'product_groups'){
-            $base_query = $base_query->where('child_categories.company_id', 1)
+            $base_query = $base_query
             ->where(function ($query) use($detail){
                 $query->where('product_groups.name',$detail)->orWhere('child_categories.name',$detail);
             });
         } elseif($type == 'child_categories'){
-            $base_query = $base_query->where([ ['child_categories.company_id', 1], ['child_categories.name',$detail] ]);
+            $base_query = $base_query->where([ ['child_categories.name',$detail] ]);
         } elseif($type == 'parent_categories'){
-            $base_query = $base_query->where([ ['parent_categories.company_id', 1], ['parent_categories.name', $detail] ]);
+            $base_query = $base_query->where([ ['parent_categories.name', $detail] ]);
         } elseif($type == 'promotions'){
             $base_query = $base_query->where([ ['promotions.supermarket_chain_id', $supermarket_chain_id], ['promotions.name', $detail] ]);
         } elseif($type == 'brands'){
