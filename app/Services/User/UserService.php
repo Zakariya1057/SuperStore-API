@@ -45,7 +45,7 @@ class UserService extends UserAuthService {
         $notification_token = $data['notification_token'] ?? null;
 
         $region_id = $data['region_id'];
-        $supermarket_chain_id = $data['supermarket_chain_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
         
         $user_data = [
             'name' => trim($data['name']),
