@@ -7,11 +7,10 @@ use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\ProductPrice;
 use App\Models\User;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Console\Command;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ExpireSale extends Command
 {
@@ -51,41 +50,23 @@ class ExpireSale extends Command
 
         DB::beginTransaction();
 
-        $product_prices = ProductPrice::where('sale_ends_at', '<', Carbon::now())
+        $product_ids = ProductPrice::whereDate('sale_ends_at', '<', Carbon::now())
         ->select('products.*', 'product_prices.id as product_price_id', 'product_prices.sale_ends_at', 'product_prices.price', 'product_prices.old_price')
         ->join('products', 'products.id', 'product_prices.product_id')
-        ->get();
+        ->groupBy('product_id')->pluck('products.id');
 
-        $product_ids = [];
-        $count = count($product_prices);
+        $this->info( count($product_ids) . ' Product prices with expired sales');
 
-        $this->info($count . ' Product prices with expired sales');
-
-        foreach($product_prices as $product){
-            $product_price_id = $product->product_price_id;
-
-            $product_id = $product->id;
-            $name = $product->name;
-            $ends_at = $product->sale_ends_at;
-
-            $price = $product->price;
-            $old_price = $product->old_price;
-
-            $this->info("Expired Sale Found: $ends_at [$product_id] $name - $price -> $old_price");
-
-            $product_ids[] = $product_id;
-
-            ProductPrice::where('id', $product_price_id)->update([
-                'price' => $old_price, 
-                'old_price' => null,
-                'sale_ends_at' => null,
-                'is_on_sale' => null
-            ]);
-        }
+        ProductPrice::whereIn('product_id', $product_ids)->update([
+            'price' => DB::raw("`old_price`"), 
+            'old_price' => null,
+            'sale_ends_at' => null,
+            'is_on_sale' => null
+        ]);
 
         $this->info('Finding Grocery Lists Containing Product');
 
-        $list_ids = GroceryListItem::whereIn('product_id', array_unique($product_ids))->groupBy('grocery_list_items.list_id')->pluck('grocery_list_items.list_id');
+        $list_ids = GroceryListItem::whereIn('product_id', $product_ids)->groupBy('grocery_list_items.list_id')->pluck('grocery_list_items.list_id');
 
         $lists = GroceryList::whereIn('id', $list_ids)->get();
 
@@ -96,10 +77,6 @@ class ExpireSale extends Command
             Auth::login($user);
 
             event(new GroceryListChangedEvent($list));
-        }
-
-        if($count > 0){
-            Artisan::call('cache:home');
         }
         
         DB::commit();
