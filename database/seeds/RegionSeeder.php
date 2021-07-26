@@ -16,78 +16,78 @@ class RegionSeeder extends Seeder
             'id' => 8,
             'name' => 'Ontario',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
  
         DB::table('regions')->insert([
             'id' => 9,
             'name' => 'Alberta',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         DB::table('regions')->insert([
-            'id' => 10,
+            'id' => 20,
             'name' => 'Manitoba',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         DB::table('regions')->insert([
-            'id' => 11,
+            'id' => 21,
             'name' => 'British Columbia',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         DB::table('regions')->insert([
-            'id' => 12,
+            'id' => 22,
             'name' => 'Saskatchewan',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         DB::table('regions')->insert([
-            'id' => 13,
+            'id' => 23,
             'name' => 'Yukon',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         // Add New Ones
         DB::table('regions')->insert([
-            'id' => 14,
+            'id' => 24,
             'name' => 'Newfoundland and Labrador',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         DB::table('regions')->insert([
-            'id' => 15,
+            'id' => 25,
             'name' => 'Nova Scotia',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         DB::table('regions')->insert([
-            'id' => 16,
+            'id' => 26,
             'name' => 'Prince Edward Island',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         DB::table('regions')->insert([
-            'id' => 17,
+            'id' => 27,
             'name' => 'New Brunswick',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
 
         DB::table('regions')->insert([
-            'id' => 18,
+            'id' => 28,
             'name' => 'Quebec',
             'country' => 'Canada',
-            'company_id' => 1
+            'company_id' => 2
         ]);
     }
 }
