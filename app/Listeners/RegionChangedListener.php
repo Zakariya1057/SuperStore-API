@@ -29,9 +29,11 @@ class RegionChangedListener
      */
     public function handle(RegionChangedEvent $event)
     {   
-        $lists = GroceryList::where('user_id', $event->user_id)->get();
+        $user = $event->user;
+
+        $lists = GroceryList::where('user_id', $user->id)->get();
         foreach($lists as $list){
-            $this->list_service->update_list($list, $event->region_id);
+            $this->list_service->update_list($list, $user->region_id, $user->supermarket_chain_id);
         }
     }
 }

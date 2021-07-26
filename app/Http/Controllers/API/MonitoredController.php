@@ -27,12 +27,12 @@ class MonitoredController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $region_id = $data['region_id'] ?? 8;
-        $store_type_id = $data['store_type_id'];
+        $region_id = $data['region_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
         $this->logger_service->log('monitor.index', $request);
 
-        $products = $this->monitoring_service->all($user_id, $region_id, $store_type_id);
+        $products = $this->monitoring_service->all($user_id, $region_id, $supermarket_chain_id);
         return response()->json(['data' => $products ]);
     }
 

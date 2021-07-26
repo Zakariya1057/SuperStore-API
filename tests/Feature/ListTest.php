@@ -43,7 +43,7 @@ class ListTest extends TestCase
                 'total_items',
                 'old_total_price',
                 'currency',
-                'store_type_id',
+                'supermarket_chain_id',
                 'updated_at',
                 'created_at',
             ]
@@ -59,7 +59,7 @@ class ListTest extends TestCase
         $response = $this->actingAs($user)->postJson('/api/list/create/', [
             'data' => [
                 'name' => 'Names',
-                'store_type_id' => 1, 
+                'supermarket_chain_id' => 1, 
                 'identifier' => '00F7301B-4607-43B0-94E6-362EB496A282'
             ]
         ]);
@@ -114,7 +114,7 @@ class ListTest extends TestCase
                     ]
                 ]
             ],
-            'store_type_id',
+            'supermarket_chain_id',
             'updated_at',
             'created_at',
         ]]);

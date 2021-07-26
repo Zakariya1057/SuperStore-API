@@ -8,7 +8,7 @@ use App\Models\ChildCategory;
 use App\Models\ParentCategory;
 use App\Models\Product;
 use App\Models\Promotion;
-use App\Models\StoreType;
+use App\Models\SupermarketChain;
 use App\Services\Product\PromotionService;
 use App\Services\RefinePaginate\RefineService;
 use App\Services\Store\StoreService;
@@ -33,7 +33,7 @@ class SearchService {
 
     ///////////////////////////////////////////     Suggestions     ///////////////////////////////////////////
 
-    public function suggestions($query, $store_type_id){
+    public function suggestions($query, $supermarket_chain_id){
         
         $results = [
             'stores' => [],
@@ -51,7 +51,7 @@ class SearchService {
             'corrections' => []
         ];
 
-        $cache_key = 'search_suggestions:' . str_replace(' ','_', $query) . '_store_type_id:' . $store_type_id;
+        $cache_key = 'search_suggestions:' . str_replace(' ','_', $query) . '_supermarket_chain_id:' . $supermarket_chain_id;
 
         $cached_results = Redis::get($cache_key);
 
@@ -60,11 +60,11 @@ class SearchService {
         } else {
 
             try {
-                $this->suggestions_by_group($query, $results, $store_type_id);
+                $this->suggestions_by_group($query, $results, $supermarket_chain_id);
             } catch(Exception $e){
                 // Backup search in case elasticsearch fails from now
                 Log::critical('Elasticsearch Error: ' . $e);
-                $this->database_suggestions($query, $results, $store_type_id);         
+                $this->database_suggestions($query, $results, $supermarket_chain_id);         
             }
 
             preg_match('/sale|discount|offer|promotion/i', $query, $sale_matches);
@@ -79,7 +79,7 @@ class SearchService {
                 ];
             } else if($sale_matches) {
                 $results['store_sales'][] = [
-                    'id' => (int)$store_type_id,
+                    'id' => (int)$supermarket_chain_id,
                     'name' => 'Offers'
                 ];
             }
@@ -92,7 +92,7 @@ class SearchService {
         return $results;
     }
 
-    private function suggestions_by_group($query, &$results, $store_type_id){
+    private function suggestions_by_group($query, &$results, $supermarket_chain_id){
         $types = [
             'stores' => 2, 
             'categories' => 3, 
@@ -117,12 +117,12 @@ class SearchService {
 
             $elsatic_limit = $fetch_limits[$type] ?? $limit;
 
-            $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $elsatic_limit);
+            $response = $this->elastic_search($this->client, $type, $query, $supermarket_chain_id, $elsatic_limit);
 
             // If searched and no results found then might be a multi word problem. Use or instead again.
             $total_results = $response['hits']['total']['value'];
             if($total_results < 3){
-                $response = $this->elastic_search($this->client, $type, $query, $store_type_id, $elsatic_limit, false, 'auto', 'or');
+                $response = $this->elastic_search($this->client, $type, $query, $supermarket_chain_id, $elsatic_limit, false, 'auto', 'or');
             }
 
             $results[$type] = [];
@@ -199,12 +199,12 @@ class SearchService {
         array_multisort($keys, SORT_DESC, $highlighted_terms);
     }
 
-    private function database_suggestions($query, &$results, $store_type_id){
-        $stores = StoreType::select('id','name')->where([ ['id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
-        $child_categories = ChildCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
-        $parent_categories = ParentCategory::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
-        $promotions = Promotion::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
-        $brands = Product::select(['id','brand as name'])->where([ ['store_type_id', $store_type_id], ['brand', 'like', "%$query%"] ])->groupBy('brand')->orderByRaw('total_reviews_count / avg_rating desc')->limit(2)->get()->toArray();
+    private function database_suggestions($query, &$results, $supermarket_chain_id){
+        $stores = SupermarketChain::select('id','name')->where([ ['id', $supermarket_chain_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
+        $child_categories = ChildCategory::select('id','name')->where([ ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
+        $parent_categories = ParentCategory::select('id','name')->where([ ['name', 'like', "%$query%"] ])->groupBy('name')->limit(5)->get()->toArray();
+        $promotions = Promotion::select('id','name')->where([ ['supermarket_chain_id', $supermarket_chain_id], ['name', 'like', "%$query%"] ])->groupBy('name')->limit(2)->get()->toArray();
+        $brands = Product::select(['id','brand as name'])->where([ ['brand', 'like', "%$query%"] ])->groupBy('brand')->orderByRaw('total_reviews_count / avg_rating desc')->limit(2)->get()->toArray();
 
         if((count($child_categories) + count($parent_categories)) <= 3 ){
             $product_limit = 10;
@@ -212,7 +212,7 @@ class SearchService {
             $product_limit = 5;
         }
 
-        $products = Product::select('id','name')->where([ ['store_type_id', $store_type_id], ['name', 'like', "%$query%"] ])->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
+        $products = Product::select('id','name')->where([ ['name', 'like', "%$query%"] ])->groupBy('name')->orderByRaw('total_reviews_count / avg_rating desc')->limit($product_limit)->get()->toArray();
 
         $results['stores'] = $stores ?? [];
         $results['parent_categories'] = $parent_categories ?? [];
@@ -233,10 +233,8 @@ class SearchService {
         $query = $data['query'];
         $type = strtolower($data['type']);
 
-        $store_type_id = $data['store_type_id'];
-        $region_id = $data['region_id'] ?? 8;
-
-        $products_limit_elastic = 300;
+        $region_id = $data['region_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
         $sort = $data['sort'] ?? '';
         $order = $data['order'] ?? '';
@@ -266,10 +264,10 @@ class SearchService {
         }
 
         if($text_search){
-            $item_ids = $this->text_search_ids($type, $query, $store_type_id, $fuzziness);
+            $item_ids = $this->text_search_ids($type, $query, $supermarket_chain_id, $fuzziness);
         }
 
-        $cache_key = "product_search_results_{$query}_store_type_id:{$store_type_id}_region_id:{$region_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_product_group:{$product_group}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_availability_type:{$availability_type}_page:$page";
+        $cache_key = "product_search_results_{$query}_supermarket_chain_id:{$supermarket_chain_id}_region_id:{$region_id}_sort:{$sort}_order:{$order}_diatary:{$dietary}_product_group:{$product_group}_category:{$category}_brand:{$brand}_promotion:{$promotion}_text_search:{$text_search}_availability_type:{$availability_type}_page:$page";
         $cache_key = str_replace(' ','_',$cache_key);
 
         $results = array(
@@ -296,6 +294,7 @@ class SearchService {
                 'product_prices.sale_ends_at', 
                 'product_prices.promotion_id', 
                 'product_prices.region_id',
+                'product_prices.supermarket_chain_id',
 
                 'parent_categories.id as parent_category_id',
 
@@ -305,7 +304,7 @@ class SearchService {
 
                 'product_groups.name as product_group_name',
 
-                'promotions.store_type_id as promotion_store_type_id',
+                'promotions.supermarket_chain_id as promotion_supermarket_chain_id',
                 'promotions.name as promotion_name',
                 'promotions.quantity as promotion_quantity',
                 'promotions.price as promotion_price',
@@ -327,7 +326,7 @@ class SearchService {
             ->leftJoin('product_groups','product_groups.id','category_products.product_group_id')
             ->leftJoin('promotions', 'promotions.id','=','product_prices.promotion_id')
             ->groupBy('products.id')
-            ->where([ ['products.store_type_id', $store_type_id], ['product_prices.region_id', $region_id], [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
+            ->where([ ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['product_prices.region_id', $region_id], [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
             ->withCasts($casts);
             
             $base_query_without_where = clone $base_query;
@@ -335,7 +334,7 @@ class SearchService {
             if($text_search){
                 $this->text_search_where($item_ids, $type, $base_query);
             } else {
-                $this->search_where($type, $query, $store_type_id, $base_query);
+                $this->search_where($type, $query, $supermarket_chain_id, $base_query);
             }   
 
             // If search results less then 3, not a search_text but product_group. Then increase results number with text search.
@@ -343,11 +342,17 @@ class SearchService {
             $products = $results['products'];
 
             if(!$text_search && $type == 'product_groups' && count($products) < 3 ){
-                $item_ids = $this->text_search_ids('products', $query, $store_type_id, $fuzziness);
+                $item_ids = $this->text_search_ids('products', $query, $supermarket_chain_id, $fuzziness);
                 $base_query = $this->text_search_where($item_ids, 'products', $base_query_without_where);
                 $results = $this->refine_service->refine_results($base_query, $data, $item_ids);
 
                 $results['products'] = array_merge($products, $results['products']);
+                
+            }
+
+            // Remove later
+            foreach($results['products'] as $product){
+                $product->store_type_id = 2;
             }
 
             Redis::set($cache_key, json_encode($results));
@@ -358,19 +363,19 @@ class SearchService {
         return $results;
     }
 
-    private function text_search_ids($type, $query, $store_type_id, $fuzziness, $products_limit_elastic = 300){
+    private function text_search_ids($type, $query, $supermarket_chain_id, $fuzziness, $products_limit_elastic = 300){
 
         $item_ids = [];
 
         // Search all matching elasticsearch items. Return array of their IDs, use to query database down below
         $search_type = preg_replace('/child_|parent_/i','',$type);
 
-        $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, $products_limit_elastic, true, $fuzziness);
+        $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $supermarket_chain_id, $products_limit_elastic, true, $fuzziness);
 
         // If searched and no results found then might be a multi word problem. Use or instead again.
         $total_results = $response['hits']['total']['value'];
         if($total_results < 3){
-            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $store_type_id, 50, true, $fuzziness, 'or');
+            $response = $this->elastic_search($this->client, $search_type, html_entity_decode($query, ENT_QUOTES), $supermarket_chain_id, 50, true, $fuzziness, 'or');
         }
 
         // dd($response['hits']['hits']);
@@ -385,29 +390,29 @@ class SearchService {
 
     }
 
-    public function store_results(int $store_type_id, $latitude, $longitude){
-        return $this->store_service->stores_by_type($store_type_id, true, $latitude, $longitude);
+    public function store_results(int $supermarket_chain_id, $latitude, $longitude){
+        return $this->store_service->stores_by_supermarket_chains($supermarket_chain_id, true, $latitude, $longitude);
     }
 
-    private function search_where($type, $detail, $store_type_id, Builder $base_query){
+    private function search_where($type, $detail, int $supermarket_chain_id, Builder $base_query){
         if($type == 'products'){
-            $base_query = $base_query->where([ ['products.store_type_id',  $store_type_id], ['products.name', 'like', "$detail%"] ]);
+            $base_query = $base_query->where([ ['product_prices.supermarket_chain_id',  $supermarket_chain_id], ['products.name', 'like', "$detail%"] ]);
         } elseif($type == 'product_groups'){
-            $base_query = $base_query->where('child_categories.store_type_id', $store_type_id)
+            $base_query = $base_query
             ->where(function ($query) use($detail){
                 $query->where('product_groups.name',$detail)->orWhere('child_categories.name',$detail);
             });
         } elseif($type == 'child_categories'){
-            $base_query = $base_query->where([ ['child_categories.store_type_id', $store_type_id], ['child_categories.name',$detail] ]);
+            $base_query = $base_query->where([ ['child_categories.name',$detail] ]);
         } elseif($type == 'parent_categories'){
-            $base_query = $base_query->where([ ['parent_categories.store_type_id', $store_type_id], ['parent_categories.name', $detail] ]);
+            $base_query = $base_query->where([ ['parent_categories.name', $detail] ]);
         } elseif($type == 'promotions'){
-            $base_query = $base_query->where([ ['promotions.store_type_id', $store_type_id], ['promotions.name', $detail] ]);
+            $base_query = $base_query->where([ ['promotions.supermarket_chain_id', $supermarket_chain_id], ['promotions.name', $detail] ]);
         } elseif($type == 'brands'){
-            $base_query = $base_query->where([ ['products.store_type_id', $store_type_id], ['brand', $detail] ]);
+            $base_query = $base_query->where([ ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['brand', $detail] ]);
         } elseif($type == 'store_sales'){
             $base_query = $base_query
-            ->where('products.store_type_id', $store_type_id)
+            ->where('product_prices.supermarket_chain_id', $supermarket_chain_id)
             ->orderBy('product_price.price', 'DESC')
             ->whereNotNull('product_prices.promotion_id');
         }
@@ -442,7 +447,7 @@ class SearchService {
     ///////////////////////////////////////////     Results        ///////////////////////////////////////////
 
 
-    private function elastic_search(Client $client, $index, $query, $store_type_id, $limit=10, $text_search = false, $fuzziness = 'auto', $operator = 'and'): Array{
+    private function elastic_search(Client $client, $index, $query, $supermarket_chain_id, $limit=10, $text_search = false, $fuzziness = 'auto', $operator = 'and'): Array{
 
         $index = strtolower($index);
         $query = strtolower($query);
@@ -460,6 +465,10 @@ class SearchService {
                 ]
             ]
         ];
+
+        if ($index == 'stores') {
+            $index = 'supermarket_chains';
+        }
 
         if($index == 'products'){
 
@@ -516,7 +525,7 @@ class SearchService {
             $fields_match = ['name'];
             $fields_should = ['name', 'weight'];
         }
-
+        
         $params = [
             'index' => $index,
             'body'  => [
@@ -526,13 +535,13 @@ class SearchService {
 
                         'bool' => [
                             'must' => [
-                                [
-                                    'match' => [
-                                        'store_type_id' => [ 
-                                            'query' => $store_type_id
-                                        ]
-                                    ]
-                                ],
+                                // [
+                                //     'match' => [
+                                //         'supermarket_chain_id' => [ 
+                                //             'query' => $supermarket_chain_id
+                                //         ]
+                                //     ]
+                                // ],
                     
                                 [
                                     'multi_match' => [

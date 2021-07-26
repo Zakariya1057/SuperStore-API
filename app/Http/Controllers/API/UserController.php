@@ -91,8 +91,11 @@ class UserController extends Controller {
         if(!key_exists('type',$data)){
             throw new Exception('Field Type required.', 422);
         }
-        
-        $this->user_service->update($data, $user_id);
+
+        // Remove later
+        if($data['type'] != 'store_type_id'){
+            $this->user_service->update($data, $user_id);
+        }
 
         return response()->json(['data' => ['status' => 'success']]);
 

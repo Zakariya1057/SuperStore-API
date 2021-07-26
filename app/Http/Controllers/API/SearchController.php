@@ -29,9 +29,9 @@ class SearchController extends Controller {
         $data = $this->sanitize_service->sanitizeAllFields($data);
         
         $query = $data['query'];
-        $store_type_id = $data['store_type_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
-        $results = $this->search_service->suggestions($query, $store_type_id);
+        $results = $this->search_service->suggestions($query, $supermarket_chain_id);
 
         $this->logger_service->log('search.suggestions',$request);
         return response()->json(['data' => $results]);
@@ -62,11 +62,11 @@ class SearchController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
 
-        $store_type_id = $data['store_type_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
         $latitude = $data['latitude'] ?? null;
         $longitude = $data['longitude'] ?? null;
         
-        $results = $this->search_service->store_results($store_type_id, $latitude, $longitude);
+        $results = $this->search_service->store_results($supermarket_chain_id, $latitude, $longitude);
 
         return response()->json(['data' => $results]);
     }

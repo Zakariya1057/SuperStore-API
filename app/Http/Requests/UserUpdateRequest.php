@@ -27,7 +27,7 @@ class UserUpdateRequest extends FormRequest
             'data.name' => [],
             'data.email' => [],
             'data.region_id' => [],
-            'data.store_type_id' => [],
+            'data.supermarket_chain_id' => [],
             'data.password' => [],
             'data.password_confirmation' => [],
             'data.current_password' => [],

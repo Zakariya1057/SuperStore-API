@@ -21,14 +21,14 @@ class CategoryTest extends TestCase
             '*' => [
                 'id',
                 'name',
-                'store_type_id',
+                'supermarket_chain_id',
                 'parent_categories' => [
                     '*' => [
                         'id',
                         'name',
                         'parent_category_id',
                         'site_category_id',
-                        'store_type_id',
+                        'supermarket_chain_id',
                         'store_id',
                     ]
                 ]
@@ -51,7 +51,7 @@ class CategoryTest extends TestCase
                 'id',
                 'name',
                 'parent_category_id',
-                'store_type_id',
+                'supermarket_chain_id',
                 'products' => [
                     '*' => [
                         'id',
@@ -59,7 +59,7 @@ class CategoryTest extends TestCase
                         'small_image',
                         'large_image',
                         
-                        'store_type_id',
+                        'supermarket_chain_id',
                         
                         'description',
                         'features',

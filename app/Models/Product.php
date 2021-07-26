@@ -11,6 +11,7 @@ class Product extends Model
 {
 
     public $region_id = 1;
+    public $supermarket_chain_id = 1;
 
     public $casts = [
         'name' => HTMLDecode::class,
@@ -69,7 +70,11 @@ class Product extends Model
         ->select('promotions.*')
         ->join('promotions','promotions.id','product_prices.promotion_id')
         ->withCasts($promotion->casts)
-        ->where([ ['promotions.enabled', 1], ['promotions.region_id', $this->region_id] ]);
+        ->where([ 
+            ['promotions.enabled', 1], 
+            ['promotions.region_id', $this->region_id],
+            ['promotions.supermarket_chain_id', $this->supermarket_chain_id],
+        ]);
     }
 
 }

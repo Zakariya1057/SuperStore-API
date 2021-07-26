@@ -27,16 +27,20 @@ class ListController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function index($store_type_id, Request $request){
+    public function index(Request $request){
         $user = $request->user();
 
         $user_id = $user->id;
+
+        $this->logger_service->log('list.index', $request);
+
+        $lists = GroceryList::where([ ['user_id', $user_id] ])->orderBy('updated_at', 'DESC')->get();
+
+        // Remove later
+        foreach($lists as $list){
+            $list->store_type_id = 2;
+        }
         
-        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
-
-        $this->logger_service->log('list.index.'.$store_type_id, $request);
-
-        $lists = GroceryList::where([ ['user_id', $user_id],['store_type_id', $store_type_id] ])->orderBy('updated_at', 'DESC')->get();
         return response()->json(['data' => $lists]);
     }
 

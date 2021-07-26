@@ -30,11 +30,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('expire:promotion')->daily()->at('00:00')->runInBackground();
-        $schedule->command('expire:sale')->daily()->at('00:00')->runInBackground();
-        $schedule->command('expire:flyer')->daily()->at('00:00')->runInBackground();
+        $schedule->command('expire:sale')->daily()->at('00:10')->runInBackground();
+        $schedule->command('expire:flyer')->daily()->at('00:20')->runInBackground();
+        $schedule->command('cache:home')->daily()->at('00:30')->runInBackground();
 
         $schedule->command('backup:database')->weekly()->at('05:00')->runInBackground();
-        $schedule->command('cache:home')->mondays()->at('06:00')->runInBackground();
         $schedule->command('cache:groceries')->weekly()->sundays()->at('03:00')->runInBackground();
     }
 

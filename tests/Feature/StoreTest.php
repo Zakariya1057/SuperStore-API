@@ -26,7 +26,7 @@ class StoreTest extends TestCase
             'url',
             'last_checked',
             'site_store_id',
-            'store_type_id',
+            'supermarket_chain_id',
             'created_at',
             'updated_at',
             'large_logo',

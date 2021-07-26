@@ -3,7 +3,7 @@
 namespace App\Console\Commands\Cache;
 
 use App\Models\Region;
-use App\Models\StoreType;
+use App\Models\SupermarketChain;
 use App\Services\Category\CategoryService;
 use App\Services\Product\ProductService;
 use App\Services\Product\PromotionService;
@@ -56,26 +56,26 @@ class CacheHome extends Command
 
         foreach($regions as $region_id){
 
-            foreach(StoreType::get() as $store_type){
+            foreach(SupermarketChain::get() as $supermarket_chain){
 
-                $store_type_id = $store_type->id;
-                $store_name = $store_type->name;
+                $supermarket_chain_id = $supermarket_chain->id;
+                $store_name = $supermarket_chain->name;
     
                 $this->info("---- $store_name Home Cache Start ----");
                 
-                $cache_key = "home_page_{$store_type_id}_{$region_id}";
+                $cache_key = "home_page_{$supermarket_chain_id}_{$region_id}";
     
                 $this->info("Caching Featured Products");
-                $featured_items = $this->product_service->featured($region_id, $store_type_id);
+                $featured_items = $this->product_service->featured($region_id, $supermarket_chain_id);
     
                 $this->info("Caching Featured Stores");
-                $stores = $this->store_service->stores_by_type($store_type_id);
+                $stores = $this->store_service->stores_by_supermarket_chains($supermarket_chain_id);
     
                 $this->info("Caching Featured Categories");
-                $categories = $this->category_service->featured($region_id, $store_type_id);
+                $categories = $this->category_service->featured($region_id, $supermarket_chain_id);
     
                 $this->info("Caching Featured Promotions");
-                $promotions = $this->promotion_service->featured($region_id, $store_type_id);
+                $promotions = $this->promotion_service->featured($region_id, $supermarket_chain_id);
         
                 $data = [
                     'stores' => $stores,

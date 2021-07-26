@@ -20,14 +20,14 @@ class CategoryController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function grand_parent_categories($store_type_id, Request $request){
+    public function grand_parent_categories($supermarket_chain_id, Request $request){
 
-        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
+        $supermarket_chain_id = $this->sanitize_service->sanitizeField($supermarket_chain_id);
 
         $this->logger_service->log('category.grand_parent_categories', $request);
 
-        $grand_parent_categories = Cache::remember('grand_parent_category_'.$store_type_id, now()->addWeek(1), function () use ($store_type_id){
-            return $this->category_service->grand_parent_categories($store_type_id);
+        $grand_parent_categories = Cache::remember('grand_parent_category_'.$supermarket_chain_id, now()->addWeek(1), function () use ($supermarket_chain_id){
+            return $this->category_service->grand_parent_categories($supermarket_chain_id);
         });
 
         return response()->json(['data' => $grand_parent_categories]);
@@ -66,9 +66,10 @@ class CategoryController extends Controller {
         $promotion = $data['promotion'] ?? '';
         $product_group = $data['product_group'] ?? '';
         $availability_type = $data['availability_type'] ?? '';
-        $region_id = $data['region_id'] ?? 8;
+        $region_id = $data['region_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
         
-        $categories = Cache::remember("category_products_{$child_category_id}_region_{$region_id}_page_{$page}_sort_{$sort}_order_{$order}_brand_{$brand}_promotion_{$promotion}_dietary_{$dietary}_product_group_{$product_group}_availability_type_{$availability_type}" , now()->addWeek(1), function () use ($child_category_id, $data){
+        $categories = Cache::remember("category_products_{$child_category_id}_supermarket_chain_{$supermarket_chain_id}_region_{$region_id}_page_{$page}_sort_{$sort}_order_{$order}_brand_{$brand}_promotion_{$promotion}_dietary_{$dietary}_product_group_{$product_group}_availability_type_{$availability_type}" , now()->addWeek(1), function () use ($child_category_id, $data){
             return $this->category_service->category_products($child_category_id, $data);
         });
 

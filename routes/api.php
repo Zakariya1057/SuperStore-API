@@ -51,13 +51,13 @@ Route::middleware(OptionalAuthentication::class)->group(function () { # Optional
     });
     
     Route::prefix('groceries')->group(function () {
-        Route::get('grand_parent_categories/{store_type_id}', 'API\CategoryController@grand_parent_categories')->name('grocery.grand_parent_categories');
+        Route::get('grand_parent_categories/{supermarket_chain_id}', 'API\CategoryController@grand_parent_categories')->name('grocery.grand_parent_categories');
         Route::get('child_categories/{parent_categories}', 'API\CategoryController@child_categories')->name('grocery.child_categories');
         Route::post('category_products/{child_category_id}', 'API\CategoryController@category_products')->name('grocery.category_products');
     });
 
     Route::prefix('promotion')->group(function () {
-        Route::prefix('all/{store_type_id}')->group(function () {
+        Route::prefix('all/{supermarket_chain_id}')->group(function () {
             Route::get('', 'API\PromotionController@all')->name('promotion.all');
             Route::get('{title}', 'API\PromotionController@groups')->name('promotion.groups');
         });
@@ -107,7 +107,7 @@ Route::middleware('auth:sanctum')->group(function () { # Authenticate Users
     });
 
     Route::prefix('list')->group(function () {
-        Route::get('stores/{store_type_id}', 'API\ListController@index')->name('list.index');
+        Route::get('stores/{supermarket_chain_id}', 'API\ListController@index')->name('list.index');
         Route::post('/create', 'API\ListController@create')->name('list.create');
         Route::post('/delete', 'API\ListController@delete')->name('list.delete');
         Route::post('/update', 'API\ListController@update')->name('list.update');

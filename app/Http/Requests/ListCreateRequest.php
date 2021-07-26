@@ -26,7 +26,7 @@ class ListCreateRequest extends FormRequest
         return [
             'data.name' => 'required|max:255',
             'data.identifier' => 'required',
-            'data.store_type_id' => 'required|integer',
+            'data.supermarket_chain_id' => 'sometimes|integer',
             'data.items' => ''
         ];
     }

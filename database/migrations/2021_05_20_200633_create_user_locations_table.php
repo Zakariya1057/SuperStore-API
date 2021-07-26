@@ -20,7 +20,7 @@ class CreateUserLocationsTable extends Migration
             $table->unsignedBigInteger('user_id')->nullable();
 
             $table->unsignedBigInteger('region_id')->nullable();
-            $table->unsignedBigInteger('store_type_id')->nullable();
+            $table->unsignedBigInteger('supermarket_chain_id')->nullable();
 
             $table->string('ip_address');
 

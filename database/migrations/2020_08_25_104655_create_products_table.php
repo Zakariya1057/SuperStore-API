@@ -54,7 +54,7 @@ class CreateProductsTable extends Migration
             $table->decimal('avg_rating', 5,2)->nullable();
             $table->integer('total_reviews_count')->nullable();
             
-            $table->unsignedBigInteger('store_type_id');
+            $table->unsignedBigInteger('company_id');
             $table->text('url')->nullable();
 
             $table->text('return_policy')->nullable();
@@ -62,7 +62,7 @@ class CreateProductsTable extends Migration
 
             $table->timestamp('last_checked')->useCurrent();
             
-            $table->foreign('store_type_id')->references('id')->on('store_types');
+            $table->foreign('company_id')->references('id')->on('companies');
 
             $table->unique('site_product_id');
 

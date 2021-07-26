@@ -63,31 +63,31 @@ class HomeController extends Controller {
 
         $data = $this->sanitize_service->sanitizeAllFields($validated_data['data']);
         
-        $store_type_id = $data['store_type_id'];
+        $region_id = $data['region_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
 
         $this->logger_service->log('home.show', $request);
         
         $latitude = $data['latitude'] ?? null;
         $longitude = $data['longitude'] ?? null;
 
-        $region_id = $data['region_id'] ?? 8;
 
-        $data['stores'] = $this->store_service->stores_by_type($store_type_id, false, $latitude, $longitude);
+        $data['stores'] = $this->store_service->stores_by_supermarket_chains($supermarket_chain_id, false, $latitude, $longitude);
 
         if(!is_null($latitude) && !is_null($longitude)){
-            $this->location_service->record_location($latitude, $longitude, $request->ip(), Auth::id(), $region_id, $store_type_id);
+            $this->location_service->record_location($latitude, $longitude, $request->ip(), Auth::id(), $region_id, $supermarket_chain_id);
         }
 
         if(Auth::check()){
-            $data['monitoring'] = $this->monitoring_service->all($user_id, $region_id, $store_type_id);
-            $data['lists'] = $this->list_service->lists_progress($user_id, $store_type_id);
-            $data['groceries'] = $this->list_service->recent_items($user_id, $region_id, $store_type_id);
+            $data['monitoring'] = $this->monitoring_service->all($user_id, $region_id, $supermarket_chain_id);
+            $data['lists'] = $this->list_service->lists_progress($user_id, $supermarket_chain_id);
+            $data['groceries'] = $this->list_service->recent_items($user_id, $region_id, $supermarket_chain_id);
             $data['messages'] = $this->message_service->unread_messages($user_id);
         } else {
             $data['monitoring'] = $data['messages'] = $data['lists'] = $data['groceries'] = [];
         }
 
-        $cache_key = "home_page_{$store_type_id}_{$region_id}";
+        $cache_key = "home_page_{$supermarket_chain_id}_{$region_id}";
 
         $retrieved_data = Redis::get($cache_key);
         
@@ -97,9 +97,9 @@ class HomeController extends Controller {
             $data['categories'] = $retrieved_data['categories'];
             $data['promotions'] = $retrieved_data['promotions'];
         } else {
-            $data['featured'] = $this->product_service->featured($region_id, $store_type_id);
-            $data['categories'] = $this->category_service->featured($region_id, $store_type_id);
-            $data['promotions'] = $this->promotion_service->featured($region_id, $store_type_id);
+            $data['featured'] = $this->product_service->featured($region_id, $supermarket_chain_id);
+            $data['categories'] = $this->category_service->featured($region_id, $supermarket_chain_id);
+            $data['promotions'] = $this->promotion_service->featured($region_id, $supermarket_chain_id);
     
             Redis::set($cache_key, json_encode($data));
             Redis::expire($cache_key, 604800);

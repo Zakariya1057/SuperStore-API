@@ -24,9 +24,8 @@ class HomeRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'data.region_id' => 'required',
-            'data.region_id' => '',
-            'data.store_type_id' => 'required',
+            'data.region_id' => 'required',
+            'data.supermarket_chain_id' => 'sometimes|integer',
             'data.latitude' => '',
             'data.longitude' => '',
         ];

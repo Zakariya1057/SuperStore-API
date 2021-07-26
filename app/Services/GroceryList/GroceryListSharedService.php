@@ -25,7 +25,9 @@ class GroceryListSharedService {
 
     public function show_list(int $list_id, int $user_id){
 
-        $region_id = Auth::user()->region_id;
+        $user = Auth::user();
+        $region_id = $user->region_id;
+        $supermarket_chain_id = $user->supermarket_chain_id;
 
         $product = new Product();
 
@@ -33,12 +35,15 @@ class GroceryListSharedService {
 
         if(!$list){
             throw new Exception('No list found for user.', 404);
+        } else {
+            // Remove later
+            $list->store_type_id = 2;
         }
 
         $product = new Product();
         $casts = $product->casts;
 
-        $items = GroceryListItem::where([ ['list_id', $list->id], ['product_prices.region_id', $region_id] ])
+        $items = GroceryListItem::where([ ['list_id', $list->id], ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id] ])
         ->select([
             'grocery_list_items.id as id',
             'grocery_list_items.product_id as product_id',
@@ -59,9 +64,10 @@ class GroceryListSharedService {
             'product_prices.sale_ends_at', 
             'product_prices.promotion_id', 
             'product_prices.region_id',
+            'product_prices.supermarket_chain_id',
 
             'promotions.id as promotion_id',
-            'promotions.store_type_id as promotion_store_type_id',
+            'promotions.supermarket_chain_id as promotion_supermarket_chain_id',
             'promotions.name as promotion_name',
             'promotions.quantity as promotion_quantity',
             'promotions.price as promotion_price',
@@ -136,6 +142,7 @@ class GroceryListSharedService {
             'product_prices.sale_ends_at', 
             'product_prices.promotion_id', 
             'product_prices.region_id',
+            'product_prices.supermarket_chain_id',
         )
         ->where([['region_id', $region_id], ['products.id',$product_id]])
         ->get()->first();
@@ -240,9 +247,11 @@ class GroceryListSharedService {
 
     ////////////////////////////////////////////    UPDATE List    //////////////////////////////////////////// 
 
-    public function update_list(GroceryList $list, ?int $region_id = null){
-        if(is_null($region_id)){
-            $region_id = Auth::user()->region_id;
+    public function update_list(GroceryList $list, ?int $region_id = null, int $supermarket_chain_id = null){
+        if(is_null($region_id) || is_null($supermarket_chain_id)){
+            $user = Auth::user();
+            $region_id = $user->region_id;
+            $supermarket_chain_id = $user->supermarket_chain_id;
         }
 
         $product = new Product();
@@ -263,8 +272,9 @@ class GroceryListSharedService {
             'product_prices.sale_ends_at', 
             'product_prices.promotion_id as promotion_id', 
             'product_prices.region_id',
+            'product_prices.supermarket_chain_id',
 
-            'promotions.store_type_id as promotion_store_type_id',
+            'promotions.supermarket_chain_id as promotion_supermarket_chain_id',
             'promotions.name as promotion_name',
             'promotions.quantity as promotion_quantity',
             'promotions.price as promotion_price',
@@ -279,7 +289,7 @@ class GroceryListSharedService {
 
             'promotions.enabled as promotion_enabled',
         )
-        ->where([ ['list_id',$list->id], ['product_prices.region_id', $region_id] ])
+        ->where([ ['list_id',$list->id], ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id] ])
         ->withCasts($casts)
         ->get();
 
@@ -293,6 +303,10 @@ class GroceryListSharedService {
         $update = [];
 
         $price_data = $this->parse_promotion_data($promotions, $total_price, $total_price_without_promotion_items);
+
+        $update['ticked_off_items'] = $ticked_off_items;
+        $update['total_items'] = count($items);
+
 
         $update['old_total_price'] = $price_data['old_total_price'];
         $update['total_price'] = $price_data['total_price'];

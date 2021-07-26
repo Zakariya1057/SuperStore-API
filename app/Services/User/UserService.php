@@ -10,7 +10,7 @@ use App\Models\GroceryListItem;
 use App\Models\Message;
 use App\Models\MonitoredProduct;
 use App\Models\Review;
-use App\Models\StoreType;
+use App\Models\SupermarketChain;
 use App\Models\User;
 use Exception;
 
@@ -44,15 +44,15 @@ class UserService extends UserAuthService {
         $user_token = $data['user_token'] ?? '';
         $notification_token = $data['notification_token'] ?? null;
 
-        $region_id = $data['region_id'] ?? 8;
-        $store_type_id = $data['store_type_id'];
+        $region_id = $data['region_id'];
+        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
         
         $user_data = [
             'name' => trim($data['name']),
             'email' => trim($data['email']),
 
             'region_id' => $region_id,
-            'store_type_id' => $store_type_id,
+            'supermarket_chain_id' => $supermarket_chain_id,
 
             'password' => Hash::make($data['password']),
             'notification_token' => $data['notification_token']
@@ -96,14 +96,14 @@ class UserService extends UserAuthService {
     }
 
     public function delete($user){
-        if(StoreType::where('user_id', $user->id)->exists()){
+        if(SupermarketChain::where('user_id', $user->id)->exists()){
             throw new Exception('Failed to delete store account.', 402);
         }
 
-        $reviews = Review::where('user_id', $user->id)->join('products', 'products.id', 'reviews.product_id')->groupBy('products.store_type_id')->get();
+        $reviews = Review::where('user_id', $user->id)->join('products', 'products.id', 'reviews.product_id')->groupBy('products.company_id')->get();
 
         foreach($reviews as $review){
-            Review::where('user_id', $user->id)->update(['user_id' => $review->store_type_id]);
+            Review::where('user_id', $user->id)->update(['user_id' => $review->supermarket_chain_id]);
         }
 
         $lists = GroceryList::where('user_id', $user->id)->get();
@@ -156,8 +156,9 @@ class UserService extends UserAuthService {
 
         User::where('id',$user_id)->update($update_fields);
 
-        if($type == 'region_id'){
-            event(new RegionChangedEvent($user_id, $value));
+        if($type == 'region_id' || $type == 'supermarket_chain_id'){
+            $user = User::where('id',$user_id)->first();
+            event(new RegionChangedEvent($user));
         }
     }
 

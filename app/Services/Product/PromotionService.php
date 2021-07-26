@@ -18,9 +18,9 @@ class PromotionService {
         $this->sanitize_service = $sanitize_service;
     }
 
-    public function all(int $store_type_id, int $region_id){
-        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
-        return Promotion::where([ ['store_type_id', $store_type_id], ['region_id', $region_id]])
+    public function all(int $supermarket_chain_id, int $region_id){
+        $supermarket_chain_id = $this->sanitize_service->sanitizeField($supermarket_chain_id);
+        return Promotion::where([ ['supermarket_chain_id', $supermarket_chain_id], ['region_id', $region_id]])
         ->whereNotNull('title')
         ->limit(200)
         ->groupBy('title')
@@ -28,22 +28,22 @@ class PromotionService {
         ->pluck('title');
     }
 
-    public function group(int $region_id, int $store_type_id, string $title){
+    public function group(int $region_id, int $supermarket_chain_id, string $title){
 
         $region_id = $this->sanitize_service->sanitizeField($region_id);
 
-        $store_type_id = $this->sanitize_service->sanitizeField($store_type_id);
+        $supermarket_chain_id = $this->sanitize_service->sanitizeField($supermarket_chain_id);
         $title = $this->sanitize_service->sanitizeField($title);
 
-        $cache_key = "promotion_group_{$store_type_id}_$title";
+        $cache_key = "promotion_group_{$supermarket_chain_id}_$title";
         $promotions = Redis::get($cache_key);
 
         if(is_null($promotions)){
-            $products = Product::where([ ['promotions.store_type_id', $store_type_id], ['title', $title] ])
+            $products = Product::where([ ['promotions.supermarket_chain_id', $supermarket_chain_id], ['title', $title] ])
             ->select(
                 'products.*',
     
-                'promotions.store_type_id as promotion_store_type_id',
+                'promotions.supermarket_chain_id as promotion_supermarket_chain_id',
                 'promotions.name as promotion_name',
                 'promotions.title as promotion_title',
                 'promotions.quantity as promotion_quantity',
@@ -56,6 +56,7 @@ class PromotionService {
                 'product_prices.sale_ends_at', 
                 'product_prices.promotion_id', 
                 'product_prices.region_id',
+                'product_prices.supermarket_chain_id',
 
                 'promotions.minimum as promotion_minimum',
                 'promotions.maximum as promotion_maximum',
@@ -68,7 +69,7 @@ class PromotionService {
             )
             ->join('product_prices','product_prices.product_id','products.id')
             ->join('promotions','promotions.id', 'promotion_id')
-            ->where('product_prices.region_id', $region_id)
+            ->where([ ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id] ])
             ->groupBy('product_prices.product_id')
             ->get();
     
@@ -110,9 +111,14 @@ class PromotionService {
 
         $promotion_id = $this->sanitize_service->sanitizeField($promotion_id);
 
-        $promotion = Promotion::where([ ['id', $promotion_id], ['region_id', $region_id] ])->first();
+        $promotion = Promotion::
+        where([ ['id', $promotion_id], ['region_id', $region_id] ])
+        ->first();
 
         if(!is_null($promotion)){
+            // Remove later
+            $promotion->store_type_id = 2;
+
             $promotion->products;
         } else {
             throw new Exception('Promotion not found.', 404);
@@ -121,7 +127,7 @@ class PromotionService {
         return $promotion;
     }
 
-    public function featured(int $region_id, int $store_type_id){
+    public function featured(int $region_id, int $supermarket_chain_id){
         $promotion = new Promotion();
         
         $promotions = [];
@@ -134,7 +140,7 @@ class PromotionService {
             'promotions.price as promotion_price',
             'promotions.for_quantity as promotion_for_quantity',
 
-            'promotions.store_type_id as promotion_store_type_id',
+            'promotions.supermarket_chain_id as promotion_supermarket_chain_id',
 
             'promotions.minimum as promotion_minimum',
             'promotions.maximum as promotion_maximum',
@@ -145,15 +151,23 @@ class PromotionService {
 
             'promotions.enabled as promotion_enabled',
         )
-        ->where([ ['featured_items.region_id', $region_id], ['featured_items.store_type_id', $store_type_id], ['type', 'promotions'], ['promotions.store_type_id', $store_type_id] ])
+        ->where([ 
+            ['type', 'promotions'], 
+            ['promotions.supermarket_chain_id', $supermarket_chain_id] ,
+            ['promotions.region_id', $region_id]
+        ])
         ->join('promotions','promotions.id','featured_id')
-        ->groupBy('featured_id')
+        ->groupBy('promotions.title')
         ->withCasts($promotion->casts)->limit(10)
         ->get();
 
 
         foreach($featured_promotions as $promotion){
             $this->set_product_promotion($promotion);
+
+            // Remove later
+            $promotion->promotion->store_type_id = 2;
+
             if(!is_null($promotion->promotion)){
                 $promotions[] = $promotion->promotion;
             }
@@ -179,7 +193,7 @@ class PromotionService {
             'minimum',
             'maximum',
     
-            'store_type_id',
+            'supermarket_chain_id',
             
             'expires',
             'starts_at',
@@ -198,6 +212,8 @@ class PromotionService {
         if(is_null($promotion->id) || !$promotion->enabled){
             $item->promotion = null;
         } else {
+            $promotion->store_type_id = 2;
+
             $item->promotion = $promotion;
 
             // If promotion expired, don't return it

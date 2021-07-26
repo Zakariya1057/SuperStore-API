@@ -40,12 +40,23 @@ class FlyerService {
     public function all(int $store_id){
         // Get all flyers for store
         $store_id = $this->sanitize_service->sanitizeField($store_id);
-        return Flyer::where('store_id', $store_id)->get();
+
+        $flyers = Flyer::where('store_id', $store_id)->get();
+
+        // Remove later
+        foreach($flyers as $flyer){
+            $flyer->store_type_id = 2;
+        }
+
+        return $flyers;
     }
 
     public function products(int $flyer_id){
         $flyer_id = $this->sanitize_service->sanitizeField($flyer_id);
-        $flyer = Flyer::where('flyers.id', $flyer_id)->join('store_locations', 'store_locations.store_id', 'flyers.store_id')->first();
+        $flyer = Flyer::where('flyers.id', $flyer_id)
+        ->join('store_locations', 'store_locations.store_id', 'flyers.store_id')
+        ->join('stores', 'stores.id', 'flyers.store_id')
+        ->first();
 
         if($flyer){
             $product = new Product();
@@ -55,16 +66,20 @@ class FlyerService {
             ->select(
                 'products.*',
     
+                // Remove later
+                'products.company_id as store_type_id',
+
                 'product_prices.price', 
                 'product_prices.old_price',
                 'product_prices.is_on_sale', 
                 'product_prices.sale_ends_at', 
                 'product_prices.promotion_id', 
                 'product_prices.region_id',
+                'product_prices.supermarket_chain_id',
             )
             ->join('products', 'products.id', 'flyer_products.product_id')
             ->join('product_prices','product_prices.product_id','products.id')
-            ->where('product_prices.region_id', $flyer->region_id)
+            ->where([ ['product_prices.region_id', $flyer->region_id], ['product_prices.supermarket_chain_id', $flyer->supermarket_chain_id] ])
             ->withCasts($casts)->get();
 
         } else {

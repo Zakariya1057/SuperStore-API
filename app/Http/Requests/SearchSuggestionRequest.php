@@ -25,7 +25,7 @@ class SearchSuggestionRequest extends FormRequest
     {
         return [
             'data.query' => 'required',
-            'data.store_type_id' => 'required'
+            'data.supermarket_chain_id' => 'sometimes|integer'
         ];
     }
 }

@@ -23,7 +23,6 @@ class CreateFlyersTable extends Migration
             $table->string('url');
 
             $table->unsignedBigInteger('store_id');
-            $table->unsignedBigInteger('store_type_id');
 
             $table->date('valid_from');
             $table->date('valid_to');
@@ -33,7 +32,6 @@ class CreateFlyersTable extends Migration
             $table->unique(['name', 'site_flyer_id', 'store_id', 'valid_from', 'valid_to'],'flyer_unique');
 
             $table->foreign('store_id')->references('id')->on('stores');
-            $table->foreign('store_type_id')->references('id')->on('store_types');
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
