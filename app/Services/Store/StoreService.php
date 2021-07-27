@@ -37,6 +37,8 @@ class StoreService {
             // Remove later
             'supermarket_chains.company_id',
             
+            'store_locations.region_id',
+
             'store_locations.city',
             'store_locations.postcode',
             'store_locations.address_line1',
@@ -54,6 +56,8 @@ class StoreService {
         ->limit(20);
 
         $location_fields = [
+            'region_id',
+
             'city',
             'address_line1',
             'address_line2',
