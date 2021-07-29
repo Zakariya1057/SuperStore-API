@@ -326,7 +326,13 @@ class SearchService {
             ->leftJoin('product_groups','product_groups.id','category_products.product_group_id')
             ->leftJoin('promotions', 'promotions.id','=','product_prices.promotion_id')
             ->groupBy('products.id')
-            ->where([ ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['product_prices.region_id', $region_id], [ 'products.enabled', 1], ['child_categories.enabled', 1] ])
+            ->where([ 
+                ['product_prices.supermarket_chain_id', $supermarket_chain_id], 
+                ['product_prices.region_id', $region_id], 
+                ['product_prices.price', '>', 0], 
+                ['products.enabled', 1], 
+                ['child_categories.enabled', 1] 
+            ])
             ->withCasts($casts);
             
             $base_query_without_where = clone $base_query;
