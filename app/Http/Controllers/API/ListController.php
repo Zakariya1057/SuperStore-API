@@ -27,14 +27,17 @@ class ListController extends Controller {
         $this->logger_service = $logger_service;
     }
 
-    public function index(Request $request){
+    public function index($supermarket_chain_id, Request $request){
         $user = $request->user();
 
         $user_id = $user->id;
 
         $this->logger_service->log('list.index', $request);
 
-        $lists = GroceryList::where([ ['user_id', $user_id] ])->orderBy('updated_at', 'DESC')->get();
+        $lists = GroceryList::where([ 
+            ['supermarket_chain_id', $supermarket_chain_id], 
+            ['user_id', $user_id] 
+        ])->orderBy('updated_at', 'DESC')->get();
 
         // Remove later
         foreach($lists as $list){
