@@ -58,7 +58,8 @@ class UserController extends Controller {
 
         $user = $this->user_service->login($data);
        
-        $user->tokens()->delete();
+        // $user->tokens()->delete();
+        
         $token_data = $this->user_service->create_token($user, $notification_token);
         return response()->json(['data' => $token_data]);
 
