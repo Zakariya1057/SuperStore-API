@@ -156,7 +156,7 @@ class UserService extends UserAuthService {
 
         User::where('id',$user_id)->update($update_fields);
 
-        if($type == 'region_id' || $type == 'supermarket_chain_id'){
+        if($type == 'region_id'){
             $user = User::where('id',$user_id)->first();
             event(new RegionChangedEvent($user));
         }

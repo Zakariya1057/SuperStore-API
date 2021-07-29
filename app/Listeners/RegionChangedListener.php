@@ -33,7 +33,7 @@ class RegionChangedListener
 
         $lists = GroceryList::where('user_id', $user->id)->get();
         foreach($lists as $list){
-            $this->list_service->update_list($list, $user->region_id, $user->supermarket_chain_id);
+            $this->list_service->update_list($list, $user->region_id, $list->supermarket_chain_id);
         }
     }
 }
