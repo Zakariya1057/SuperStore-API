@@ -167,7 +167,7 @@ class GroceryListService extends GroceryListSharedService {
     }
 
     public function lists_progress(int $user_id, int $supermarket_chain_id){
-        $lists = GroceryList::where([ ['user_id', $user_id] ])
+        $lists = GroceryList::where([ ['supermarket_chain_id', $supermarket_chain_id], ['user_id', $user_id] ])
         ->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')
         ->limit(4)->get();
 

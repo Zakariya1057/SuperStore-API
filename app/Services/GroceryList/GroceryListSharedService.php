@@ -27,7 +27,6 @@ class GroceryListSharedService {
 
         $user = Auth::user();
         $region_id = $user->region_id;
-        $supermarket_chain_id = $user->supermarket_chain_id;
 
         $product = new Product();
 
@@ -39,6 +38,8 @@ class GroceryListSharedService {
             // Remove later
             $list->store_type_id = 2;
         }
+
+        $supermarket_chain_id = $list->supermarket_chain_id;
 
         $product = new Product();
         $casts = $product->casts;

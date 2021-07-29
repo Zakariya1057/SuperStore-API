@@ -25,7 +25,7 @@ class GroceryListItemService extends GroceryListSharedService {
         $total_price = $this->item_price($product_id, $quantity);
 
         if($total_price == 0){
-            throw new Exception('Product not found for current region.');
+            throw new Exception('Product not found for current region.', 404);
         }
 
         if($list){
