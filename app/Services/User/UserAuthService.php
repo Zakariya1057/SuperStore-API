@@ -85,7 +85,7 @@ class UserAuthService {
         $token = $data['user_token'];
         $token_data = $this->get_token_data($token);
 
-        if(strtolower($token_data->aud) != strtolower(env('APP_BUNDLE_IDENTIFIER'))){
+        if(stripos($token_data->aud, env('APP_BUNDLE_IDENTIFIER')) === false){
             Log::error('Invalid App Bundle Identifier. Potential breaking attempt.');
             return false;
         }
