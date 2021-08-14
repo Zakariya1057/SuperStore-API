@@ -132,7 +132,7 @@ class PromotionService {
         
         $promotions = [];
 
-        $featured_promotions = FeaturedItem::select(
+        $featured_promotions = Promotion::select(
             'promotions.id as promotion_id',
             'promotions.title as promotion_title',
             'promotions.name as promotion_name',
@@ -152,13 +152,13 @@ class PromotionService {
             'promotions.enabled as promotion_enabled',
         )
         ->where([ 
-            ['type', 'promotions'], 
             ['promotions.supermarket_chain_id', $supermarket_chain_id] ,
             ['promotions.region_id', $region_id]
         ])
-        ->join('promotions','promotions.id','featured_id')
         ->groupBy('promotions.title')
-        ->withCasts($promotion->casts)->limit(10)
+        ->withCasts($promotion->casts)
+        ->inRandomOrder()
+        ->limit(10)
         ->get();
 
 
