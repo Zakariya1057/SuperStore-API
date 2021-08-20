@@ -29,7 +29,7 @@ class ImageService {
                 Redis::set($cache_key, base64_encode($image));
             } catch(Exception $e){
                 Log::error("Image not found: Name: {$name}, Type: {$type}", ['error' => $e]);
-                $image = file_get_contents(__DIR__.'/../../public/img/no_image.png');
+                $image = file_get_contents(__DIR__.'/../../../public/img/no_image.png');
             }
         }
 

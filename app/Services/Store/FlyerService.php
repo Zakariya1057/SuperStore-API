@@ -31,7 +31,7 @@ class FlyerService {
             Redis::set($cache_key, base64_encode($flyer));
         } catch(Exception $e){
             Log::error("Flyer not found: Name: {$name}", ['error' => $e]);
-            $flyer = file_get_contents(__DIR__.'/../../public/img/no_image.png');
+            $flyer = file_get_contents(__DIR__.'/../../../public/img/no_image.png');
         }
 
         return $flyer;
