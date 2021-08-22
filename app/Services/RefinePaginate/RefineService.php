@@ -120,7 +120,7 @@ class RefineService {
     private function search_availability_type($data, Builder $base_query){
         if(key_exists('availability_type', $data) && !is_null($data['availability_type'])){
             $availability = $data['availability_type'];
-            $base_query = $base_query->where('products.availability_type',$availability);
+            $base_query = $base_query->whereIn('products.availability_type', ['in-store', $availability]);
         }
 
         return $base_query;
