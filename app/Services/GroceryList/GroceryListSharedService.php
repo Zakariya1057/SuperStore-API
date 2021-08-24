@@ -34,9 +34,6 @@ class GroceryListSharedService {
 
         if(!$list){
             throw new Exception('No list found for user.', 404);
-        } else {
-            // Remove later
-            $list->store_type_id = 2;
         }
 
         $supermarket_chain_id = $list->supermarket_chain_id;

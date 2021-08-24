@@ -6,7 +6,7 @@ use App\Casts\HTMLDecode;
 use App\Models\Product;
 use App\Models\ChildCategory;
 use App\Models\GrandParentCategory;
-use App\Models\FeaturedItem;
+use App\Models\ParentCategory;
 use App\Services\RefinePaginate\RefineService;
 
 class CategoryService {
@@ -18,29 +18,20 @@ class CategoryService {
     }
     
     public function grand_parent_categories(int $company_id){
-        $grand_parent_categories = GrandParentCategory::select(
-            'grand_parent_categories.*', 
-            // Remove later
-            'grand_parent_categories.company_id as store_type_id'
-        )
-        ->where([ ['enabled', 1], ['grand_parent_categories.company_id', $company_id]])
-        ->with(['parent_categories' => function ($query) {
-            // Remove later
-            $query->select('parent_categories.*', 'parent_categories.company_id as store_type_id')->orderBy('index', 'ASC');
-        }])
-        ->orderBy('index', 'ASC')->get();
-
+        $grand_parent_categories = GrandParentCategory::
+        where([ 
+            ['enabled', 1], 
+            ['grand_parent_categories.company_id', $company_id]
+        ])
+        ->orderBy('index', 'ASC')
+        ->with('parent_categories')
+        ->get();
+        
         return $grand_parent_categories;
     }
 
     public function child_categories(int $parent_category_id){
-        return ChildCategory::select(
-            'child_categories.*', 
-            // Remove later
-            'child_categories.company_id as store_type_id'
-        )
-        ->where([ ['enabled', 1], ['child_categories.parent_category_id', $parent_category_id] ])
-        ->orderBy('index', 'ASC')->get();
+        return ChildCategory::where([ ['enabled', 1], ['child_categories.parent_category_id', $parent_category_id] ])->orderBy('index', 'ASC')->get();
     }
 
     public function category_products(int $child_category_id, $data = []){
@@ -48,16 +39,13 @@ class CategoryService {
         $casts = $product->casts;
 
         $region_id = $data['region_id'];
-        $supermarket_chain_id = $data['supermarket_chain_id'] ?? 1;
+        $supermarket_chain_id = $data['supermarket_chain_id'];
 
         $casts['category_name'] = HTMLDecode::class;
         
         $base_query = ChildCategory::where('child_categories.id', $child_category_id)
         ->select(
             'products.*',
-
-            // Remove later
-            'child_categories.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',
@@ -115,8 +103,6 @@ class CategoryService {
                     'name' => $product->child_category_name,
                     'index' => $product->child_category_index,
                     'parent_category_id' => $product->parent_category_id,
-                    // Remove later
-                    'store_type_id' => $product->company_id,
                     'company_id' => $product->company_id,
                     'products' => [],
 
@@ -131,19 +117,15 @@ class CategoryService {
 
     }
 
-
     public function featured(int $region_id, int $supermarket_chain_id){
 
         $product = new Product();
         $casts = $product->casts;
 
-        $categories = FeaturedItem::select('parent_categories.*')
-        ->where([ ['enabled', 1], ['type', 'categories'] ])
-        ->join('parent_categories','parent_categories.id','featured_id')
-        ->withCasts(['name' => HTMLDecode::class])
-        ->groupBy('featured_id')
-        ->orderBy('featured_items.created_at', 'ASC')
-        ->limit(20)->get();
+        $categories = ParentCategory::groupBy('name')
+        ->inRandomOrder()
+        ->limit(20)
+        ->get();
 
         $results = [];
 
@@ -156,9 +138,6 @@ class CategoryService {
             ->select(
                 'products.*',
                 
-                // Remove later
-                'parent_categories.company_id as store_type_id',
-
                 'product_prices.price', 
                 'product_prices.old_price',
                 'product_prices.is_on_sale', 
@@ -180,9 +159,6 @@ class CategoryService {
             ->limit(15)->groupBy('category_products.product_id')->withCasts($casts)->get();
 
             $category->enabled = (bool)$category->enabled;
-
-            // Remove Later
-            $category->store_type_id = $category->company_id;
 
             $category->products = $products;
             $results[] = $category; 

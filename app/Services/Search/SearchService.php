@@ -356,11 +356,6 @@ class SearchService {
                 
             }
 
-            // Remove later
-            foreach($results['products'] as $product){
-                $product->store_type_id = 2;
-            }
-
             Redis::set($cache_key, json_encode($results));
             Redis::expire($cache_key, 86400);
 

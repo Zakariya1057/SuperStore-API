@@ -14,7 +14,7 @@ class ParentCategory extends Model
     ];
 
     public function child_categories() {
-        return $this->hasMany('App\Models\ChildCategory','child_category_id')->join('child_categories','child_categories.id','category_products.child_category_id');
+        return $this->hasMany('App\Models\ChildCategory','parent_category_id');
     }
 
     public function products() {

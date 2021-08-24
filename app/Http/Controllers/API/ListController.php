@@ -38,11 +38,6 @@ class ListController extends Controller {
             ['supermarket_chain_id', $supermarket_chain_id], 
             ['user_id', $user_id] 
         ])->orderBy('updated_at', 'DESC')->get();
-
-        // Remove later
-        foreach($lists as $list){
-            $list->store_type_id = 2;
-        }
         
         return response()->json(['data' => $lists]);
     }

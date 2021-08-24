@@ -35,8 +35,6 @@ class StoreController extends Controller {
         ->first();
 
         if($store){
-            // Remove later
-            $store->store_type_id = $store->company_id;
 
             $store->location;
             $store->opening_hours;

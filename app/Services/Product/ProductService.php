@@ -27,9 +27,6 @@ class ProductService {
         ->select(
             'products.*',
 
-            // Remove later
-            'products.company_id as store_type_id',
-
             'product_prices.price', 
             'product_prices.old_price',
             'product_prices.is_on_sale', 
@@ -44,13 +41,21 @@ class ProductService {
             'parent_categories.id as parent_category_id',
             'parent_categories.name as parent_category_name',
         )
+        
         ->join('product_prices','product_prices.product_id','products.id')
         ->join('category_products','category_products.product_id','products.id')
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
         ->join('child_categories','category_products.child_category_id','child_categories.id')
+
         ->withCasts($casts)
-        ->where([ ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id] ])
+
+        ->where([ 
+            ['product_prices.region_id', $region_id], 
+            ['product_prices.supermarket_chain_id', $supermarket_chain_id] 
+        ])
+
         ->get()
+        
         ->first();
 
         if(!$product){
@@ -60,10 +65,8 @@ class ProductService {
         $product->region_id = $region_id;
         $product->supermarket_chain_id = $supermarket_chain_id;
 
-        // Remove later
         $promotion = $product->promotion;
         if(!is_null($promotion)){
-            $promotion->store_type_id = 2;
             $product->promotion = $promotion;
         }
 
@@ -83,9 +86,6 @@ class ProductService {
         $product->recommended = Recommended::where([ ['recommended.product_id',$product->id], ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id] ])
         ->select(
             'products.*',
-
-            // Remove later
-            'products.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',
@@ -117,13 +117,8 @@ class ProductService {
     }
 
     public function featured(int $region_id, int $supermarket_chain_id){
-        $product = new Product();
-
-        return FeaturedItem::select(
+        return Product::select(
             'products.*',
-
-            // Remove later
-            'products.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',
@@ -136,13 +131,20 @@ class ProductService {
             'parent_categories.id as parent_category_id', 
             'parent_categories.name as parent_category_name'
         )
-        ->where([ ['products.enabled', 1], ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id], ['type', 'products'] ])
-        ->join('products', 'products.id','=','featured_id')
+        
+        ->where([ ['product_prices.region_id', $region_id], ['product_prices.supermarket_chain_id', $supermarket_chain_id] ])
+        
         ->join('product_prices', 'products.id','=','product_prices.product_id')
+        
         ->join('category_products','category_products.product_id','products.id')
+
         ->join('parent_categories','category_products.parent_category_id','parent_categories.id')
-        ->orderBy('featured_items.updated_at', 'DESC')
-        ->limit(10)->groupBy('category_products.product_id')->withCasts($product->casts)->get() ?? [];
+
+        ->inRandomOrder()
+        
+        ->limit(20)
+        
+        ->get();
     }
 
     public function on_sale($supermarket_chain_id){

@@ -43,11 +43,6 @@ class FlyerService {
 
         $flyers = Flyer::where('store_id', $store_id)->get();
 
-        // Remove later
-        foreach($flyers as $flyer){
-            $flyer->store_type_id = 2;
-        }
-
         return $flyers;
     }
 
@@ -65,9 +60,6 @@ class FlyerService {
             return FlyerProduct::where('flyer_id', $flyer_id)
             ->select(
                 'products.*',
-    
-                // Remove later
-                'products.company_id as store_type_id',
 
                 'product_prices.price', 
                 'product_prices.old_price',

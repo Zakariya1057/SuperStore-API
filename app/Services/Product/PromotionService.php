@@ -116,9 +116,6 @@ class PromotionService {
         ->first();
 
         if(!is_null($promotion)){
-            // Remove later
-            $promotion->store_type_id = 2;
-
             $promotion->products;
         } else {
             throw new Exception('Promotion not found.', 404);
@@ -165,9 +162,6 @@ class PromotionService {
         foreach($featured_promotions as $promotion){
             $this->set_product_promotion($promotion);
 
-            // Remove later
-            $promotion->promotion->store_type_id = 2;
-
             if(!is_null($promotion->promotion)){
                 $promotions[] = $promotion->promotion;
             }
@@ -212,8 +206,6 @@ class PromotionService {
         if(is_null($promotion->id) || !$promotion->enabled){
             $item->promotion = null;
         } else {
-            $promotion->store_type_id = 2;
-
             $item->promotion = $promotion;
 
             // If promotion expired, don't return it

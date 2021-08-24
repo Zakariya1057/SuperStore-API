@@ -125,8 +125,6 @@ class UserAuthService {
             'token' => $token, 
             'name' => $user->name, 
             'email' => $user->email,
-            // Remove later
-            'store_type_id' => 2,
             'supermarket_chain_id' => (int)$user->supermarket_chain_id,
             'region_id' => (int)$user->region_id,
             'send_notifications' => $send_notifications

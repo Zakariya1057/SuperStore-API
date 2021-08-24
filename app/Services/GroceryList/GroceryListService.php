@@ -33,9 +33,6 @@ class GroceryListService extends GroceryListSharedService {
             
             $created_list = GroceryList::whereId($list->id)->get()->first();
 
-            // Remove later
-            $created_list->store_type_id = 2;
-
             return $created_list;
         }
     }
@@ -141,9 +138,6 @@ class GroceryListService extends GroceryListSharedService {
         return GroceryList::where('user_id', $user_id)
         ->select(
             'products.*',
-            
-            // Remove later
-            'products.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',
@@ -170,11 +164,6 @@ class GroceryListService extends GroceryListSharedService {
         $lists = GroceryList::where([ ['supermarket_chain_id', $supermarket_chain_id], ['user_id', $user_id] ])
         ->orderByRaw('(ticked_off_items/ total_items) DESC, `grocery_lists`.`updated_at` DESC')
         ->limit(4)->get();
-
-        // Remove later
-        foreach($lists as $list){
-            $list->store_type_id = 2;
-        }
 
         return $lists;
     }

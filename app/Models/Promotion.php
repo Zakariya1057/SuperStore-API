@@ -21,9 +21,6 @@ class Promotion extends Model
         'minimum',
         'maximum',
 
-        // Remove later
-        'store_type_id',
-
         'supermarket_chain_id',
         'products',
         'site_promotion_id',
@@ -61,8 +58,6 @@ class Promotion extends Model
         ->join('parent_categories','parent_categories.id','category_products.parent_category_id')
         ->select(
             'products.*',    
-            
-            'products.company_id as store_type_id',
 
             'product_prices.price', 
             'product_prices.old_price',

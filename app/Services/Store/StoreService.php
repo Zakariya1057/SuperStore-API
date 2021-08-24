@@ -34,9 +34,6 @@ class StoreService {
         $select = [
             'stores.*',
             
-            // Remove later
-            'supermarket_chains.company_id',
-            
             'store_locations.region_id',
 
             'store_locations.city',
@@ -91,10 +88,6 @@ class StoreService {
 
         foreach($stores as $store){
             $location = [];
-            
-            // Remove later
-            $store->store_type_id = $store->company_id;
-            $store->small_logo = $store->large_logo = " ";
 
             if($opening_hours){
                 $hour = new OpeningHour();

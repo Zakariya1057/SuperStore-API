@@ -93,11 +93,6 @@ class UserController extends Controller {
             throw new Exception('Field Type required.', 422);
         }
 
-        // Remove later
-        if($data['type'] != 'store_type_id'){
-            $this->user_service->update($data, $user_id);
-        }
-
         return response()->json(['data' => ['status' => 'success']]);
 
     }
